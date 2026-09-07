@@ -187,9 +187,10 @@ public sealed class PageRequestHandler
 
         var nonce = CspNonce.Derive(etag);
         var hasMermaid = page.HtmlContent.Contains("class=\"mermaid\"", StringComparison.Ordinal);
+        var hasInlineStyleTag = page.HtmlContent.Contains("<style", StringComparison.OrdinalIgnoreCase);
         var baseCsp = SecurityHeaders.WithExtraSources(_settings.CustomCsp ?? SecurityHeaders.DefaultCsp, extensions.CspSources);
         var pageCsp = SecurityHeaders.BuildNonceCsp(baseCsp, nonce);
-        context.Response.Headers.ContentSecurityPolicy = hasMermaid
+        context.Response.Headers.ContentSecurityPolicy = hasMermaid || hasInlineStyleTag
             ? SecurityHeaders.WithInlineStyleElements(pageCsp)
             : pageCsp;
 
