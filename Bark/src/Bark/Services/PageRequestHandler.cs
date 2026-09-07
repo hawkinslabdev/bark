@@ -226,7 +226,7 @@ public sealed class PageRequestHandler
             paginationHtml = PaginationHtmlRenderer.BuildPaginationHtml(prevTitle, prevPath, nextTitle, nextPath, basePath, l);
         }
 
-        var themeCss = ThemeProvider.BuildThemeCss(_themeOptions);
+        var themeCss = ThemeProvider.BuildThemeCss(_themeOptions, nonce);
         var customCssLink = ThemeProvider.BuildCustomCssLink(_themeOptions, _settings.ThemeDir, basePath);
         var customJsScript = ThemeProvider.BuildCustomJsScript(_themeOptions, _settings.ThemeDir, basePath);
         var brandText = l.Label(config?.Brand ?? config?.Title ?? ThemeProvider.GetBrandText(_themeOptions));

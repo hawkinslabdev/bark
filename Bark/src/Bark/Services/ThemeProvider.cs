@@ -5,7 +5,7 @@ namespace Bark.Services;
 
 public static class ThemeProvider
 {
-    public static string BuildThemeCss(ThemeOptions? theme)
+    public static string BuildThemeCss(ThemeOptions? theme, string? nonce = null)
     {
         if (theme is null)
             return string.Empty;
@@ -29,7 +29,8 @@ public static class ThemeProvider
             return string.Empty;
 
         // Both selectors, so an override outranks the theme's light and dark blocks. Mode-agnostic by design.
-        return "<style>\n:root, :root[data-theme=\"dark\"] {\n" + string.Join("\n", vars) + "\n}\n</style>";
+        var nonceAttr = nonce is { Length: > 0 } ? $" nonce=\"{nonce}\"" : "";
+        return $"<style{nonceAttr}>\n:root, :root[data-theme=\"dark\"] {{\n" + string.Join("\n", vars) + "\n}\n</style>";
     }
 
     public static string BuildCustomCssLink(ThemeOptions? theme, string themeDir, string basePath = "")
