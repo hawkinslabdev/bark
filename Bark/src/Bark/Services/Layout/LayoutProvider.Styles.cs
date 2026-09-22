@@ -401,7 +401,7 @@ public static partial class LayoutProvider
             margin-bottom: 2.25rem;
         }}
         .nav-group-title {{
-            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+            font-size: 0.75rem; letter-spacing: 0.05em;
             color: var(--text-muted); margin-bottom: 1rem; font-weight: 600;
         }}
         .nav-list {{
@@ -540,8 +540,8 @@ public static partial class LayoutProvider
             max-height: 200px;
         }}
         .bark-hero-name {{
-            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em;
-            text-transform: uppercase; color: var(--accent); margin-bottom: 1.1rem;
+            font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em;
+            color: var(--accent); margin-bottom: 1.1rem;
         }}
         .bark-hero-text {{
             font-size: 3rem; font-weight: 700; color: var(--text-color);

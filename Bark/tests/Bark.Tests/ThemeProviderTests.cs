@@ -20,10 +20,18 @@ public sealed class ThemeProviderTests : IDisposable
     }
 
     [Fact]
-    public void BuildThemeCss_TargetsBothLightAndDarkRoots()
+    public void BuildThemeCss_BrandColor_TargetsBothLightAndDarkRoots()
+    {
+        var css = ThemeProvider.BuildThemeCss(new ThemeOptions { PrimaryColor = "#7c3aed" });
+        Assert.Contains(":root, :root[data-theme=\"dark\"]", css);
+    }
+
+    [Fact]
+    public void BuildThemeCss_SurfaceColor_TargetsLightRootOnly()
     {
         var css = ThemeProvider.BuildThemeCss(new ThemeOptions { BgColor = "#fff" });
-        Assert.Contains(":root, :root[data-theme=\"dark\"]", css);
+        Assert.Contains(":root:not([data-theme=\"dark\"])", css);
+        Assert.DoesNotContain(":root, :root[data-theme=\"dark\"]", css);
     }
 
     [Fact]

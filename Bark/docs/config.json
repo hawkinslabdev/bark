@@ -17,7 +17,7 @@
   "favicon": "🌳",
   "lastUpdated": true,
   "theme": "default",
-  "promo": "**New:** version 0.0.1 is available. Read the [release notes](https://github.com/hawkinslabdev/bark/releases).",
+  "promo": "**New:** version 0.0.99 is available. Read the [release notes](https://github.com/hawkinslabdev/bark/releases).",
   "footer": "Built with Bark · [EUPL-1.2](https://github.com/hawkinslabdev/bark/blob/main/LICENSE). Host your own instance now! [Learn more](https://github.com/hawkinslabdev/bark){target=\"_blank\" rel=\"noopener\"}.",
   "topNav": [
     {

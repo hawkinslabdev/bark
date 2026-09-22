@@ -10,27 +10,33 @@ public static class ThemeProvider
         if (theme is null)
             return string.Empty;
 
-        var vars = new List<string>();
+        var brandVars = new List<string>();
+        AddVar(brandVars, "--primary-color", theme.PrimaryColor);
+        AddVar(brandVars, "--accent", theme.PrimaryColor);
+        AddVar(brandVars, "--accent-light", theme.AccentLight);
+        AddVar(brandVars, "--font-sans", theme.FontSans);
+        AddVar(brandVars, "--font-mono", theme.FontMono);
 
-        // --primary-color is the documented name; --accent is what the stylesheet reads. Emit both.
-        AddVar(vars, "--primary-color", theme.PrimaryColor);
-        AddVar(vars, "--accent", theme.PrimaryColor);
-        AddVar(vars, "--bg-color", theme.BgColor);
-        AddVar(vars, "--sidebar-bg", theme.SidebarBg);
-        AddVar(vars, "--text-color", theme.TextColor);
-        AddVar(vars, "--text-muted", theme.TextMuted);
-        AddVar(vars, "--border", theme.BorderColor);
-        AddVar(vars, "--code-bg", theme.CodeBg);
-        AddVar(vars, "--accent-light", theme.AccentLight);
-        AddVar(vars, "--font-sans", theme.FontSans);
-        AddVar(vars, "--font-mono", theme.FontMono);
+        var surfaceVars = new List<string>();
+        AddVar(surfaceVars, "--bg-color", theme.BgColor);
+        AddVar(surfaceVars, "--sidebar-bg", theme.SidebarBg);
+        AddVar(surfaceVars, "--text-color", theme.TextColor);
+        AddVar(surfaceVars, "--text-muted", theme.TextMuted);
+        AddVar(surfaceVars, "--border", theme.BorderColor);
+        AddVar(surfaceVars, "--code-bg", theme.CodeBg);
 
-        if (vars.Count == 0)
+        if (brandVars.Count == 0 && surfaceVars.Count == 0)
             return string.Empty;
 
-        // Both selectors, so an override outranks the theme's light and dark blocks. Mode-agnostic by design.
         var nonceAttr = nonce is { Length: > 0 } ? $" nonce=\"{nonce}\"" : "";
-        return $"<style{nonceAttr}>\n:root, :root[data-theme=\"dark\"] {{\n" + string.Join("\n", vars) + "\n}\n</style>";
+        var blocks = "";
+        if (brandVars.Count > 0)
+            blocks += ":root, :root[data-theme=\"dark\"] {\n" + string.Join("\n", brandVars) + "\n}\n";
+        // Light-mode-only selector: the theme's own [data-theme="dark"] block outranks this on toggle.
+        if (surfaceVars.Count > 0)
+            blocks += ":root:not([data-theme=\"dark\"]) {\n" + string.Join("\n", surfaceVars) + "\n}\n";
+
+        return $"<style{nonceAttr}>\n{blocks}</style>";
     }
 
     public static string BuildCustomCssLink(ThemeOptions? theme, string themeDir, string basePath = "")
