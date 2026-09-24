@@ -199,11 +199,6 @@
   },
   "socialLinks": [
     {
-      "icon": "github",
-      "url": "https://github.com/hawkinslabdev/bark",
-      "title": "GitHub"
-    },
-    {
       "icon": "mastodon",
       "url": "https://fosstodon.org/@example",
       "title": "Mastodon"
