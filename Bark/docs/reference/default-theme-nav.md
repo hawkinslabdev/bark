@@ -5,7 +5,7 @@ description: The header navigation bar, configured via topNav in config.json
 
 # Navigation
 
-The header nav bar comes from `topNav` in `docs/config.json`. Skip it entirely and Bark renders the topbar without one, just the brand and search box.
+The header navigation bar is defined by `topNav` in `docs/config.json`. Without `topNav`, the header contains only the brand and search box.
 
 ```json
 {
@@ -26,23 +26,21 @@ The header nav bar comes from `topNav` in `docs/config.json`. Skip it entirely a
 
 ## Item shapes
 
-Every `topNav` entry is one of two shapes:
+Each `topNav` entry has one of two shapes:
 
 | Shape | Fields | Renders as |
 |---|---|---|
 | Link | `text`, `link` | A direct link. |
 | Dropdown | `text`, `items` | A button that opens a menu of links on hover or focus. |
 
-Set `link` for a plain link. Set `items` (an array of the same two shapes) for a dropdown. Don't set both on the same entry.
+`link` defines a link; `items` (an array of the same shapes) defines a dropdown. An entry must not set both.
 
-Bark detects external links automatically: anything starting with `http://` or `https://` opens in a new tab, gets `rel="noopener noreferrer"`, and shows a small external-link icon. Internal links (anything else) get normalized to an absolute path and participate in active-link highlighting.
+Links starting with `http://` or `https://` are external: they open in a new tab with `rel="noopener noreferrer"` and an external-link icon. Other links are normalized to absolute paths and participate in active-link highlighting.
 
 ## Active state
 
-A `topNav` link gets the `active` class when its `link` matches the current page's path exactly. Dropdown triggers don't get an active state. Bark doesn't currently highlight a dropdown as active when one of its children matches the current page.
+A `topNav` link receives the `active` class when `link` matches the current path exactly. Dropdown triggers have no active state, including when a child matches.
 
 ## Mobile
 
-The header nav bar hides below 768px width. Its items reappear at the top of the mobile sidebar drawer instead, dropdowns rendered as native `<details>` disclosures so they work without any JavaScript.
-
-There's no separate mobile-specific config. Whatever you put in `topNav` controls both.
+At 768px and below, the header navigation is hidden and its items render at the top of the sidebar drawer. Dropdowns render as native `<details>` disclosures and work without JavaScript. `topNav` configures both layouts.

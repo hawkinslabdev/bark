@@ -5,21 +5,28 @@ description: The two page layouts Bark renders and what each one includes
 
 # Layout
 
-Bark has two layouts. You don't pick a layout directly. Front matter's `layout` field switches between them.
+Bark has two layouts, selected by the front matter `layout` field:
 
-## Doc layout (default)
+1. Document layout (default)
+2. Home layout
 
-Every page without `layout: home` in its front matter gets the doc layout:
+The latter is only used for the initial landing page, which is set optionally.
+
+## Document
+
+Pages without `layout: home` use the doc layout:
 
 - Header nav bar (if `topNav` is configured).
 - Left sidebar (auto-generated, or from `nav`/`sidebar` config).
 - Breadcrumbs.
-- A right-hand "On This Page" table of contents, collapsing to a disclosure on tablet widths. Set `toc: false` in frontmatter to hide it on a specific page. See [Table of Contents](/reference/default-theme-toc).
-- Your rendered Markdown content.
+- Right-hand "On this page" table of contents; a disclosure below 1280px. `toc: false` hides it per page. See [Table of Contents](/reference/default-theme-toc).
+- Rendered Markdown content.
 - "Edit this page" link (if `editLink` is configured).
 - "Last updated" stamp (if enabled).
-- Prev/next pagination, derived from your nav order.
+- Prev/next pagination, derived from nav order.
 - The footer (if `footer` is configured).
+
+This means that the following attribute must be set in frontmatter:
 
 ```yaml
 ---
@@ -27,9 +34,11 @@ title: Configuration
 ---
 ```
 
-No `layout` field needed. This is the default.
+Omitting `layout` selects the default layout.
 
-## Home layout
+## Home
+
+To enable the home layout, make sure to set the following attributes:
 
 ```yaml
 ---
@@ -40,7 +49,7 @@ hero:
 ---
 ```
 
-Set `layout: home` and Bark drops the sidebar, breadcrumbs, and TOC entirely, replacing your content with a full-width hero section and features grid. See [homepage](../default-theme-home-page) for the full `hero`/`features` schema.
+`layout: home` removes the sidebar, breadcrumbs and table of contents, and renders a full-width hero section and features grid. Schema for `hero` and `features`: [Home Page](../default-theme-home-page).
 
 > [!NOTE]  
-> Home pages never show "Edit this page", "Last updated", or pagination links, regardless of config. This is intentional: a landing page isn't part of the linear reading order pagination assumes, and there's nothing to "edit" in the sense those links imply.
+> Home pages never render "Edit this page", "Last updated" or pagination links, regardless of configuration. A landing page is outside the linear reading order.

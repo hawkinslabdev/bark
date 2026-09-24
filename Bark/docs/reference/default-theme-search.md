@@ -5,7 +5,7 @@ description: Bark's built-in search, no third-party service required
 
 # Search
 
-Search is built in. The search box in the sidebar talks to `/api/search`, backed by an in-memory (inverted) index that rebuilds automatically every time your configuration changes.
+The header search queries `/api/search`, backed by an in-memory inverted index. The index rebuilds automatically when the configuration changes.
 
 ## How it ranks results
 
@@ -16,7 +16,7 @@ Search is built in. The search box in the sidebar talks to `/api/search`, backed
 | Heading | 3 |
 | Body text | 1 |
 
-A query matching a page's title outranks one that only matches buried body text. That is the entire ranking model: weighted term matches.
+Ranking is the sum of weighted term matches. A title match outranks a body-text match.
 
 ## Calling it directly
 
@@ -24,8 +24,8 @@ A query matching a page's title outranks one that only matches buried body text.
 curl "http://localhost:5000/api/search?q=hot+reload"
 ```
 
-Queries under 2 characters return an empty array rather than the whole index. See [API Reference](../api-reference) for the full response shape.
+Queries shorter than 2 characters return an empty array. Response shape: [API Reference](../api-reference).
 
 ## What's not here
 
-We've chosen to keep Bark lightweight. There is no "Ask AI" panel, nor any analytics dashboard. If you need full-text search across a documentation servicer larger than a few hundred pages, or you want fuzzy/typo-tolerant matching, Bark's in-memory index isn't built for that scale. With our customisation options you can adjust the search box's markup plain HTML, easy to swap out from source or with custom JS.
+Not included: AI answers, analytics, fuzzy or typo-tolerant matching. The in-memory index targets sites of up to a few hundred pages. The search box is plain HTML and can be replaced from source or with custom JavaScript.

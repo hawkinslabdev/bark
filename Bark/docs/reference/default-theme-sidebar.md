@@ -5,13 +5,13 @@ description: The left navigation tree, auto-generated or fully configured via si
 
 # Sidebar
 
-Bark builds the left sidebar one of three ways, in priority order:
+Sidebar sources, in priority order:
 
 1. **`sidebar` in `config.json`**, matched by path prefix. Highest priority.
 2. **`nav` in `config.json`**, one flat tree shared by every page. Used only when no `sidebar` prefix matches.
-3. **Your folder structure**, auto-generated. Used when neither `sidebar` nor `nav` is set.
+3. **Folder structure**, auto-generated. Used when neither `sidebar` nor `nav` is set.
 
-Most projects start with option 3 and graduate to option 1 once they have more than one logical section (a guide and a reference, for example).
+Option 1 suits sites with several sections, for example a guide and a reference.
 
 ## Multi-sidebar config
 
@@ -40,24 +40,24 @@ Most projects start with option 3 and graduate to option 1 once they have more t
 }
 ```
 
-Each key is a path prefix. Bark picks whichever key is the **longest match** for the page you're viewing, so `/guide/` and `/guide/advanced/` can both exist, the more specific one winning for pages under it. An empty-string key (`""` or `/`) acts as a catch-all for anything not matched by a more specific prefix.
+Each key is a path prefix; the **longest matching** key applies. `/guide/` and `/guide/advanced/` can coexist, with the more specific key winning. An empty key (`""` or `/`) is the catch-all.
 
 ## Entries
 
-Every entry in a sidebar array is either a link or a group, and groups nest to any depth:
+Each entry is a link or a group. Groups nest to any depth:
 
 | Field | Type | Description |
 |---|---|---|
 | `title` | `string` | Link text or group heading. |
 | `path` | `string` | Leaf link target: a docs page path, or a full `http://`/`https://` URL. Omit it to make this entry a group. |
 | `items` | `array` | Child entries. Set this (and omit `path`) to make this entry a group. |
-| `collapsed` | `bool` | Group-only. See below. |
+| `collapsed` | `bool` | Groups only. See [Collapse behavior](#collapse-behavior). |
 
-If you leave the `title` off a group, its links render together as one heading-less cluster. You can read more about this in [Grouping links without a heading](#grouping-links-without-a-heading) further down.
+A group without `title` renders as a heading-less cluster. See [Grouping links without a heading](#grouping-links-without-a-heading).
 
 ## External links
 
-A `path` starting with `http://` or `https://` is treated as an external link rather than a docs page:
+A `path` starting with `http://` or `https://` is an external link:
 
 ```json
 {
@@ -75,13 +75,13 @@ A `path` starting with `http://` or `https://` is treated as an external link ra
 }
 ```
 
-External entries render with an outbound arrow and open in a new tab (`target="_blank"`, `rel="noopener noreferrer"`), the same as external [top-nav](/reference/default-theme-nav/) items. They are never highlighted as the active page, never auto-expand their group, and are skipped by [prev/next pagination](/reference/default-theme-prev-next-links/) since they aren't pages in your docs.
+External entries render with an outbound arrow and open in a new tab (`target="_blank"`, `rel="noopener noreferrer"`), like external [top-nav](/reference/default-theme-nav/) items. They are never marked active, never auto-expand their group, and are excluded from [prev/next pagination](/reference/default-theme-prev-next-links/).
 
-Only `http` and `https` are recognised. Any other value is treated as a docs page path.
+Only `http` and `https` are recognized; other values are treated as page paths.
 
 ## Collapse behavior
 
-`collapsed` controls whether a group gets a toggle caret and what state it starts in:
+`collapsed` sets whether a group is collapsible and its initial state:
 
 | Value | Behavior |
 |---|---|
@@ -89,14 +89,14 @@ Only `http` and `https` are recognised. Any other value is treated as a docs pag
 | `false` | Collapsible, starts expanded. |
 | `true` | Collapsible, starts collapsed. |
 
-A group containing the page you're currently on always renders expanded. Collapsing is implemented with native `<details>`/`<summary>`, so it works with JavaScript disabled and doesn't need any client-side state.
+A group containing the current page always renders expanded. Collapsing uses native `<details>`/`<summary>` and works without JavaScript.
 
 > [!NOTE] 
-> Use static (no `collapsed` field) groups for reference material someone scans top to bottom, like this site's `/reference/` sidebar. Use collapsible groups for a guide with more sections than fit comfortably on screen at once.
+> Static groups (no `collapsed`) suit reference material read top to bottom, such as this site's `/reference/` sidebar. Collapsible groups suit long guides.
 
 ## Grouping links without a heading
 
-Sometimes you have a handful of standalone links that belong together, yet none of them really calls for a section heading above it. Rather than leaving them as separate top-level links, where each one sits on its own under a divider, you can gather them into a group and simply leave the `title` off. Bark then renders the links as one tight cluster, quietly skipping the uppercase heading that a titled group would show.
+A group without `title` renders its links as one cluster without a heading. Top-level links would otherwise each be separated by a divider.
 
 ```json
 {
@@ -113,4 +113,4 @@ Sometimes you have a handful of standalone links that belong together, yet none 
 }
 ```
 
-This is convenient for a closing set of reference or housekeeping links at the bottom of a guide sidebar. The cluster is still set apart from the section above it by a gentle divider, so your grouping stays clear without adding extra visual weight. A heading-less group is always expanded and is not collapsible, since there is no title to click.
+The cluster is separated from the previous section by a divider. Heading-less groups are always expanded and not collapsible.

@@ -5,7 +5,7 @@ description: The content footer, configured via footer in config.json
 
 # Footer
 
-Set `footer` in `docs/config.json` and Bark renders it at the bottom of every page's content, below the pagination links.
+`footer` in `docs/config.json` renders at the bottom of every page, below the pagination links.
 
 ```json
 {
@@ -13,7 +13,7 @@ Set `footer` in `docs/config.json` and Bark renders it at the bottom of every pa
 }
 ```
 
-`footer` is a Markdown string, not plain text. Links, bold, inline code, all of it works:
+`footer` is a Markdown string. Inline Markdown (links, emphasis, inline code) is supported:
 
 ```json
 {
@@ -21,11 +21,11 @@ Set `footer` in `docs/config.json` and Bark renders it at the bottom of every pa
 }
 ```
 
-Skip `footer` and Bark renders nothing there. There's no default placeholder text to remove.
+Without `footer`, no footer is rendered. There is no default text.
 
 ## Variables
 
-The footer supports a few dynamic variables, substituted before the Markdown is rendered:
+Variables are substituted before Markdown rendering:
 
 | Variable | Replaced with |
 |----------|---------------|
@@ -33,7 +33,7 @@ The footer supports a few dynamic variables, substituted before the Markdown is 
 | `{brand}` | The brand text (`brand`, falling back to `title`) |
 | `{title}` | The site `title` from `config.json` |
 
-Handy for copyright lines that never go stale:
+Example copyright line:
 
 ```json
 {
@@ -42,7 +42,7 @@ Handy for copyright lines that never go stale:
 ```
 
 ::: note Rendering the footer
-The footer renders once per page, not once per site. There's no separate "footer-only" content area independent of the per-page Markdown pipeline, so anything you put here goes through the same renderer as your docs content (full support for links, code spans, and emphasis; no headings or fenced code blocks, since those don't make sense in a one-line footer).
+The footer is rendered per page through the same Markdown pipeline as page content. Inline elements (links, code spans, emphasis) are supported; headings and fenced code blocks are not.
 :::
 
-Home pages (`layout: home`) render the footer too, below the features grid. This can be hidden with [custom CSS](/guide/themes) rules.
+Home pages (`layout: home`) render the footer below the features grid. Hide it with [custom CSS](/guide/themes).

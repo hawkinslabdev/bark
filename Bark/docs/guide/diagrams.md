@@ -5,9 +5,9 @@ description: Mermaid diagrams, rendered straight from a fenced code block
 
 # Using Diagrams
 
-To fence a Mermaid block, simply use the `mermaid` language identifier. Bark will automatically detect this and render it as a diagram rather than displaying it as a code listing.
+Fenced code blocks with the `mermaid` language identifier render as diagrams.
 
-This process requires no plugins or build steps. The client loads `mermaid.js` once per page and replaces the raw code block with the rendered SVG after the page has finished loading.
+No plugins or build steps are required. `mermaid.js` loads once per page and replaces each block with an SVG after page load.
 
 ## Flowchart
 
@@ -50,7 +50,7 @@ sequenceDiagram
 
 ## Class diagram
 
-Useful for explaining a data model, not just code architecture:
+Data model example:
 
 ```mermaid
 classDiagram
@@ -91,8 +91,8 @@ pie title Search ranking weight
     "Body text" : 1
 ```
 
-Diagrams on this site render client-side after the initial page load. Consequently, they are not visible in the raw HTML source or to automated tools that only scrape text, including many search engine crawlers and text-based indexing files like `sitemap.xml` or `llms.txt`. If a diagram is essential to the reader's understanding of the content, please ensure that the core information is also provided in the surrounding text.
+Diagrams render client-side. They are absent from the HTML source, from text-only crawlers, and from `llms.txt`. Content essential to understanding must also appear in the surrounding text, which also provides a text alternative for assistive technology.
 
 ::: note
-Diagrams take their colors from the active theme's palette, but Mermaid bakes those colors into the rendered SVG rather than following CSS variables the way the rest of the page does. Toggling dark mode on a page with diagrams triggers a full reload so they redraw with the right theme.
+Diagram colors come from the active theme palette. Mermaid bakes colors into the SVG instead of using CSS variables, so toggling dark mode on a page with diagrams triggers a full reload.
 :::

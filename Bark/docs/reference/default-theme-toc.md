@@ -5,17 +5,17 @@ description: The "On This Page" outline Bark builds from each page's headings
 
 # Table of Contents
 
-The server automatically renders an "On this page" outline in the right-hand column of every document page, built from that page's headings.
+Every doc-layout page renders an "On this page" outline built from its headings.
 
 ## Content
 
-Every `##` and deeper heading becomes an entry. The pages title (`#`) is left out in the TOC. Nesting stops at three levels, so a `#####` heading is at the same indent as a `###` one rather than growing a fourth step.
+Headings `##` and deeper become entries; the page title (`#`) is excluded. Nesting is capped at three levels: `#####` renders at the `###` indent.
 
-A page with no subheadings at all still gets a single entry linking to its `#` heading, rather than an empty box. Anchors come from the same slug generation as the heading IDs, so an outline link always resolves to the heading it names.
+A page without subheadings gets a single entry for its `#` heading. Anchors use the same slug generation as heading IDs.
 
 ## Disabling per page
 
-Set `toc: false` in a page's frontmatter and the column disappears, letting the content take the full width.
+`toc: false` in frontmatter removes the outline; the content uses the full width.
 
 ```yaml
 ---
@@ -23,13 +23,19 @@ toc: false
 ---
 ```
 
-There is no site-wide equivalent. The outline is derived from content that already exists, so pages that do not want one are the exception rather than the rule.
+There is no site-wide setting.
 
 ## Rendering
 
-On screens wider than 1024px the outline is a sticky column next to your content. Between 769px and 1024px it collapses into an "On this page" disclosure above the content, using a native `<details>` element so it opens without JavaScript. Screens narrower than that, it is not rendered at all.
+| Viewport width | Rendering |
+|---|---|
+| 1280px and wider | Sticky column beside the content |
+| 769px to 1279px | "On this page" `<details>` disclosure above the content; works without JavaScript |
+| 768px and narrower | Not rendered |
+
+A toggle button beside the sticky column hides and restores the outline; the content column widens while it is hidden. The button exposes `aria-expanded` and `aria-controls`, and its label comes from the `tocCollapse` and `tocExpand` locale strings. The hidden state sets the `hidden` attribute on the outline, removing it from the tab order and accessibility tree. The state persists in `localStorage` under `bark-toc-collapsed`.
 
 
 ## Home pages
 
-Pages with `layout: home` never show an outline, regardless of `toc`. See [Layout](/reference/default-theme-layout).
+Pages with `layout: home` never render an outline, regardless of `toc`. See [Layout](/reference/default-theme-layout).

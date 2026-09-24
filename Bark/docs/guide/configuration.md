@@ -5,18 +5,18 @@ description: appsettings.json options, docs/config.json, and theming
 
 # Configuration
 
-Bark splits configuration into two files:
+Configuration is split across two files:
 
-- **`appsettings.json`**: host-level concerns. Where the docs folder lives, whether hot reload is on, theme colors. Set per deployment, and applied on restart.
-- **`docs/config.json`**: content-level concerns. Site title and metadata, brand text, navigation, footer, social links. Set per project and hot-reloaded alongside your Markdown, so no restart is needed.
+- **`appsettings.json`**: host settings (content root, hot reload, theme colors). Per deployment; applied on restart.
+- **`docs/config.json`**: content settings (title, metadata, brand, navigation, footer, social links). Per project; applied through hot reload.
 
-That split means a content editor never needs deploy access just to fix a typo in the brand name.
+Content settings do not require deployment access.
 
-This page covers what you will touch first. For the field-by-field list, see [Site Config](/reference/site-config). If you run Bark in a container, [Environment Variables](/guide/environment-variables) gives the equivalent variable names.
+This page covers the common settings. Field reference: [Site Config](/reference/site-config). Container variable names: [Environment Variables](/guide/environment-variables).
 
-## `appsettings.json`
+## Server settings
 
-These settings belong to the `Docs` section:
+Defined in the `Docs` section of `appsettings.json`:
 
 | Setting | Default | Description |
 |---|---|---|
@@ -37,20 +37,20 @@ These settings belong to the `Docs` section:
 ```
 
 ::: tip
-`BasePath` matters most for [static export](/guide/deploy#option-e-static-export-github-pages-etc), where the `--base-path` CLI flag usually replaces it entirely. Set it here instead when the live server is behind a reverse proxy that mounts Bark under a subpath.
+For [static export](/guide/deploy#option-e-static-export-github-pages-etc), the `--base-path` flag typically replaces `BasePath`. Set `BasePath` when a reverse proxy mounts the server under a subpath.
 :::
 
-Colors, fonts, and your own CSS or JS are a separate concern, covered in [Themes](/guide/themes).
+Colors, fonts, custom CSS and JavaScript: [Themes](/guide/themes).
 
-## `docs/config.json`
+## Site settings
 
-This file covers your site's title, HTML metadata, navigation, footer, and social links. Navigation has the most moving parts, so it gets the space below. For everything else, see [Site Config](/reference/site-config).
+`docs/config.json` defines the site title, HTML metadata, navigation, footer and social links. Navigation is covered below; other fields: [Site Config](/reference/site-config).
 
-Navigation has three levels of control, and they mix:
+Navigation options (combinable):
 
-1. **Do nothing.** With no `nav`, `sidebar`, or `topNav`, Bark builds the left sidebar from your folder structure.
-2. **One flat sidebar** (`nav`) for the whole site. Good for small doc sets that need no header bar.
-3. **A header nav with dropdowns** (`topNav`) plus **a different sidebar per section** (`sidebar`, keyed by path prefix). This is what most multi-section sites want.
+1. **Auto-generated.** Without `nav`, `sidebar` or `topNav`, the sidebar is built from the folder structure.
+2. **Single sidebar** (`nav`) for the whole site.
+3. **Header navigation with dropdowns** (`topNav`) and **per-section sidebars** (`sidebar`, keyed by path prefix).
 
 ```json
 {
@@ -96,19 +96,19 @@ Navigation has three levels of control, and they mix:
 }
 ```
 
-A `topNav` item is either a direct link (`text` plus `link`) or a dropdown (`text` plus `items`, no `link`). Those are the only two shapes.
+A `topNav` item is a link (`text`, `link`) or a dropdown (`text`, `items`).
 
-`sidebar` keys are path prefixes, and the longest match for the current page wins. That lets `/guide/` and `/guide/advanced/` coexist, with the more specific key taking over for pages beneath it.
+`sidebar` keys are path prefixes; the longest match wins, so `/guide/` and `/guide/advanced/` can coexist.
 
 ::: tip
-When `sidebar` is present it takes priority over `nav` for any page matching one of its prefixes. `nav`, when present at all, fully replaces the auto-generated folder navigation on every page. Neither one merges with the folder tree. Leave both out to let Bark build navigation from your folders.
+`sidebar` takes priority over `nav` for matching pages. `nav` replaces the auto-generated navigation on every page. Neither merges with the folder tree.
 :::
 
-`footer` is rendered as Markdown, so links and formatting work as expected. For social links, an `icon` of `"github"` or `"mastodon"` renders as an inline SVG; any other value renders as plain text.
+`footer` is rendered as Markdown. Social link `icon` values `"github"` and `"mastodon"` render as inline SVG; other values render as text.
 
-## `docs/locale/`
+## Translations
 
-Every piece of text Bark puts on the page itself, the search modal, the table of contents heading, the pager labels, the 404 page, reads from a string table. English is built in. To translate it, point `locale` at a language code and drop a file next to the others:
+String tables are stored in `docs/locale/`. All interface text (search modal, table of contents heading, pager labels, ARIA labels, 404 page) comes from a string table. English is built in. `locale` selects a language file:
 
 ```json
 {
@@ -116,9 +116,9 @@ Every piece of text Bark puts on the page itself, the search modal, the table of
 }
 ```
 
-That reads `docs/locale/nl.json`. The object form works too, if you prefer it: `"locale": { "code": "nl" }`. Leave `locale` out and Bark falls back to `lang`, then to English.
+This loads `docs/locale/nl.json`. Object form: `"locale": { "code": "nl" }`. Without `locale`, `lang` is used, then English.
 
-To start a translation, copy `docs/locale/en.json`, which lists every key Bark knows about, and translate the values:
+`docs/locale/en.json` lists every key and serves as the template:
 
 ```json
 {
@@ -128,20 +128,20 @@ To start a translation, copy `docs/locale/en.json`, which lists every key Bark k
 }
 ```
 
-A few rules make this safe to do halfway:
+Rules:
 
-- Any key you leave out keeps its English text. A partial file is fine and renders as a mix.
-- Placeholders like `{0}` hold a value from the page. Keep them exactly as they appear in the English source.
-- Keys Bark does not know are ignored, and it logs a warning naming them, which is usually a typo.
-- A file that is not valid JSON is skipped completely, with a warning, and the interface is shown in English.
+- Missing keys fall back to English.
+- Placeholders such as `{0}` must be kept as in the English source.
+- Unknown keys are ignored and logged as a warning.
+- Invalid JSON is skipped with a warning; the interface falls back to English.
 
-Locale files hot reload like any other content. Save one and the running site picks it up, no restart. They are never served to a browser or listed by the API; the only thing that reads them is the string table.
+Locale files apply through hot reload. They are not served over HTTP or listed by the API.
 
-Bark comes with `en.json` and `nl.json`. One language is active at a time, for the whole site.
+Bundled: `en.json`, `nl.json`. `locale` sets one interface language for the site; per-tree languages are configured under [Translated pages](#translated-pages).
 
 ## Translated pages
 
-The string table covers the interface. To translate the pages themselves, give each language a directory and name it in `config.json`:
+Page translations use one directory per language, declared in `config.json`:
 
 ```json
 {
@@ -152,7 +152,7 @@ The string table covers the interface. To translate the pages themselves, give e
 }
 ```
 
-`root` names the untranslated tree, the one that already lives at the top of `docs/`. Every other key is both a directory name and a locale code, so `docs/nl/guide/install.md` serves at `/nl/guide/install/` and reads its interface strings from `docs/locale/nl.json`.
+`root` is the untranslated tree at the top of `docs/`. Other keys are both directory name and locale code: `docs/nl/guide/install.md` is served at `/nl/guide/install/` with strings from `docs/locale/nl.json`.
 
 ```
 docs/
@@ -163,21 +163,21 @@ docs/
     guide/install.md        → /nl/guide/install/
 ```
 
-Each tree gets its own navigation, its own search index, and its own `<html lang>`. A language switcher appears in the header as soon as a second language is configured. Because `sidebar` keys are path prefixes, a `/nl/` key gives that tree its own sidebar with no extra setup.
+Each tree has its own navigation, search index and `<html lang>`. The header includes a language switcher (globe icon) when two or more languages are configured. A `/nl/` `sidebar` key defines that tree's sidebar.
 
-A page with `layout: home` never shows a translation notice. A landing page is there to invite people in, not to explain itself, and a banner across the top of it looks like an error rather than help.
+Pages with `layout: home` never render a translation notice.
 
-You do not have to translate everything before you ship. A page that exists in English but not yet in Dutch is served at its Dutch URL, in the Dutch interface, with a notice above the content linking to the English original. Its `canonical` points at the original, and it stays out of the Dutch search index, so an untranslated page never competes with the page it came from.
+Untranslated pages are served at the translated URL with the translated interface and a notice linking to the original. Their `canonical` points to the original, and they are excluded from that tree's search index.
 
-Translations also go stale. When the original changes after the translation was written, Bark compares the two timestamps and shows a smaller notice that invites a comparison. Nothing is hidden, and nothing is wrong without saying so.
+When the original is newer than the translation (by timestamp), an outdated-translation notice is rendered.
 
 ::: tip
-One language is active per request, decided by the URL. Bark never redirects readers based on their browser language: that would fight shared caches, static export, and the reader's own choice of link.
+The language is determined by the URL. There is no redirect based on browser language, which keeps responses cacheable and compatible with static export.
 :::
 
 ### Drafting a translation with LibreTranslate
 
-Bark can draft a translated tree for you from a self-hosted [LibreTranslate](https://libretranslate.com/) instance. It is a one-off generator, not a runtime service: it writes real Markdown files that you then own, review, and edit.
+A one-off generator drafts a translated tree through a self-hosted [LibreTranslate](https://libretranslate.com/) instance. Output is regular Markdown for review and editing; there is no runtime translation.
 
 ```bash
 dotnet run --project src/Bark -- --translate nl --translate-endpoint http://localhost:5000
@@ -193,17 +193,17 @@ Flags:
 | `--translate-api-key <key>` | Sent as `api_key` when your instance requires one |
 | `--translate-overwrite` | Retranslate files that already exist, which is off by default so your edits survive |
 
-What it leaves alone: fenced and indented code, inline code spans, link and image targets, HTML blocks, container markers, and every front matter field except `title` and `description`. Headings keep an explicit `{#anchor}` matching the original slug, so links into a translated page still land in the right place.
+Not translated: fenced and indented code, inline code, link and image targets, HTML blocks, container markers, and front matter except `title` and `description`. Headings receive an explicit `{#anchor}` matching the original slug.
 
-Every generated file has `machineTranslated: true` in its front matter, which renders a notice inviting corrections. Remove the flag once a person has read the page.
+Generated files set `machineTranslated: true`, which renders a machine-translation notice. Remove the flag after human review.
 
 ::: warning
-Machine translation is a starting point, not a finished page. Review before you announce a language, and treat the flag as a to-do list rather than a badge.
+Machine-translated pages require review before publication.
 :::
 
 ### Translating the menus
 
-`config.json` contains text too: menu labels, sidebar titles, the brand, the footer, the promo bar, the edit-link label. That text remains in `config.json`, written once, in one language. The translations live in the locale file, as a dictionary keyed by the original text:
+Text in `config.json` (menu labels, sidebar titles, brand, footer, promo bar, edit-link label) is written once. Translations are stored in the locale file as a dictionary keyed by the original text:
 
 ```json
 {
@@ -217,9 +217,9 @@ Machine translation is a starting point, not a finished page. Review before you 
 }
 ```
 
-The structure of your navigation is never duplicated. Add a page to the sidebar and every language picks it up; only its label needs a line in each `config` block. Anything absent from the dictionary renders in the original language, so a partly translated menu shows some English, but nothing disappears.
+Navigation structure is shared across languages; only labels are translated. Missing entries render in the original language.
 
-Markdown values work the same way. Use the exact source string as the key, links and all, and the translation is rendered as Markdown just like the original:
+Markdown values use the exact source string, including links, as the key:
 
 ```json
 "config": {
@@ -227,4 +227,4 @@ Markdown values work the same way. Use the exact source string as the key, links
 }
 ```
 
-`config` is a reserved key inside a locale file. Every other key is an interface string, and Bark warns about names it does not recognise.
+`config` is a reserved key in locale files. Other keys are interface strings; unknown keys are logged as a warning.

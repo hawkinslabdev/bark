@@ -5,11 +5,11 @@ description: Every Markdown extension Bark supports, with live examples
 
 # Using Markdown
 
-All pages are primarily written in [Markdown](https://www.markdownguide.org/guide/). Everything below renders live on this page; it´s tested and verified.
+Pages are written in [Markdown](https://www.markdownguide.org/guide/). Every example on this page renders live.
 
 ## Syntax-highlighted code blocks
 
-We're using grammar-based tokenization[^1] which works across the ~65 languages bundled with Bark. A few examples:
+Highlighting uses grammar-based tokenization[^1] for about 65 bundled languages:
 
 ```csharp
 public sealed record Order(string Id, decimal Total)
@@ -44,11 +44,11 @@ fn main() {
 SELECT id, title FROM pages WHERE published = true ORDER BY title;
 ```
 
-Shorthands work alongside the full ids: `c#`, `cs` and `dotnet` all reach the C# grammar, as do `f#` for F# and `c++` for C++. A name Bark has no grammar for still renders, just without colors.
+Aliases resolve to full grammar IDs: `c#`, `cs` and `dotnet` for C#, `f#` for F#, `c++` for C++. Unknown languages render without highlighting.
 
 ## Title bars
 
-Add `[filename]` to the fence info string to show a title bar instead of the language badge:
+`[filename]` in the fence info string renders a title bar instead of the language badge:
 
 ````md
 ```json [src/appsettings.json]
@@ -68,7 +68,7 @@ Renders as:
 
 ## Line highlighting
 
-Highlight specific lines with `{n,m-o}` in the fence info string:
+`{n,m-o}` in the fence info string highlights lines:
 
 ```ts{2}
 function add(a: number, b: number) {
@@ -76,7 +76,7 @@ function add(a: number, b: number) {
 }
 ```
 
-Or mark a line with a ==trailing== comment. Bark strips the marker and keeps the highlight:
+A trailing `// [!code highlight]` comment also highlights a line; the comment is removed from output:
 
 ```ts
 const cache = new Map();
@@ -139,11 +139,11 @@ dotnet restore
 ```
 :::
 
-Use `[label]` for the tab title. If the label matches a name on [Simple Icons](https://simpleicons.org/), its icon will display automatically. You can a specific icon with `[label icon:slug]`, e.g. `[csharp icon:dotnet]`.
+`[label]` sets the tab title. Labels matching a [Simple Icons](https://simpleicons.org/) name display that icon. `[label icon:slug]` sets the icon explicitly, for example `[csharp icon:dotnet]`.
 
 ## Alerts
 
-Use these for quick highlights within your text. These can be spawned with the syntax `> [!TYPE]`:
+GitHub-style alerts use `> [!TYPE]`:
 
 > [!NOTE]
 > Important context.
@@ -162,7 +162,7 @@ Use these for quick highlights within your text. These can be spawned with the s
 
 ## Custom containers
 
-These are blocks starting and ending with ```:::``` follewed by either `note`, `tip`, `warning`, `danger` or `details`. Can be combined with `Click to expand` for expanding blocks.
+Blocks delimited by `:::` with a type: `note`, `tip`, `info`, `warning`, `danger` or `details`. `details` takes an optional summary text and renders as a disclosure.
 
 ::: note
 This is a note container.
@@ -188,12 +188,12 @@ This is a danger container.
 Hidden content goes here.
 :::
 
-Custom containers are sugar over a plain `<div class="TYPE custom-block">`. Markdig passes raw HTML straight through, so you can write the div yourself when you need something the shorthand can't do, like a one-off inline style:
+Containers render as `<div class="TYPE custom-block">`. Raw HTML passes through, so the `div` can be written directly, for example to add an inline style:
 
 ```md
 <div class="tip custom-block">
 
-Just want to try it out? Skip to the [Quickstart](/guide/getting-started).
+Quick setup: [Getting Started](/guide/getting-started).
 
 </div>
 ```
@@ -202,15 +202,15 @@ Renders as:
 
 <div class="tip custom-block">
 
-Just want to try it out? Skip to the [Quickstart](/guide/getting-started).
+Quick setup: [Getting Started](/guide/getting-started).
 
 </div>
 
-Though make sure to leave a blank line after the opening `<div>` and before the closing `</div>`. Without it, the Markdown renderer treats the inside as raw HTML instead of Markdown and your `[links](...)` won't render.
+A blank line is required after the opening `<div>` and before the closing `</div>`; otherwise the content is treated as raw HTML and Markdown inside is not rendered.
 
 ## Badges
 
-Small inline labels, the kind you'd drop next to a heading to flag "new in 3.0" or an unstable API. Write them as plain HTML, Bark passes unrecognized tags straight through and styles `<badge>` itself:
+Inline labels written as HTML; `<badge>` is styled by the Bark stylesheet. See [Badge](/reference/default-theme-badge).
 
 ```md
 Hello world <Badge type="tip">3.0+</Badge>
@@ -220,7 +220,7 @@ Renders as:
 
 Hello world <Badge type="tip">3.0+</Badge>
 
-Four types, same colors as the alert blocks above: `info` (blue), `tip` (green, default), `warning` (amber), `danger` (red).
+Types match the alert colors: `info` (blue), `tip` (green, default), `warning` (amber), `danger` (red).
 
 <Badge type="info">info</Badge>
 <Badge type="tip">tip</Badge>
@@ -228,12 +228,12 @@ Four types, same colors as the alert blocks above: `info` (blue), `tip` (green, 
 <Badge type="danger">danger</Badge>
 
 ::: danger
-Always close the tag: `<Badge type="tip">text</Badge>`. A self-closing `<Badge text="x" />` looks reasonable but breaks, HTML has no XML-style self-close for unknown elements, so it silently swallows the rest of the paragraph as its content instead of rendering a badge.
+The closing tag is required: `<Badge type="tip">text</Badge>`. HTML ignores `/>` on unknown elements, so `<Badge text="x" />` stays open and absorbs the rest of the paragraph.
 :::
 
 ## Definition lists 
 
-A definition list pairs terms with their meanings. Use a colon `:` followed by a space to mark each definition.
+Terms followed by lines starting with `:` and a space produce a definition list.
 
 Term 1
 :   Definition of term 1.
@@ -254,7 +254,7 @@ $$
 
 ## Abbreviations
 
-Define abbreviations by providing the reference at the bottom of your document, which will automatically wrap matching terms in an `<abbr>` tag:
+Abbreviation definitions at the end of a document wrap matching terms in `<abbr>`:
 
 ````md
 The spec is written by the WHATWG and served here over HTTP.
@@ -271,17 +271,17 @@ The spec is written by the WHATWG and served here over HTTP.
 *[WHATWG]: Web Hypertext Application Technology Working Group
 *[HTTP]: HyperText Transfer Protocol
 
-A definition covers the whole page, so every later mention picks it up: you can use HTML anywhere in your text and it stays explained. Terms have a dotted underline. On a desktop the explanation appears on hover; on a phone, tap the term and it appears just above it.
+A definition applies to every occurrence on the page. Terms render with a dotted underline; the expansion appears on hover, and on tap on touch devices.
 
 ## Citations
 
-Wrap your text in double quotes `""` to create a citation element:
+Text wrapped in doubled quotes (`""`) renders as a `<cite>` element:
 
 ""The Art of Computer Programming""
 
 ## Standard Markdown
 
-Tables, task lists, footnotes, and alert blocks all work too:
+Tables, task lists and footnotes are supported:
 
 | Feature | Supported |
 |---|---|
@@ -294,12 +294,12 @@ Tables, task lists, footnotes, and alert blocks all work too:
 
 A sentence with a footnote.[^2]
 
-[^1]: Using TextMateSharp found [here](https://github.com/danipen/TextMateSharp){target="_blank" rel="noopener"}.
+[^1]: [TextMateSharp](https://github.com/danipen/TextMateSharp){target="_blank" rel="noopener"}.
 [^2]: The footnote text.
 
 ## Link attributes
 
-Append `{target="_blank" rel="noopener"}` after a link to open it in a new tab:
+`{target="_blank" rel="noopener"}` after a link sets its attributes:
 
 ```md
 [Bark on GitHub](https://github.com/org/bark){target="_blank" rel="noopener"}
@@ -307,7 +307,7 @@ Append `{target="_blank" rel="noopener"}` after a link to open it in a new tab:
 
 ## Video and media
 
-Drop media files into `docs/assets/` and reference them with image syntax. Bark turns known video, audio, and embed URLs into native players:
+Image syntax pointing at a video, audio or embed URL renders a native player. Media files are stored in `docs/assets/`:
 
 ```md
 ![Demo clip](/assets/video.mp4)

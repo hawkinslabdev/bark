@@ -5,13 +5,13 @@ description: Small inline labels for flagging new features, version requirements
 
 # Badge
 
-A small pill-shaped label you drop inline, next to a heading, after a word, wherever you need to flag "new", "deprecated", or "requires 3.0+" without breaking the sentence.
+An inline pill-shaped label for flags such as "new", "deprecated" or "requires 3.0+".
 
 ```md
 ## Some heading <Badge type="tip">3.0+</Badge>
 ```
 
-Bark has no client-side framework in the loop, so this is plain HTML: write `<Badge type="...">text</Badge>` directly in your Markdown, and Bark's stylesheet renders it. Markdig passes unrecognized tags through as raw HTML, and HTML lowercases tag names on parse, so the actual rendered element is `<badge>`. You never need to think about that. Always write the closing tag.
+`<Badge type="...">text</Badge>` is plain HTML in Markdown, styled by the Bark stylesheet. Markdig passes the tag through as raw HTML, and the parser lowercases it to `<badge>`. The closing tag is required.
 
 ## Types
 
@@ -22,7 +22,7 @@ Bark has no client-side framework in the loop, so this is plain HTML: write `<Ba
 | `warning` | Amber | `--alert-warning` |
 | `danger` | Red | `--alert-caution` |
 
-Same four colors as [Alerts](/guide/markdown#alerts), so a badge and an alert block referring to the same kind of thing always match.
+The colors match [Alerts](/guide/markdown#alerts).
 
 <Badge type="tip">tip</Badge>
 <Badge type="info">info</Badge>
@@ -31,17 +31,17 @@ Same four colors as [Alerts](/guide/markdown#alerts), so a badge and an alert bl
 
 ## Usage
 
-Inline, anywhere text can go:
+Inline:
 
 ```md
 Supports `Ctrl+K` <Badge type="tip">3.0+</Badge> on every page.
 ```
 
-Right after a heading, the most common placement:
+After a heading:
 
 ```md
 ## Customization <Badge type="warning">beta</Badge>
 ```
 
 > [!WARNING]
-> Self-closing syntax (`<Badge text="x" />`) is not supported and will break your page. HTML has no XML-style self-close for unknown elements: a stray `/>` opens an unclosed `<badge>` tag, which then silently swallows the rest of the paragraph as its content instead of rendering a label. Always write `<Badge type="...">text</Badge>` with an explicit closing tag.
+> Self-closing syntax (`<Badge text="x" />`) is not supported. HTML ignores `/>` on unknown elements, so the `<badge>` stays open and absorbs the rest of the paragraph. Use `<Badge type="...">text</Badge>`.

@@ -5,42 +5,42 @@ description: HTTP routes Bark exposes
 
 # API Reference
 
-This document defines the HTTP routes Bark exposes. The surface area exposed is tiny.
+HTTP routes exposed by Bark.
 
 ## `GET /{path}`
 
 Returns the rendered HTML page for the given documentation path.
 
 ```bash
-curl http://localhost:5000/guide/guide/
+curl http://localhost:5000/guide/getting-started
 ```
 
-What happens on each request:
+Request handling:
 
-1. Look up the pre-rendered page from the in-memory cache (built at startup, rebuilt on file change).
-2. Compute a SHA-256 `ETag` of the HTML. If the request's `If-None-Match` matches, respond `304 Not Modified` instead of re-sending the page.
-3. Build navigation, breadcrumbs, table of contents, and prev/next pagination for the response.
-4. Stitch it all into one HTML string and return it.
+1. The pre-rendered page is read from the in-memory cache (built at startup, rebuilt on file change).
+2. A SHA-256 `ETag` is computed. A matching `If-None-Match` returns `304 Not Modified`.
+3. Navigation, breadcrumbs, table of contents and pagination are built.
+4. The assembled HTML is returned.
 
-Unknown paths return a 404 page rather than an exception.
+Unknown paths return the 404 page.
 
 ## `GET /raw/{path}`
 
-Returns the raw Markdown source for the given documentation page. This is what the [page controls](/reference/site-config#pagecontrolsconfig) "Copy page" and "View as Markdown" actions use.
+Returns the Markdown source of a page. Used by the [page controls](/reference/site-config#site-metadata) "Copy page" and "View as Markdown" actions.
 
 ```bash
 curl -O http://localhost:5000/raw/guide/getting-started
 ```
 
-By default the response is served as a file download (`Content-Disposition: attachment`). Adding `?view=true` changes that to an inline `text/plain` response, which is what "View as Markdown" uses to open the source in a new tab without triggering a download.
+Default response: file download (`Content-Disposition: attachment`). `?view=true` returns inline `text/plain`, used by "View as Markdown".
 
-The path follows the same normalization rules as the page route: case-insensitive, no trailing slash needed. If the path does not match a known page, the endpoint returns `404 Not Found`.
+Path normalization matches the page route (case-insensitive, trailing slash optional). Unknown paths and paths through symlinks return `404 Not Found`.
 
-This endpoint is rate-limited to 30 requests per minute per IP address, the same policy as `/api/search`.
+Rate limit: 30 requests per minute per IP address (shared policy with `/api/search`).
 
 ## `GET /api/search`
 
-Returns a JSON array of search results, ranked by a weighted score.
+Returns a JSON array of results ranked by weighted score.
 
 ```bash
 curl "http://localhost:5000/api/search?q=hot+reload"
@@ -58,37 +58,37 @@ curl "http://localhost:5000/api/search?q=hot+reload"
 | Heading | 3 |
 | Body text | 1 |
 
-The index is an in-memory inverted index, rebuilt in full (not incrementally) every time the docs rebuild.
+The in-memory inverted index is rebuilt in full on every docs rebuild.
 
-This endpoint is rate-limited to 30 requests per minute per IP address. Requests over that threshold receive a `429 Too Many Requests` response.
+Rate limit: 30 requests per minute per IP address; excess requests receive `429 Too Many Requests`.
 
 ## `GET /api/build-version`
 
-Returns an integer that increments every time the docs content actually changes, not on every filesystem event (see [Getting Started](/guide/getting-started) for why that distinction matters).
+Returns an integer that increments when rendered content changes, not on every filesystem event.
 
 ```json
 { "version": 4 }
 ```
 
-The dev-mode hot-reload script polls this endpoint and reloads the browser when it sees a new value. You probably won't call this directly, but it's there if you want to build your own "content changed" hook.
+The hot-reload script polls this endpoint and reloads the page on a new value. Usable as a content-change hook.
 
 ## `GET /feed.xml`
 
-Returns an RSS 2.0 feed of the 20 most recently modified pages, sorted by last-modified date. The feed title, description, and base URL are derived from your `docs/config.json` settings.
+Returns an RSS 2.0 feed of the 20 most recently modified pages, newest first. Title, description and base URL derive from `docs/config.json`.
 
 ```bash
 curl http://localhost:5000/feed.xml
 ```
 
-This endpoint is rate-limited to 30 requests per minute per IP address. RSS readers that poll hourly or daily are well within this limit.
+Rate limit: 30 requests per minute per IP address.
 
 ## `GET /sitemap.xml`
 
-Returns a standard XML sitemap covering every known page, `<lastmod>` populated from each file's last-write time on disk.
+Returns an XML sitemap of every page; `<lastmod>` is the file's last-write time.
 
 ## `GET /robots.txt`
 
-Returns a `robots.txt` with a `Sitemap:` line built from the actual request host, correct behind a reverse proxy as long as forwarded headers are configured.
+Returns `robots.txt`. The `Sitemap:` URL uses `PublicBaseUrl`, or the request host when unset (behind a reverse proxy, forwarded headers are required).
 
 ```
 User-agent: *
@@ -96,10 +96,10 @@ Allow: /
 Sitemap: https://your-host/sitemap.xml
 ```
 
-See [Deploy](/guide/deploy) for the forwarded-headers setup.
+Forwarded headers: [Deploy](/guide/deploy).
 
 ## `GET /llms.txt`
 
-Returns a plain-text index of every page (title, URL, and description), formatted for LLM crawlers and agentic tools that prefer a flat, low-noise summary over crawling rendered HTML.
+Returns a plain-text index of every page (title, URL, description) for LLM crawlers and agents.
 
-See [Sitemap & Crawlers](/reference/sitemap-generation) for how these three endpoints fit together.
+See [Sitemap & Crawlers](/reference/sitemap-generation).

@@ -5,13 +5,11 @@ description: Run Bark locally in under a minute
 
 # Getting Started
 
-Bark is a documentation server: point it at a folder of Markdown and it serves a full site, navigation, search, and all. This guide gets a copy running locally.
-
-Want to know why it is built this way first? Read [What is Bark?](/guide/what-is-bark). Otherwise, keep going.
+This guide runs Bark locally with Docker. Background: [What is Bark?](/guide/what-is-bark).
 
 ## Installation
 
-Docker is the fastest path and the one this guide uses. Without it, [Deploy](/guide/deploy) covers Windows/IIS, a Linux release zip, and building from source.
+Other install methods (Windows/IIS, Linux release zip, source build): [Deploy](/guide/deploy).
 
 Create a `docker-compose.yml`:
 
@@ -26,13 +24,13 @@ services:
       - ./docs:/app/docs:ro,Z
 ```
 
-The `./docs` volume is your content: Markdown files plus an optional `config.json`. Bark reads everything from there.
+The `./docs` volume holds the content: Markdown files and an optional `config.json`.
 
 ```bash
 docker compose up -d
 ```
 
-Open `http://localhost:8080`. That is the whole setup.
+The site is served at `http://localhost:8080`.
 
 ## File structure
 
@@ -51,7 +49,7 @@ docs/
     └── sitemap-generation.md
 ```
 
-Your folder layout becomes the site's navigation and URLs. No index to maintain.
+The folder layout determines navigation and URLs.
 
 ## What's next
 

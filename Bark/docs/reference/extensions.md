@@ -5,11 +5,9 @@ description: Enabling privacy-friendly analytics like Matomo, Plausible, Medama,
 
 # Extensions
 
-Extensions are small, built-in integrations that Bark sets up for you. You describe the one you want, and Bark injects its script, keeps your Content Security Policy in step, and reloads on save. The current family covers privacy-friendly analytics, so you can measure your traffic while respecting your readers.
+Extensions are built-in integrations configured in `extensions.json`. Bark injects the script, updates the Content Security Policy, and applies changes through hot reload. Available extensions are privacy-focused analytics providers.
 
 ## What's Supported
-
-The following extensions are supported:
 
 | Extension | Type | Required keys |
 | --- | --- | --- |
@@ -21,7 +19,7 @@ The following extensions are supported:
 
 ## How Extensions Work
 
-Extensions live in one optional file, `extensions.json`, next to your `config.json` in the `docs/` folder. Keeping them separate leaves your main config focused on content and navigation.
+Extensions are configured in the optional `docs/extensions.json`, next to `config.json`.
 
 ```json
 {
@@ -34,21 +32,21 @@ Extensions live in one optional file, `extensions.json`, next to your `config.js
 }
 ```
 
-Every extension stays off until you set `enabled` to `true`. An empty or absent file simply means no analytics run. Because Bark reads this file in memory alongside your Markdown, a saved change is picked up right away through hot reload. There is no build step to wait on.
+Extensions are disabled unless `enabled` is `true`. An empty or absent file disables all extensions. Changes apply through hot reload.
 
-Bark also verifies each enabled extension before it goes live. If a setting looks off, that extension is left inactive and a warning is written to your startup log. This way a small typo cannot push a broken tracker to your visitors.
+Each enabled extension is validated. An invalid configuration leaves the extension inactive and logs a warning at startup.
 
 ::: info
-Analytics scripts talk to an outside server, so Bark widens your Content Security Policy to allow the origin you configure. Each injected script also has the page's security nonce. You are welcome to keep a strict CSP: the extension you enable is added to it for you.
+The Content Security Policy is extended with the configured origin, and each injected script carries the page nonce. A strict CSP remains compatible.
 :::
 
 ## Available Extensions
 
-You can pick whichever tool fits your workflow. Running more than one at a time is fine if you are comparing them.
+Multiple extensions can run simultaneously.
 
 ### Matomo
 
-[Matomo](https://matomo.org) is a self-hosted analytics platform for teams that want to own their data. Bark configures it in cookieless mode by default, which keeps you clear of consent prompts. You can turn that off if your setup calls for it.
+[Matomo](https://matomo.org): self-hosted analytics. Cookieless mode is enabled by default.
 
 ```json
 {
@@ -65,14 +63,14 @@ You can pick whichever tool fits your workflow. Running more than one at a time 
 
 | Field | Description |
 |---|---|
-| `enabled` | Set to `true` to activate the extension. |
-| `url` | The base URL of your Matomo install. |
-| `siteId` | The numeric site id Matomo assigned. The `site_id` spelling works too. |
-| `disableCookies` | Cookieless tracking, on by default. Set to `false` for standard cookies. |
+| `enabled` | `true` activates the extension. |
+| `url` | Matomo base URL. |
+| `siteId` | Numeric Matomo site ID. `site_id` is also accepted. |
+| `disableCookies` | Cookieless tracking. Default: `true`. |
 
 ### Plausible
 
-[Plausible](https://plausible.io) is a lightweight, cookie-free service. It comes hosted or self-hosted, and needs no consent banner.
+[Plausible](https://plausible.io): cookie-free analytics, hosted or self-hosted.
 
 ```json
 {
@@ -89,14 +87,14 @@ You can pick whichever tool fits your workflow. Running more than one at a time 
 
 | Field | Description |
 |---|---|
-| `enabled` | Set to `true` to activate the extension. |
-| `domain` | The site domain registered in Plausible. Comma-separate several for a shared script. |
-| `url` | The base URL of your install. Defaults to `https://plausible.io`, so you only need it when self-hosting. |
-| `script` | The script variant under `/js/`, such as `script.outbound-links.js`. Defaults to `script.js`. |
+| `enabled` | `true` activates the extension. |
+| `domain` | Site domain registered in Plausible. Comma-separated for a shared script. |
+| `url` | Base URL. Default: `https://plausible.io`; required only when self-hosting. |
+| `script` | Script variant under `/js/`, such as `script.outbound-links.js`. Default: `script.js`. |
 
 ### Medama
 
-[Medama](https://github.com/medama-io/medama) is a self-hosted, privacy-first server with a light footprint. It needs only the address it lives at.
+[Medama](https://github.com/medama-io/medama): self-hosted analytics.
 
 ```json
 {
@@ -111,12 +109,12 @@ You can pick whichever tool fits your workflow. Running more than one at a time 
 
 | Field | Description |
 |---|---|
-| `enabled` | Set to `true` to activate the extension. |
-| `url` | The base URL of your Medama install. |
+| `enabled` | `true` activates the extension. |
+| `url` | Medama base URL. |
 
 ### GoatCounter
 
-[GoatCounter](https://www.goatcounter.com) is an easygoing option, offered as a free hosted service or self-hosted. It suits personal sites and smaller projects.
+[GoatCounter](https://www.goatcounter.com): analytics, free hosted or self-hosted.
 
 ```json
 {
@@ -131,12 +129,12 @@ You can pick whichever tool fits your workflow. Running more than one at a time 
 
 | Field | Description |
 |---|---|
-| `enabled` | Set to `true` to activate the extension. |
-| `url` | The base URL of your GoatCounter site. |
+| `enabled` | `true` activates the extension. |
+| `url` | GoatCounter site base URL. |
 
 ### Liwan
 
-[Liwan](https://liwan.dev) is a self-hosted, privacy-friendly analytics server written in Rust. It is small and stores its data in a single file. Point it at your instance and name the entity you track.
+[Liwan](https://liwan.dev): self-hosted analytics with single-file storage.
 
 ```json
 {
@@ -152,13 +150,13 @@ You can pick whichever tool fits your workflow. Running more than one at a time 
 
 | Field | Description |
 |---|---|
-| `enabled` | Set to `true` to activate the extension. |
-| `url` | The base URL of your Liwan instance. |
-| `entity` | The entity id you configured in Liwan for this site. |
+| `enabled` | `true` activates the extension. |
+| `url` | Liwan base URL. |
+| `entity` | Liwan entity ID for this site. |
 
 ## A Complete Example
 
-Here is an `extensions.json` listing all four providers, each switched off. Keep it as a template and flip `enabled` to `true` on the one you choose.
+Template with all five providers disabled:
 
 ```json
 {
@@ -192,4 +190,4 @@ Here is an `extensions.json` listing all four providers, each switched off. Keep
 }
 ```
 
-Save the file with an extension enabled, then reload a page and view its source. The analytics script is in the `<head>`, with the page nonce. From here, the [Site Config](/reference/site-config) reference shows how `extensions.json` sits alongside the rest of your setup.
+An enabled extension injects its script into `<head>` with the page nonce. Related: [Site Config](/reference/site-config).

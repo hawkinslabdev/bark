@@ -5,7 +5,7 @@ description: layout:home frontmatter, hero and features
 
 # Homepage
 
-Set `layout: home` in a page's front matter to swap the normal docs interface (sidebar, table of contents, breadcrumbs) for a hero section and a features grid. That's exactly what `index.md` on this site uses.
+`layout: home` replaces the doc interface (sidebar, table of contents, breadcrumbs) with a hero section and a features grid. This site's `index.md` uses it.
 
 ```yaml
 ---
@@ -28,7 +28,7 @@ features:
 ---
 ```
 
-## `hero`
+## Hero
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -44,11 +44,11 @@ features:
 |---|---|---|---|
 | `theme` | `"brand"` \| `"alt"` | no | `brand` is the filled button, `alt` is the outline button. Defaults to `brand`. |
 | `text` | `string` | yes | Button label. |
-| `link` | `string` | yes | Where the button goes. Internal paths and external URLs both work. |
+| `link` | `string` | yes | Button target. Internal paths and external URLs are supported. |
 
-## `features`
+## Features
 
-An array of cards rendered in a responsive grid below the hero.
+Array of cards rendered in a responsive grid below the hero.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -56,7 +56,7 @@ An array of cards rendered in a responsive grid below the hero.
 | `iconImage` | `FeatureIconConfig` | no | A themed icon object for separate light and dark variants. Takes priority over `icon` when both are set. |
 | `title` | `string` | yes | Card heading. |
 | `details` | `string` | yes | Card body text. |
-| `link` | `string` | no | If set, the whole card becomes a link. |
+| `link` | `string` | no | Makes the whole card a link. |
 
 **`FeatureIconConfig`**
 
@@ -68,6 +68,6 @@ An array of cards rendered in a responsive grid below the hero.
 | `alt` | `string?` | Alt text for the image. Defaults to an empty string, treating the icon as decorative. |
 
 > [!NOTE]  
-> `hero.image` accepts a URL or a single emoji/character and does not currently support the `iconImage` format.
+> `hero.image` accepts a URL or a single emoji/character. The `iconImage` format is not supported.
 
-Content written below the front matter (regular Markdown) still renders, directly beneath the features grid. Use it for a short paragraph or an extra call-to-action that doesn't fit the hero/features shape.
+Markdown below the front matter renders beneath the features grid.

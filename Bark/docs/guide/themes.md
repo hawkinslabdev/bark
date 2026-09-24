@@ -5,18 +5,18 @@ description: Override colors, add your own CSS and JS, or hand the whole theme f
 
 # Themes
 
-Bark comes with nine built-in themes and four escalating levels of control, from "pick a different look" to "replace every line of CSS":
+Bark includes nine built-in themes and four levels of customization:
 
-1. **A built-in theme**, one word in `config.json`.
-2. **CSS variables**, for palette and font tweaks on top of it.
-3. **A `custom.css` / `custom.js` drop-in**, for anything a variable cannot reach.
-4. **Your own theme class**, to ship a look as code.
+1. **Built-in theme**: one value in `config.json`.
+2. **CSS variables**: palette and font overrides.
+3. **`custom.css` / `custom.js`**: arbitrary styling and scripting.
+4. **Theme class**: a theme shipped as code.
 
-Just want dark mode off, or your brand color in place? Skip to [CSS variables](#css-variables).
+Brand colors and dark-mode settings: [CSS variables](#css-variables).
 
 ## Picking a theme
 
-Set `theme` in `docs/config.json`:
+`theme` in `docs/config.json` selects the theme:
 
 ```json
 {
@@ -24,9 +24,9 @@ Set `theme` in `docs/config.json`:
 }
 ```
 
-That is the whole opt-in. Leave it out and you get `default`. The value hot-reloads with the rest of `config.json`, so you can flip between themes without restarting.
+Default: `default`. Changes apply through hot reload without a restart.
 
-Add ` dark` or ` light` to pin the color scheme, e.g. `"theme": "forest-ledger dark"`. That hides the in-page toggle and ignores the visitor's OS preference; leaving the mode off keeps the toggle and follows the OS, same as today.
+A ` dark` or ` light` suffix pins the color scheme, for example `"theme": "forest-ledger dark"`. A pinned scheme removes the theme toggle and ignores the OS preference. Without a suffix, the toggle is shown and the OS preference applies.
 
 | Name | Look |
 |---|---|
@@ -40,11 +40,11 @@ Add ` dark` or ` light` to pin the color scheme, e.g. `"theme": "forest-ledger d
 | `laserwave` | Synthwave violet with a hot magenta accent and a 2px accent rule above each feature. |
 | `limelight` | Pale off-white with a sage-lime accent and a cyan counterpart. Square corners and a gradient rule under the hero. |
 
-Every theme has a full light **and** dark palette, so the light/dark toggle behaves the same whichever you pick. The dark-sounding names are not dark-only: `signal-dark` has a paper-toned light mode that swaps its amber for bronze, and `laserwave` and `deep-space` have daylight palettes too.
+Every theme defines light **and** dark palettes, including `signal-dark`, `laserwave` and `deep-space`.
 
-An unrecognised name logs a warning and falls back to `default`. A typo will never take your site down.
+An unrecognized name logs a warning and falls back to `default`.
 
-Two other places can set it, for when `config.json` is the wrong home:
+Alternative sources:
 
 | Source | Wins over | Use it for |
 |---|---|---|
@@ -59,13 +59,13 @@ dotnet run --project src/Bark -- --export ./out --theme blueprint-grid
 
 ### What a theme controls
 
-Colors, fonts, icon treatment, card treatment, hero styling. That is the whole list.
+Colors, fonts, icon treatment, card treatment and hero styling.
 
-A theme cannot change your navigation, content, URLs, or front matter. Switching themes never reshuffles a sidebar or breaks a link, which is why it is safe to try one on a live site.
+Themes do not affect navigation, content, URLs or front matter.
 
 ## The theme folder
 
-Drop your custom files into the right place:
+File locations:
 
 | File | Effect |
 |---|---|
@@ -78,9 +78,9 @@ Drop your custom files into the right place:
 
 ## CSS variables
 
-Bark's layout reads its colors and fonts from CSS variables. The active theme supplies a full set; override the ones you care about and leave the rest.
+Colors and fonts are CSS variables. The active theme defines all of them; overrides replace individual values.
 
-Defaults below are the `default` theme's light values:
+Defaults (`default` theme, light mode):
 
 | Variable | Default (light) | Controls |
 |---|---|---|
@@ -98,9 +98,9 @@ Defaults below are the `default` theme's light values:
 | `--font-mono` | system stack | Code font. |
 
 > [!IMPORTANT]
-> These overrides apply to **both** light and dark mode, because one value cannot be right for two grounds. Set `--bg-color` and you get that background in dark mode too. To change a single mode, use `custom.css` with a `:root[data-theme="dark"]` selector, or write your own theme.
+> Overrides apply to **both** light and dark mode. For a single mode, use `custom.css` with a `:root[data-theme="dark"]` selector, or a custom theme.
 
-Set them with `theme.json` (no config edit) or `Docs:Themes` in `appsettings.json` (no filesystem write). Field names map 1:1 to the variables above, in PascalCase:
+Set overrides in `theme.json` or in `Docs:Themes` in `appsettings.json`. Field names are the variable names in PascalCase:
 
 ::: code-group
 
@@ -127,9 +127,9 @@ Set them with `theme.json` (no config edit) or `Docs:Themes` in `appsettings.jso
 :::
 
 > [!IMPORTANT]
-> If `Docs:Themes` exists in `appsettings.json` at all, it wins outright over `theme.json`. Bark does not merge the two field by field, it picks one source. Use `theme.json` for filesystem-only workflows and `appsettings.json` for everything else.
+> When `Docs:Themes` exists in `appsettings.json`, `theme.json` is ignored. The sources are not merged.
 
-Two more fields round out the toggle list:
+Additional fields:
 
 | Field | Type | Default | Effect |
 |---|---|---|---|
@@ -138,7 +138,7 @@ Two more fields round out the toggle list:
 
 ## Escape hatches
 
-CSS variables cover palette and fonts. For layout tweaks, hiding an element, or animating something, reach for `custom.css` and `custom.js` directly.
+`custom.css` and `custom.js` cover changes beyond palette and fonts.
 
 `wwwroot/theme/custom.css`:
 
@@ -157,14 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 ```
 
-`custom.css` loads after Bark's own stylesheet, so a plain selector wins without a specificity fight. `custom.js` runs with `defer`, after the DOM is parsed but before Bark's inline script finishes setting up search, the sidebar, and dark mode. To run after those are ready, listen for `DOMContentLoaded` as above.
+`custom.css` loads after the built-in stylesheet; equal-specificity selectors override it. `custom.js` loads with `defer`, before the built-in script initializes search, the sidebar and dark mode. Code that depends on them should run on `DOMContentLoaded`.
 
 > [!TIP]
-> Need a CSS file hosted elsewhere, such as a CDN or a different path? Set `CustomCssUrl` in `Docs:Themes` or `theme.json`. It takes priority over an auto-detected `custom.css` if both exist.
+> `CustomCssUrl` in `Docs:Themes` or `theme.json` loads a stylesheet from another URL. It takes priority over `custom.css`.
 
 ## Writing your own theme
 
-If a look is worth keeping, ship it as code instead of a pile of CSS overrides. A theme is one class implementing `IBarkTheme`, in its own file under `src/Bark/Services/Theming/Themes/`:
+A theme is a class implementing `IBarkTheme` in `src/Bark/Services/Theming/Themes/`:
 
 ```csharp
 namespace Bark.Services.Theming.Themes;
@@ -207,7 +207,7 @@ public sealed class MidnightTheme : IBarkTheme
 }
 ```
 
-Then add one line to `ThemeRegistry.All`:
+Register it in `ThemeRegistry.All`:
 
 ```csharp
 public static IReadOnlyList<IBarkTheme> All { get; } =
@@ -224,18 +224,18 @@ public static IReadOnlyList<IBarkTheme> All { get; } =
 ];
 ```
 
-`"theme": "midnight"` now works in `config.json`.
+`"theme": "midnight"` then selects it.
 
-Three rules the test suite enforces for you:
+Rules enforced by the test suite:
 
-- **Both modes, always.** Every literal color in `LightTokens` needs a counterpart in `DarkTokens`, or the light value bleeds into dark mode.
-- **The eight palette keys are required.** `--bg-color`, `--sidebar-bg`, `--text-color`, `--text-muted`, `--accent`, `--accent-light`, `--border`, `--code-bg`. Everything else (alert hues, fonts, shadows, alias variables) comes from `ThemeDefaults` and only needs declaring when you want it different.
-- **Contrast is checked.** Text, muted text and accent must clear 4.5:1 against the background in both modes. Run `dotnet test --filter ThemeContrastTests` and it reports the exact ratio it measured.
+- **Both modes.** Every literal color in `LightTokens` requires a counterpart in `DarkTokens`.
+- **The eight palette keys are required.** `--bg-color`, `--sidebar-bg`, `--text-color`, `--text-muted`, `--accent`, `--accent-light`, `--border`, `--code-bg`. Other values (alert hues, fonts, shadows, aliases) default from `ThemeDefaults`.
+- **Contrast.** Text, muted text and accent require at least 4.5:1 against the background in both modes (WCAG 1.4.3). `dotnet test --filter ThemeContrastTests` reports measured ratios.
 
-`ComponentCss` is appended after the entire built-in stylesheet, inside the same `<style>` element, so plain selectors win without `!important`.
+`ComponentCss` is appended after the built-in stylesheet in the same `<style>` element; `!important` is not required.
 
 ## Limitations
 
-Themes change how Bark looks, not how it is built. You cannot restructure the header, add interactive features to the sidebar, or give individual pages their own layout.
+Themes change presentation only: header structure, sidebar behavior and per-page layouts are fixed.
 
-Custom CSS and JavaScript stretch this a fair way, but a genuinely different structure means changing Bark's own code. That is on purpose: one well-maintained layout beats a plugin system that the maintainers cannot easily debug.
+Structural changes require modifying Bark source. There is no plugin system by design.

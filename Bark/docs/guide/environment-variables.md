@@ -5,43 +5,41 @@ description: Configuring Bark via environment variables for Docker and container
 
 # Environment Variables
 
-When you are running Bark inside a Docker container or deploying through an orchestration platform, environment variables are often the most convenient way to pass configuration in. ASP.NET Core's built-in configuration system picks them up automatically, so no code changes or extra config files are needed on your end.
-
-Every setting you would normally write in `appsettings.json` can be provided this way. For the full list of available keys, see [Site Config](/reference/site-config).
+Every `appsettings.json` setting can be supplied as an environment variable through the ASP.NET Core configuration system. Key reference: [Site Config](/reference/site-config).
 
 ## How the mapping works
 
-ASP.NET Core translates environment variable names into configuration keys by replacing double underscores (`__`) with the colon (`:`) used to separate nested sections. This keeps the naming consistent with what you would write directly in `appsettings.json`.
+Double underscores (`__`) in variable names map to the `:` section separator.
 
 For example, `Docs:RootPath` becomes `Docs__RootPath`, and `Docs:Themes:PrimaryColor` becomes `Docs__Themes__PrimaryColor`.
 
 ## Public base URL
 
-Set `PublicBaseUrl` to the origin your site is actually served from:
+`PublicBaseUrl` sets the public origin of the site:
 
 ```bash
 PublicBaseUrl=https://docs.example.com
 ```
 
-Bark uses it to build the absolute URLs in `robots.txt`, `llms.txt`, the RSS feed, and the `canonical` and `og:url` tags. Left unset, those URLs are built from the incoming request's `Host` header, which the caller controls. That is fine locally, but on a public host anyone can request your `robots.txt` with a forged `Host` and get a `Sitemap:` line pointing somewhere else. If a CDN caches that response, the forged copy is what your visitors and crawlers get.
+It is used for absolute URLs in `robots.txt`, `llms.txt`, the RSS feed, and the `canonical` and `og:url` tags. When unset, these URLs derive from the request's `Host` header, which the client controls. On a public host, a forged `Host` produces a `Sitemap:` line pointing elsewhere, and a CDN can cache and serve that response.
 
-Combine it with the standard `AllowedHosts` variable so requests for other hostnames are rejected outright rather than merely ignored:
+`AllowedHosts` rejects requests for other hostnames:
 
 ```bash
 AllowedHosts=docs.example.com
 ```
 
-`Docs__PublicBaseUrl` works too, if you prefer keeping it alongside the other `Docs__` settings. Exporting a static site with `--base-url` sets the same value, so you only need this when running Bark as a server.
+`Docs__PublicBaseUrl` is an equivalent key. Static export sets the same value through `--base-url`; the variable applies to server mode only.
 
 ## Server URL and port
 
-Kestrel's listening address is controlled by the standard `ASPNETCORE_URLS` variable:
+`ASPNETCORE_URLS` sets the Kestrel listening address:
 
 ```bash
 ASPNETCORE_URLS=http://+:8080
 ```
 
-You can specify multiple addresses separated by a semicolon if your deployment needs to listen on more than one port:
+Multiple addresses are separated by semicolons:
 
 ```bash
 ASPNETCORE_URLS=http://+:8080;https://+:8443
@@ -49,7 +47,7 @@ ASPNETCORE_URLS=http://+:8080;https://+:8443
 
 ## Examples
 
-Docker is a common deployment target, so the examples below show both a `docker run` one-liner and a Compose file. The same variables work in any environment that supports standard process environment variables.
+The same variables apply to any process environment.
 
 **`docker run`:**
 

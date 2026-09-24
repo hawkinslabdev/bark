@@ -5,7 +5,7 @@ description: How Bark generates sitemap.xml, robots.txt, and llms.txt
 
 # Sitemap & Crawlers
 
-Three endpoints, all generated from the same in-memory page list, all rebuilt automatically when your docs change. You don't run a separate command to produce any of them.
+Three endpoints are generated from the in-memory page list and rebuilt when content changes. No separate command is required.
 
 ## `sitemap.xml`
 
@@ -22,7 +22,7 @@ curl http://localhost:5000/sitemap.xml
 </urlset>
 ```
 
-The home page gets priority `1.0`; everything else gets `0.8`. `<lastmod>` comes straight from each Markdown file's last-write timestamp on disk: no Git history lookup, no separate metadata to keep in sync. Edit the file, the sitemap reflects it on the next rebuild.
+Priority: `1.0` for the home page, `0.8` for other pages. `<lastmod>` is the Markdown file's last-write time; Git history is not consulted.
 
 ## `robots.txt`
 
@@ -32,10 +32,10 @@ Allow: /
 Sitemap: https://your-host/sitemap.xml
 ```
 
-Because this is generated dynamically for every request rather than being served as a static file, the `Sitemap:` line always points to the specific host that handled the request. Whether you are working locally at `http://localhost:5000` or browsing your live site in production, it points to the correct location automatically, so you never have to manage multiple versions of the file.
+Generated per request. The `Sitemap:` URL uses `PublicBaseUrl` when set, otherwise the host of the request. See [Environment Variables](/guide/environment-variables#public-base-url).
 
 ::: note
-Behind a reverse proxy, this only resolves correctly if forwarded headers are set up so the server sees the original scheme and host;  instead of the proxy's internal address. See [Deploy](/guide/deploy).
+Behind a reverse proxy without `PublicBaseUrl`, forwarded headers must be configured so the original scheme and host are used instead of the proxy's internal address. See [Deploy](/guide/deploy).
 :::
 
 ## `llms.txt`
@@ -48,6 +48,6 @@ Behind a reverse proxy, this only resolves correctly if forwarded headers are se
 ...
 ```
 
-This file lists every page with its title, URL, and a description. It helps AI agents read your site. These tools often struggle to ignore your site's navigation and layout when parsing HTML, so this file gives them a clean index instead. 
+Lists every page with title, URL and description, as a navigation-free index for LLM agents.
 
-None of these three files require any setup. If you put a page in your `docs/` folder, Bark includes it in all of them.
+All three files include every page in `docs/` without configuration.
