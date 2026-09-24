@@ -766,8 +766,11 @@ public static partial class LayoutProvider
         }}
         .page-meta {{
             display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-            margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border);
+            margin-top: 4rem; padding-bottom: 1.125rem;
             flex-wrap: wrap;
+        }}
+        .page-meta + .pagination {{
+            margin-top: 0;
         }}
         .page-meta-right {{
             margin-left: auto;
@@ -970,13 +973,16 @@ public static partial class LayoutProvider
         }}
         code {{
             font-family: var(--font-mono);
-            background-color: var(--code-bg);
-            padding: 0.2rem 0.4rem;
+            font-size: 0.875em;
+            color: var(--accent);
+            background-color: color-mix(in srgb, var(--text-color) 7%, transparent);
+            padding: 0.1875rem 0.375rem;
             border-radius: 4px;
-            font-size: 0.85rem;
+            unicode-bidi: plaintext;
+            -webkit-box-decoration-break: clone; box-decoration-break: clone;
         }}
         pre code {{
-            padding: 0; background-color: transparent; border-radius: 0;
+            padding: 0; background-color: transparent; border-radius: 0; color: inherit; font-size: inherit;
         }}
         dt {{
             font-weight: 700;
@@ -987,7 +993,7 @@ public static partial class LayoutProvider
         }}
         .content h1 code, .content h2 code, .content h3 code,
         .content h4 code, .content h5 code, .content h6 code {{
-            background: none; padding: 0; border-radius: 0; font-size: inherit;
+            font-size: 0.9em; color: inherit;
         }}
         .content div[class^=""language-""] {{
             --line-start: 0;
@@ -1197,9 +1203,6 @@ public static partial class LayoutProvider
         }}
         .content tr:nth-child(even) {{
             background-color: var(--code-bg);
-        }}
-        .content tr:nth-child(even) code {{
-            background-color: color-mix(in srgb, var(--accent) 8%, var(--code-bg));
         }}
         .code-block-wrapper {{
             position: relative;
