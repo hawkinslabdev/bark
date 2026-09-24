@@ -58,6 +58,7 @@ public static partial class LayoutProvider
         }}
         :root {{
             --topbar-height: 57px;
+            --drawer-top: var(--topbar-height);
         }}
         .icon-btn {{
             display: inline-flex; align-items: center; justify-content: center;
@@ -671,7 +672,7 @@ public static partial class LayoutProvider
         .page-controls-toggle[aria-expanded=""true""] {{
             color: var(--text-color); background-color: var(--code-bg);
         }}
-        .page-controls-menu {{
+        .page-controls-menu, .locale-dropdown {{
             position: absolute; top: calc(100% + 6px); right: 0; z-index: 200;
             display: flex; flex-direction: column; gap: 1px;
             min-width: 13.5rem; max-width: calc(100vw - 2rem); padding: 0.3rem;
@@ -683,10 +684,10 @@ public static partial class LayoutProvider
         @keyframes page-controls-in {{
             from {{ opacity: 0; transform: translateY(-4px) scale(0.98); }}
         }}
-        .page-controls-menu[hidden] {{
+        .page-controls-menu[hidden], .locale-dropdown[hidden] {{
             display: none;
         }}
-        .page-controls-menu .page-controls-item {{
+        .page-controls-menu .page-controls-item, .locale-dropdown .locale-option {{
             display: flex; align-items: center; gap: 0.6rem;
             width: 100%; min-height: 34px; padding: 0.4rem 0.65rem; box-sizing: border-box;
             border: none; border-radius: 6px; background: none;
@@ -699,10 +700,12 @@ public static partial class LayoutProvider
             transition: color 0.12s ease;
         }}
         .page-controls-menu .page-controls-item:hover,
-        .page-controls-menu .page-controls-item:focus-visible {{
+        .page-controls-menu .page-controls-item:focus-visible,
+        .locale-dropdown .locale-option:hover,
+        .locale-dropdown .locale-option:focus-visible {{
             background: var(--nav-hover-bg); color: var(--text-color);
         }}
-        .page-controls-item:focus-visible {{
+        .page-controls-item:focus-visible, .locale-option:focus-visible {{
             outline: 2px solid var(--accent); outline-offset: -2px;
         }}
         .page-controls-item:hover svg,
@@ -722,7 +725,7 @@ public static partial class LayoutProvider
             height: 1px; background: var(--border); margin: 0.25rem 0.35rem;
         }}
         @media (hover: none) and (pointer: coarse) {{
-            .page-controls-menu .page-controls-item {{
+            .page-controls-menu .page-controls-item, .locale-dropdown .locale-option {{
                 min-height: 44px;
             }}
         }}
@@ -742,24 +745,13 @@ public static partial class LayoutProvider
             width: 18px; height: 18px; flex-shrink: 0;
         }}
         .locale-dropdown {{
-            position: absolute; top: calc(100% + 4px); right: 0; z-index: 200;
-            background: var(--sidebar-bg); border: 1px solid var(--border);
-            border-radius: 6px; box-shadow: var(--shadow-md);
-            min-width: 9rem; padding: 0.25rem 0;
-            display: flex; flex-direction: column;
+            min-width: 11rem;
         }}
-        .locale-dropdown[hidden] {{
-            display: none;
+        .locale-dropdown .locale-option--current {{
+            font-weight: 600;
         }}
-        .locale-option {{
-            padding: 0.4rem 0.75rem; font-size: 0.875rem;
-            color: var(--text-color); text-decoration: none; white-space: nowrap;
-        }}
-        .locale-option:hover, .locale-option:focus-visible {{
-            background: var(--accent-light); color: var(--accent);
-        }}
-        .locale-option--current {{
-            color: var(--accent); font-weight: 600;
+        .locale-option--current::after {{
+            content: ""\2713"" / """"; margin-left: auto; color: var(--accent);
         }}
         .translation-notice {{
             margin: 0 0 1.5rem; padding: 0.75rem 1rem; border-radius: 8px;
@@ -1620,8 +1612,8 @@ public static partial class LayoutProvider
                 font-weight: 400;
             }}
             .sidebar-left {{
-                position: fixed; top: var(--topbar-height); left: 0;
-                height: calc(100dvh - var(--topbar-height)); width: 280px;
+                position: fixed; top: var(--drawer-top); left: 0;
+                height: calc(100dvh - var(--drawer-top)); width: 280px;
                 max-width: 85vw; z-index: 1003; padding: 1.5rem 1rem;
                 background-color: var(--sidebar-bg);
                 transform: translateX(-100%); visibility: hidden;
@@ -1633,7 +1625,7 @@ public static partial class LayoutProvider
                 transition: transform 0.2s ease;
             }}
             .sidebar-overlay.open {{
-                display: block; position: fixed; top: var(--topbar-height); left: 0; right: 0; bottom: 0;
+                display: block; position: fixed; top: var(--drawer-top); left: 0; right: 0; bottom: 0;
                 background: var(--overlay-bg); z-index: 1001;
             }}
             .nav-item a, .toc-item a {{

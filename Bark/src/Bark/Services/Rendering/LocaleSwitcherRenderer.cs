@@ -35,7 +35,7 @@ public static class LocaleSwitcherRenderer
             .Append("\">")
             .Append(GlobeIcon)
             .Append("</button>")
-            .Append("<div class=\"locale-dropdown\" id=\"locale-dropdown\" hidden role=\"menu\">");
+            .Append("<div class=\"locale-dropdown\" id=\"locale-dropdown\" hidden role=\"menu\" aria-labelledby=\"locale-toggle\">");
 
         foreach (var code in codes)
         {

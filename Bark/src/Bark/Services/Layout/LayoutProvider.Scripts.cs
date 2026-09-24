@@ -127,8 +127,16 @@ public static partial class LayoutProvider
                     }}
                 }}
 
+                function setDrawerTop() {{
+                    if (topbarEl) document.documentElement.style.setProperty('--drawer-top', Math.max(0, topbarEl.getBoundingClientRect().bottom) + 'px');
+                }}
+                window.addEventListener('resize', function() {{
+                    if (sidebarLeft.classList.contains('open')) setDrawerTop();
+                }});
+
                 function openSidebar() {{
                     sidebarLastFocused = document.activeElement;
+                    setDrawerTop();
                     sidebarLeft.classList.add('open');
                     sidebarOverlay.classList.add('open');
                     menuToggle.setAttribute('aria-expanded', 'true');
