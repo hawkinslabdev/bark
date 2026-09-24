@@ -27,10 +27,11 @@ public static class LocaleSwitcherRenderer
         var currentPrefix = currentCode == rootCode ? string.Empty : currentCode;
         var rootPath = LocaleRouting.Delocalize(currentPrefix, currentPath);
 
+        var toggleLabel = LayoutProvider.HtmlEncode($"{localization.LocaleSwitcher} ({LocaleRouting.LabelOf(config, currentCode)})");
         var html = new StringBuilder();
         html.Append("<div class=\"locale-switcher\">")
-            .Append("<button type=\"button\" class=\"icon-btn locale-toggle\" id=\"locale-toggle\" aria-haspopup=\"true\" aria-expanded=\"false\" aria-label=\"")
-            .Append(LayoutProvider.HtmlEncode(localization.LocaleSwitcher))
+            .Append("<button type=\"button\" class=\"locale-toggle icon-btn\" id=\"locale-toggle\" aria-haspopup=\"menu\" aria-controls=\"locale-dropdown\" aria-expanded=\"false\" aria-label=\"")
+            .Append(toggleLabel).Append("\" title=\"").Append(toggleLabel)
             .Append("\">")
             .Append(GlobeIcon)
             .Append("</button>")

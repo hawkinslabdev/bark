@@ -21,7 +21,7 @@ public static class TranslationRunner
         var written = 0;
         var skipped = 0;
 
-        foreach (var file in Directory.GetFiles(request.DocsPath, "*.md", SearchOption.AllDirectories).Order())
+        foreach (var file in Directory.GetFiles(request.DocsPath, "*.md", ContentLinks.NoLinks).Order())
         {
             var relative = Path.GetRelativePath(request.DocsPath, file).Replace('\\', '/');
             var head = relative.Split('/')[0];

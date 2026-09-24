@@ -34,8 +34,9 @@ public static partial class LayoutProvider
         }}
         #scroll-indicator {{
             position: fixed; top: 0; left: 0; height: 3px;
-            background-color: var(--accent); width: 0%; z-index: 1101;
-            transition: width 0.15s ease;
+            background-color: var(--accent); width: 100%; z-index: 1101;
+            transform: scaleX(0); transform-origin: left;
+            transition: transform 0.15s ease;
         }}
         :focus-visible {{
             outline: 2px solid var(--accent);
@@ -113,10 +114,14 @@ public static partial class LayoutProvider
         }}
         .promo-dismissed .promo-bar {{ display: none; }}
         .topbar {{
-            display: flex; align-items: center; justify-content: space-between;
-            height: var(--topbar-height); padding: 0 1.5rem;
+            height: var(--topbar-height);
             background-color: var(--bg-color); border-bottom: 1px solid var(--border);
             position: sticky; top: 0; z-index: 1002;
+        }}
+        .topbar-inner {{
+            display: flex; align-items: center; justify-content: space-between;
+            height: 100%; max-width: 1600px; margin: 0 auto; padding: 0 1.5rem;
+            box-sizing: border-box; position: relative;
         }}
         .topbar-left {{
             display: flex; align-items: center; gap: 0.75rem;
@@ -191,11 +196,17 @@ public static partial class LayoutProvider
         }}
         .layout {{
             display: grid;
-            grid-template-columns: 270px 1fr 270px;
+            grid-template-columns: 18rem minmax(0, 1fr);
+            grid-template-rows: 1fr auto;
+            width: 100%; max-width: 1600px; margin: 0 auto;
+            padding: 0 2rem; box-sizing: border-box;
             flex: 1 0 auto;
         }}
         .layout.no-left-sidebar {{
-            grid-template-columns: 1fr 270px;
+            grid-template-columns: minmax(0, 1fr);
+        }}
+        .content-shell {{
+            display: flex; min-width: 0;
         }}
         @media (min-width: 769px) {{
             .layout.no-left-sidebar > .sidebar-left {{
@@ -203,8 +214,8 @@ public static partial class LayoutProvider
             }}
         }}
         .sidebar-left {{
-            background-color: var(--sidebar-bg);
-            padding: 2.75rem 1.75rem;
+            padding: 2.75rem 1rem 2.75rem 0; box-sizing: border-box;
+            grid-row: 1 / -1;
             position: sticky; top: var(--topbar-height); align-self: start;
             height: calc(100vh - var(--topbar-height)); overflow-y: auto;
         }}
@@ -372,7 +383,7 @@ public static partial class LayoutProvider
             line-height: 1;
         }}
         @media (max-width: 768px) {{
-            .search-trigger {{
+            .topbar-left .search-trigger {{
                 display: none;
             }}
             .search-trigger-mobile {{
@@ -439,18 +450,15 @@ public static partial class LayoutProvider
         }}
         .sidebar-group-title {{
             display: flex; align-items: center; gap: 0.4rem;
-            padding: 0.5rem 0.8rem; border-radius: 6px;
+            padding: 0.5rem 1rem; border-radius: 6px;
             user-select: none; transition: background-color 0.15s ease;
         }}
         .sidebar-group-summary:hover .sidebar-group-title {{
             background-color: var(--code-bg);
         }}
         .sidebar-group-title h2, .sidebar-group-title h3 {{
-            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
-            color: var(--text-muted); font-weight: 600; flex: 1; margin: 0;
-        }}
-        .sidebar-group-title.has-active h2, .sidebar-group-title.has-active h3 {{
-            color: var(--accent);
+            font-size: 0.875rem; line-height: 1.4;
+            color: var(--text-color); font-weight: 600; flex: 1; margin: 0;
         }}
         .caret-icon {{
             display: inline-flex; flex-shrink: 0; width: 16px; height: 16px;
@@ -482,12 +490,12 @@ public static partial class LayoutProvider
             margin-top: 0.75rem;
         }}
         .sidebar-link a {{
-            display: block; 
-            padding: 0.45rem 0.8rem; 
+            display: block;
+            padding: 0.5rem 1rem;
             line-height: 1.4;
-            color: var(--text-muted); 
+            color: var(--text-muted);
             text-decoration: none; font-size: 0.875rem;
-            border-radius: 6px; 
+            border-radius: 6px;
             transition: color 0.15s ease, background-color 0.15s ease;
         }}
         .sidebar-link a:hover {{
@@ -498,9 +506,12 @@ public static partial class LayoutProvider
             color: var(--accent); background-color: var(--nav-active-bg); font-weight: 500;
         }}
         .main-container {{
-            padding: 3rem 4rem;
-            max-width: 800px; justify-self: center; width: 100%;
+            padding: 3rem 3rem 3rem 4rem;
+            flex: 1 1 auto; max-width: 960px;
             min-width: 0;
+        }}
+        .toc-collapsed .main-container {{
+            max-width: 1200px;
         }}
         .bark-home-layout {{
             grid-template-columns: 1fr;
@@ -650,43 +661,85 @@ public static partial class LayoutProvider
             color: var(--text-muted);
             line-height: 1.55;
         }}
-        .page-controls {{ 
-            position: relative; margin-left: auto; flex-shrink: 0; 
+        .page-controls {{
+            position: relative; margin-left: auto; flex-shrink: 0;
         }}
-        .page-controls-toggle {{ 
-            color: var(--text-muted); 
+        .page-controls-toggle {{
+            color: var(--text-muted);
         }}
-        .page-controls-toggle:hover {{ 
-            color: var(--text-color); 
+        .page-controls-toggle:hover,
+        .page-controls-toggle[aria-expanded=""true""] {{
+            color: var(--text-color); background-color: var(--code-bg);
         }}
         .page-controls-menu {{
-            position: absolute; top: calc(100% + 4px); right: 0; z-index: 200;
-            background: var(--sidebar-bg); border: 1px solid var(--border);
-            border-radius: 6px; box-shadow: var(--shadow-md);
-            min-width: 10rem; padding: 0.25rem 0;
-            display: flex; flex-direction: column;
+            position: absolute; top: calc(100% + 6px); right: 0; z-index: 200;
+            display: flex; flex-direction: column; gap: 1px;
+            min-width: 13.5rem; max-width: calc(100vw - 2rem); padding: 0.3rem;
+            background: var(--bg-color); border: 1px solid var(--border);
+            border-radius: 10px; box-shadow: var(--shadow-md);
+            transform-origin: top right;
+            animation: page-controls-in 0.14s ease-out;
         }}
-        .page-controls-menu[hidden] {{ 
-            display: none; 
+        @keyframes page-controls-in {{
+            from {{ opacity: 0; transform: translateY(-4px) scale(0.98); }}
         }}
-        .page-controls-item {{
-            display: flex; align-items: center; gap: 0.5rem;
-            padding: 0.4rem 0.75rem; font-size: 0.875rem;
+        .page-controls-menu[hidden] {{
+            display: none;
+        }}
+        .page-controls-menu .page-controls-item {{
+            display: flex; align-items: center; gap: 0.6rem;
+            width: 100%; min-height: 34px; padding: 0.4rem 0.65rem; box-sizing: border-box;
+            border: none; border-radius: 6px; background: none;
+            font: inherit; font-size: 0.875rem; line-height: 1.3; text-align: left;
             color: var(--text-color); text-decoration: none; white-space: nowrap;
-            cursor: pointer;
+            cursor: pointer; transition: background-color 0.12s ease, color 0.12s ease;
         }}
         .page-controls-item svg {{
-            width: 14px; height: 14px; flex-shrink: 0;
+            width: 16px; height: 16px; flex-shrink: 0; color: var(--text-muted);
+            transition: color 0.12s ease;
         }}
-        .page-controls-item:hover {{
-            background: var(--accent-light); color: var(--accent);
+        .page-controls-menu .page-controls-item:hover,
+        .page-controls-menu .page-controls-item:focus-visible {{
+            background: var(--nav-hover-bg); color: var(--text-color);
         }}
-        .page-controls-item.loading {{ opacity: 0.6; pointer-events: none; }}
+        .page-controls-item:focus-visible {{
+            outline: 2px solid var(--accent); outline-offset: -2px;
+        }}
+        .page-controls-item:hover svg,
+        .page-controls-item:focus-visible svg {{
+            color: var(--accent);
+        }}
+        .page-controls-item .page-controls-external {{
+            width: 12px; height: 12px; margin-left: auto; opacity: 0.7;
+        }}
+        .page-controls-item[aria-busy=""true""] {{
+            opacity: 0.6; cursor: progress;
+        }}
+        .page-controls-item.is-done svg {{
+            color: var(--alert-tip);
+        }}
         .page-controls-divider {{
-            height: 1px; background: var(--border); margin: 0.25rem 0;
+            height: 1px; background: var(--border); margin: 0.25rem 0.35rem;
+        }}
+        @media (hover: none) and (pointer: coarse) {{
+            .page-controls-menu .page-controls-item {{
+                min-height: 44px;
+            }}
         }}
         .locale-switcher {{
             position: relative;
+        }}
+        .repo-widget {{
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 6px;
+            color: var(--text-muted); text-decoration: none;
+            flex-shrink: 0; transition: color 0.15s ease, background-color 0.15s ease;
+        }}
+        .repo-widget:hover {{
+            color: var(--accent); background-color: var(--code-bg);
+        }}
+        .repo-widget svg {{
+            width: 18px; height: 18px; flex-shrink: 0;
         }}
         .locale-dropdown {{
             position: absolute; top: calc(100% + 4px); right: 0; z-index: 200;
@@ -1264,8 +1317,8 @@ public static partial class LayoutProvider
             margin: 0 0.3rem; padding: 0.15rem 0.55rem; border-radius: 6px;
             background-color: color-mix(in srgb, var(--alert-tip) 16%, var(--code-bg));
             color: var(--alert-tip); font-family: var(--font-sans);
-            font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em;
-            text-transform: uppercase; line-height: 1.5;
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 0.02em;
+            line-height: 1.5;
         }}
         badge[type=""info""] {{
             background-color: color-mix(in srgb, var(--alert-note) 16%, var(--code-bg));
@@ -1289,40 +1342,85 @@ public static partial class LayoutProvider
             vertical-align: middle;
         }}
         .pagination {{
-            display: flex; justify-content: space-between; gap: 1rem;
-            margin-top: 5rem; padding-top: 2rem;
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem;
+            margin-top: 4rem; padding-top: 1.5rem;
             border-top: 1px solid var(--border);
         }}
-        .pagination-link {{
-            text-decoration: none; color: var(--text-muted);
-            display: flex; flex-direction: column; gap: 0.3rem;
-            flex: 1 1 0; min-width: 0; max-width: 22rem;
-            padding: 0.85rem 1.1rem; border: 1px solid var(--border); border-radius: 8px;
-            transition: color 0.15s ease, border-color 0.15s ease;
+        .pagination .pagination-link {{
+            display: inline-flex; align-items: flex-start; gap: 0.5rem;
+            min-width: 0; max-width: 50%; min-height: 24px;
+            font-size: 0.875rem; font-weight: 600; line-height: 1.5;
+            color: var(--text-color); text-decoration: none; border-radius: 4px;
+            transition: color 0.15s ease;
         }}
-        .pagination-link:hover {{
-            color: var(--accent); border-color: var(--accent);
-        }}
-        .pagination-link .label {{
-            font-size: 0.80rem; font-weight: 600;
-        }}
-        .pagination-link .title {{
-            font-size: 1rem; font-weight: 500; color: var(--text-color);
-        }}
-        .pagination-link:hover .title {{
+        .pagination .pagination-link:hover {{
             color: var(--accent);
+        }}
+        .pagination-link svg {{
+            width: 16px; height: 16px; flex-shrink: 0; margin-top: 0.1875rem;
+            color: var(--text-muted); transition: color 0.15s ease, transform 0.15s ease;
+        }}
+        .pagination-link:hover svg {{
+            color: var(--accent);
+        }}
+        .pagination-link.prev:hover svg {{
+            transform: translateX(-2px);
+        }}
+        .pagination-link.next:hover svg {{
+            transform: translateX(2px);
         }}
         .pagination-link.next {{
             text-align: right; margin-left: auto;
         }}
+        .toc-column {{
+            display: flex; align-items: flex-start; gap: 0.5rem;
+            flex: 0 0 auto; margin-left: auto;
+            position: sticky; top: var(--topbar-height); align-self: flex-start;
+            box-sizing: border-box; padding-top: 3rem;
+        }}
         .sidebar-right {{
-            padding: 3.5rem 2rem;
-            position: sticky; top: var(--topbar-height); align-self: start;
-            height: calc(100vh - var(--topbar-height)); overflow-y: auto;
+            width: 16.5rem; max-height: calc(100vh - var(--topbar-height) - 3rem); box-sizing: border-box;
+            overflow-y: auto; overscroll-behavior: contain;
+            padding: 0.25rem 0.25rem 2rem 0;
+        }}
+        .sidebar-right[hidden] {{
+            display: none;
         }}
         .toc-title {{
-            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
-            color: var(--text-muted); margin-bottom: 1rem; font-weight: 600;
+            display: flex; align-items: center; gap: 0.5rem;
+            margin: 0 0 0.75rem; font-size: 0.875rem; line-height: 1.4;
+            color: var(--text-color); font-weight: 600;
+        }}
+        .toc-title svg {{
+            width: 16px; height: 16px; flex-shrink: 0; color: var(--text-muted);
+        }}
+        .toc-collapse-toggle {{
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem;
+            min-width: 28px; height: 28px; padding: 0 0.4rem; box-sizing: border-box;
+            border-radius: 999px; border: 1px solid var(--border);
+            background: var(--bg-color); color: var(--text-muted); cursor: pointer;
+            transition: color 0.15s ease, border-color 0.15s ease;
+        }}
+        .toc-collapse-toggle:hover {{
+            color: var(--text-color); border-color: var(--text-muted);
+        }}
+        .toc-collapse-toggle:focus-visible {{
+            outline: 2px solid var(--accent); outline-offset: 2px;
+        }}
+        .toc-collapse-toggle svg {{
+            width: 14px; height: 14px; flex-shrink: 0;
+        }}
+        .toc-collapse-toggle .toc-chevron {{
+            transition: transform 0.15s ease;
+        }}
+        .toc-collapse-toggle .toc-glyph {{
+            display: none;
+        }}
+        .toc-collapsed .toc-collapse-toggle .toc-chevron {{
+            transform: rotate(180deg);
+        }}
+        .toc-collapsed .toc-collapse-toggle .toc-glyph {{
+            display: block;
         }}
         .toc-list-wrapper {{
             position: relative;
@@ -1332,9 +1430,9 @@ public static partial class LayoutProvider
             border-radius: 2px; background-color: var(--accent-light);
         }}
         .toc-indicator {{
-            position: absolute; left: 0; top: 0; width: 2px; border-radius: 2px;
-            background-color: var(--accent); opacity: 0; height: 0;
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, height 0.2s ease;
+            position: absolute; left: 0; top: 0; width: 2px; height: 1px;
+            background-color: var(--accent); opacity: 0; transform-origin: top;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
             will-change: transform;
         }}
         .toc-indicator.visible {{
@@ -1350,7 +1448,7 @@ public static partial class LayoutProvider
             margin-bottom: 0.1rem;
         }}
         .toc-list > .toc-item > a {{
-            font-weight: 500;
+            color: var(--text-color);
         }}
         .toc-list > .toc-item > .toc-sublist > .toc-item > a {{
             font-weight: 400;
@@ -1360,15 +1458,15 @@ public static partial class LayoutProvider
         }}
         .toc-item a {{
             display: block; color: var(--text-muted); line-height: 1.5;
-            text-decoration: none; padding: 0.3rem 0.8rem;
+            text-decoration: none; padding: 0.3rem 0.8rem; margin-left: -0.8rem;
             transition: color 0.15s ease;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            overflow-wrap: anywhere;
         }}
         .toc-item a:hover {{
             color: var(--text-color);
         }}
         .toc-item.active > a {{
-            color: var(--accent);
+            color: var(--accent); font-weight: 600;
         }}
         .social-links {{
             display: flex; align-items: center; gap: 0.25rem;
@@ -1379,9 +1477,15 @@ public static partial class LayoutProvider
         .sidebar-social-links {{
             display: none;
         }}
-        .content-footer {{
-            margin-top: 3rem; padding-top: 1.5rem;
+        .site-footer {{
+            grid-column: -2 / -1;
             border-top: 1px solid var(--border);
+            padding: 1.25rem 0 1.25rem 4rem;
+        }}
+        .bark-home-layout .site-footer {{
+            padding-left: 0;
+        }}
+        .content-footer {{
             font-size: 0.8rem; color: var(--text-muted);
         }}
         .content-footer a {{
@@ -1400,6 +1504,12 @@ public static partial class LayoutProvider
             display: none;
         }}
         @media (hover: none) and (pointer: coarse) {{
+            .pagination .pagination-link {{
+                align-items: center; min-height: 44px;
+            }}
+            .pagination-link svg {{
+                margin-top: 0;
+            }}
             .icon-btn {{
                 width: 44px;
                 height: 44px;
@@ -1411,25 +1521,34 @@ public static partial class LayoutProvider
                 opacity: 1;
             }}
         }}
-        @media (max-width: 1024px) {{
-            .layout {{
-                grid-template-columns: 240px 1fr;
-            }}
-            .sidebar-right {{
+        @media (max-width: 1279px) {{
+            .toc-column {{
                 display: none;
             }}
-            .main-container {{
-                padding: 2rem 1.5rem;
+            .main-container,
+            .toc-collapsed .main-container {{
+                max-width: 960px;
             }}
         }}
-        @media (min-width: 769px) and (max-width: 1024px) {{
+        @media (max-width: 1024px) {{
+            .layout {{
+                grid-template-columns: 15rem minmax(0, 1fr); padding: 0 1.5rem;
+            }}
+            .main-container {{
+                padding: 2rem 0 2rem 1.5rem;
+            }}
+            .site-footer {{
+                padding-left: 1.5rem;
+            }}
+        }}
+        @media (min-width: 769px) and (max-width: 1279px) {{
             .toc-inline {{
                 display: block; margin-bottom: 2rem;
                 border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 1rem;
             }}
             .toc-inline summary {{
                 cursor: pointer; font-size: 0.8rem; font-weight: 600;
-                text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);
+                letter-spacing: 0.02em; color: var(--text-muted);
                 padding: 0.5rem 0; list-style: none;
                 display: flex; align-items: center; justify-content: space-between;
             }}
@@ -1449,12 +1568,13 @@ public static partial class LayoutProvider
         }}
         @media (max-width: 768px) {{
             .layout {{
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr); padding: 0;
             }}
             .bark-home-layout .sidebar-left {{
                 display: block;
             }}
-            .main-container {{
+            .main-container,
+            .site-footer {{
                 padding: 2rem 1.5rem;
             }}
             .bark-hero {{
@@ -1502,13 +1622,15 @@ public static partial class LayoutProvider
             .sidebar-left {{
                 position: fixed; top: var(--topbar-height); left: 0;
                 height: calc(100dvh - var(--topbar-height)); width: 280px;
-                max-width: 85vw; z-index: 1003;
-                box-shadow: var(--shadow-lg);
-                transform: translateX(-100%);
-                transition: transform 0.2s ease;
+                max-width: 85vw; z-index: 1003; padding: 1.5rem 1rem;
+                background-color: var(--sidebar-bg);
+                transform: translateX(-100%); visibility: hidden;
+                transition: transform 0.2s ease, visibility 0s linear 0.2s;
             }}
             .sidebar-left.open {{
-                transform: translateX(0);
+                transform: translateX(0); visibility: visible;
+                box-shadow: var(--shadow-lg);
+                transition: transform 0.2s ease;
             }}
             .sidebar-overlay.open {{
                 display: block; position: fixed; top: var(--topbar-height); left: 0; right: 0; bottom: 0;
@@ -1530,6 +1652,9 @@ public static partial class LayoutProvider
                 display: flex; flex-wrap: wrap; gap: 0.25rem;
                 padding: 1.25rem 0 0.25rem;
                 border-top: 1px solid var(--border);
+            }}
+            .repo-widget {{
+                display: none;
             }}
         }}
         @media (prefers-reduced-motion: reduce) {{

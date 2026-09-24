@@ -27,6 +27,8 @@ public sealed class Localization
         ["tocTitle"] = "On this page",
         ["tocMobileSummary"] = "On this page",
         ["tocAria"] = "Table of contents",
+        ["tocCollapse"] = "Hide table of contents",
+        ["tocExpand"] = "Show table of contents",
         ["searchTrigger"] = "Search",
         ["searchAria"] = "Search documentation",
         ["searchHeading"] = "Search documentation",
@@ -48,11 +50,13 @@ public sealed class Localization
         ["searchResultPlural"] = "results found.",
         ["pagerPrevious"] = "Previous",
         ["pagerNext"] = "Next",
+        ["pagerAria"] = "Pagination",
         ["pageOptions"] = "Page options",
         ["copyPage"] = "Copy page",
         ["viewAsMarkdown"] = "View as Markdown",
         ["copyRssUrl"] = "Copy RSS feed URL",
         ["copied"] = "Copied!",
+        ["opensInNewTab"] = "opens in a new tab",
         ["copyFailed"] = "Failed",
         ["promoAria"] = "Announcement",
         ["promoDismiss"] = "Dismiss announcement",
@@ -70,7 +74,8 @@ public sealed class Localization
         ["translationMissingLink"] = "Open the original page",
         ["translationStale"] = "The original of this page changed after this translation was written, so parts of it may be out of date.",
         ["translationStaleLink"] = "Compare with the original",
-        ["translationMachine"] = "This page was translated by a machine, so some sentences may read badly. Corrections are welcome."
+        ["translationMachine"] = "This page was translated by a machine, so some sentences may read badly. Corrections are welcome.",
+        ["repoWidgetAria"] = "{0} repository"
     };
 
     private readonly IReadOnlyDictionary<string, string> _map;
@@ -127,6 +132,8 @@ public sealed class Localization
     public string TocTitle => this["tocTitle"];
     public string TocMobileSummary => this["tocMobileSummary"];
     public string TocAria => this["tocAria"];
+    public string TocCollapse => this["tocCollapse"];
+    public string TocExpand => this["tocExpand"];
     public string SearchTrigger => this["searchTrigger"];
     public string SearchAria => this["searchAria"];
     public string SearchHeading => this["searchHeading"];
@@ -148,11 +155,13 @@ public sealed class Localization
     public string SearchResultPlural => this["searchResultPlural"];
     public string PagerPrevious => this["pagerPrevious"];
     public string PagerNext => this["pagerNext"];
+    public string PagerAria => this["pagerAria"];
     public string PageOptions => this["pageOptions"];
     public string CopyPage => this["copyPage"];
     public string ViewAsMarkdown => this["viewAsMarkdown"];
     public string CopyRssUrl => this["copyRssUrl"];
     public string Copied => this["copied"];
+    public string OpensInNewTab => this["opensInNewTab"];
     public string CopyFailed => this["copyFailed"];
     public string PromoAria => this["promoAria"];
     public string PromoDismiss => this["promoDismiss"];
@@ -171,6 +180,7 @@ public sealed class Localization
     public string TranslationStale => this["translationStale"];
     public string TranslationStaleLink => this["translationStaleLink"];
     public string TranslationMachine => this["translationMachine"];
+    public string RepoWidgetAria => this["repoWidgetAria"];
 
     private static Localization From(string docsPath, Config? config, ILogger logger) =>
         FromCode(docsPath, ResolveCode(config), logger);

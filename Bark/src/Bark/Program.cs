@@ -102,6 +102,7 @@ try
         PublicBaseUrl: PageRequestSettings.ResolvePublicBaseUrl(
             exportBaseUrl, docsOptions.PublicBaseUrl, builder.Configuration["PublicBaseUrl"]),
         CliTheme: cliArgs.Theme));
+    builder.Services.AddSingleton<RepoStatsProvider>();
     builder.Services.AddSingleton<PageRequestHandler>();
 
     builder.Services.ConfigureHttpJsonOptions(opts =>
@@ -180,7 +181,7 @@ try
 
     // when theme/ lives in the git-synced repo rather than wwwroot, wwwroot's static file provider can't see it
     if (usingGitTheme)
-        app.UseStaticFiles(new StaticFileOptions { FileProvider = new PhysicalFileProvider(themeDir), RequestPath = "/theme" });
+        app.UseStaticFiles(new StaticFileOptions { FileProvider = new ContentLinks.NoLinkFileProvider(themeDir), RequestPath = "/theme" });
 
     // Serve user-hosted media/files from /assets/
     var assetsDir = Path.Combine(Path.GetFullPath(docsOptions.RootPath), "assets");
@@ -191,7 +192,7 @@ try
 
         app.UseStaticFiles(new StaticFileOptions
         {
-            FileProvider = new PhysicalFileProvider(assetsDir),
+            FileProvider = new ContentLinks.NoLinkFileProvider(assetsDir),
             RequestPath = "/assets",
             ContentTypeProvider = assetContentTypes,
             ServeUnknownFileTypes = false,

@@ -17,7 +17,7 @@ public static class BreadcrumbHtmlRenderer
                 : $"<span class=\"crumb-text\">{LayoutProvider.HtmlEncode(crumb.Title)}</span>");
             html.Append("<span class=\"separator\">/</span>");
         }
-        html.Append($"<span class=\"current\">{LayoutProvider.HtmlEncode(currentTitle)}</span>");
+        html.Append($"<span class=\"current\" aria-current=\"page\">{LayoutProvider.HtmlEncode(currentTitle)}</span>");
         return html.ToString();
     }
 }

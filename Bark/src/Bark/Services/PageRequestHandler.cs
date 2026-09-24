@@ -44,6 +44,7 @@ public sealed class PageRequestHandler
     private readonly ThemeOptions _themeOptions;
     private readonly PageRequestSettings _settings;
     private readonly ILogger<PageRequestHandler> _logger;
+    private readonly RepoStatsProvider _repoStats;
     private readonly string _iconsDir;
     private readonly string? _fallbackIconsDir;
 
@@ -53,7 +54,8 @@ public sealed class PageRequestHandler
         DocsOptions docsOptions,
         ThemeOptions themeOptions,
         PageRequestSettings settings,
-        ILogger<PageRequestHandler> logger)
+        ILogger<PageRequestHandler> logger,
+        RepoStatsProvider repoStats)
     {
         _docs = docs;
         _markdown = markdown;
@@ -61,6 +63,7 @@ public sealed class PageRequestHandler
         _themeOptions = themeOptions;
         _settings = settings;
         _logger = logger;
+        _repoStats = repoStats;
         _iconsDir = Path.Combine(settings.WebRootPath, "icons");
         var defaultIconsDir = Path.Combine(AppContext.BaseDirectory, "wwwroot-default", "icons");
         _fallbackIconsDir = Directory.Exists(defaultIconsDir) ? defaultIconsDir : null;
@@ -149,10 +152,13 @@ public sealed class PageRequestHandler
             var isAbsolute = redirectTarget.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
                 || redirectTarget.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
 
-            if (isAbsolute && !IsAllowedRedirectHost(redirectTarget, context.Request.Host.Host, config?.RedirectHosts))
+            // Browsers read '\' as '/' and drop tabs/newlines, so "/\evil.example" would leave the origin as a "relative" target.
+            var unsafeRelative = !isAbsolute && redirectTarget.Any(ch => ch == '\\' || char.IsControl(ch) || char.IsWhiteSpace(ch));
+
+            if (unsafeRelative || (isAbsolute && !IsAllowedRedirectHost(redirectTarget, context.Request.Host.Host, config?.RedirectHosts)))
             {
                 _logger.LogWarning(
-                    "Page {Page} redirects to {Target}, whose host is not listed in config.json redirectHosts; redirect ignored",
+                    "Page {Page} redirects to {Target}, which is neither a plain site path nor a host listed in config.json redirectHosts; redirect ignored",
                     page.Path, redirectTarget);
             }
             else
@@ -235,6 +241,8 @@ public sealed class PageRequestHandler
         var combinedThemeCss = themeCss + customCssLink + customJsScript;
 
         var socialLinksHtml = await SocialLinksHtmlRenderer.BuildSocialLinksHtmlAsync(config?.SocialLinks, _iconsDir, _fallbackIconsDir, l);
+        var repoStats = config?.Repo is { Length: > 0 } repoUrl ? await _repoStats.GetStatsAsync(repoUrl, context.RequestAborted) : null;
+        var repoWidgetHtml = await RepoWidgetHtmlRenderer.BuildAsync(config?.Repo, repoStats, _iconsDir, _fallbackIconsDir, l);
         var footerHtml = config?.Footer is { } footer
             ? $"<div class=\"content-footer\">{_markdown.ToHtml(ExpandFooterVariables(l.Label(footer), brandText, config?.Title))}</div>"
             : string.Empty;
@@ -325,6 +333,7 @@ public sealed class PageRequestHandler
             showScrollIndicator: ThemeProvider.ShowScrollIndicator(_themeOptions),
             footerHtml: footerHtml,
             socialLinksHtml: socialLinksHtml,
+            repoWidgetHtml: repoWidgetHtml,
             enableLiveReload: _docsOptions.EnableHotReload,
             staticSearch: _docsOptions.IsStaticExport,
             buildVersion: _docs.BuildVersion,

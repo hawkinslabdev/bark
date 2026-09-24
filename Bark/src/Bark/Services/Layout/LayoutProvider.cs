@@ -20,6 +20,7 @@ public static partial class LayoutProvider
         bool enableDarkMode = true,
         string? footerHtml = null,
         string? socialLinksHtml = null,
+        string? repoWidgetHtml = null,
         bool enableLiveReload = false,
         bool staticSearch = false,
         long buildVersion = 0,
@@ -92,8 +93,14 @@ public static partial class LayoutProvider
                 </svg>
             </button>"
             : "";
+        var searchTriggerHtml = $@"<button type=""button"" class=""search-trigger"" id=""search-trigger""
+                aria-haspopup=""dialog"" aria-controls=""search-modal"" aria-label=""{HtmlEncode(l.SearchAria)}"">
+            <svg viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" aria-hidden=""true""><circle cx=""11"" cy=""11"" r=""7""/><path d=""M21 21l-4.3-4.3""/></svg>
+            <span class=""search-trigger-label"">{HtmlEncode(l.SearchTrigger)}</span>
+            <kbd class=""search-trigger-kbd"" id=""search-trigger-kbd"" aria-hidden=""true"">Ctrl K</kbd>
+        </button>";
         var sidebarLeftHtml = $@"
-        <aside class=""sidebar-left"" id=""sidebar-left"" aria-label=""{HtmlEncode(l.SidebarAria)}"">
+        <aside class=""sidebar-left"" id=""sidebar-left"" tabindex=""-1"" aria-label=""{HtmlEncode(l.SidebarAria)}"">
             {mobileTopNavHtml}
             {drawerNavigationHtml}
             {mobileSocialHtml}
@@ -112,15 +119,26 @@ public static partial class LayoutProvider
         var sidebarRightHtml = isHomePage || string.IsNullOrWhiteSpace(tocHtml)
             ? ""
             : $@"
-        <aside class=""sidebar-right"" aria-label=""{HtmlEncode(l.TocAria)}"">
-            <div class=""toc-title"">{HtmlEncode(l.TocTitle)}</div>
-            <div class=""toc-list-wrapper"">
-                <div class=""toc-indicator"" aria-hidden=""true""></div>
-                <ul class=""toc-list"">
-                    {tocHtml}
-                </ul>
-            </div>
-        </aside>";
+        <div class=""toc-column"">
+            <button type=""button"" class=""toc-collapse-toggle"" id=""toc-collapse-toggle"" aria-expanded=""true"" aria-controls=""sidebar-right""
+                    data-label-hide=""{HtmlEncode(l.TocCollapse)}"" data-label-show=""{HtmlEncode(l.TocExpand)}""
+                    aria-label=""{HtmlEncode(l.TocCollapse)}"" title=""{HtmlEncode(l.TocCollapse)}"">
+                <svg viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.2"" stroke-linecap=""round"" stroke-linejoin=""round"" class=""toc-chevron"" aria-hidden=""true""><path d=""M9 18l6-6-6-6""/></svg>
+                <svg viewBox=""0 0 18 18"" fill=""none"" stroke=""currentColor"" stroke-width=""1.6"" stroke-linecap=""round"" class=""toc-glyph"" aria-hidden=""true""><path d=""M2.75 14.25H15.25""/><path d=""M2.75 3.75H15.25""/><path d=""M2.75 9H8.25""/></svg>
+            </button>
+            <nav class=""sidebar-right"" id=""sidebar-right"" aria-label=""{HtmlEncode(l.TocAria)}"">
+                <h2 class=""toc-title"">
+                    <svg viewBox=""0 0 18 18"" fill=""none"" stroke=""currentColor"" stroke-width=""1.6"" stroke-linecap=""round"" aria-hidden=""true""><path d=""M2.75 14.25H15.25""/><path d=""M2.75 3.75H15.25""/><path d=""M2.75 9H8.25""/></svg>
+                    {HtmlEncode(l.TocTitle)}
+                </h2>
+                <div class=""toc-list-wrapper"">
+                    <div class=""toc-indicator"" aria-hidden=""true""></div>
+                    <ul class=""toc-list"">
+                        {tocHtml}
+                    </ul>
+                </div>
+            </nav>
+        </div>";
         var contentClass = isHomePage ? "content bark-home-content" : "content";
         // Home pages never show "last updated" or prev/next pagination, regardless of caller input.
         var paginationBlock = isHomePage ? "" : paginationHtml;
@@ -185,25 +203,23 @@ public static partial class LayoutProvider
     {promoBarHtml}
     {scrollIndicatorHtml}
     <header class=""topbar"">
-        <div class=""topbar-left"">
-            {menuToggleHtml}
-            <div class=""brand""><a href=""{homeHref}"">{(brandImageSrc is not null ? $"<img src=\"{HtmlEncode(brandImageSrc)}\" alt=\"\">" : "")}{brandText ?? "Bark"}</a></div>
-            <button type=""button"" class=""search-trigger"" id=""search-trigger""
-                    aria-haspopup=""dialog"" aria-controls=""search-modal"" aria-label=""{HtmlEncode(l.SearchAria)}"">
-                <svg viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" aria-hidden=""true""><circle cx=""11"" cy=""11"" r=""7""/><path d=""M21 21l-4.3-4.3""/></svg>
-                <span class=""search-trigger-label"">{HtmlEncode(l.SearchTrigger)}</span>
-                <kbd class=""search-trigger-kbd"" id=""search-trigger-kbd"" aria-hidden=""true"">Ctrl K</kbd>
-            </button>
-        </div>
-        {topNavHtml}
-        <div class=""topbar-right"">
-            <button type=""button"" class=""search-trigger-mobile icon-btn"" id=""search-trigger-mobile""
-                    aria-haspopup=""dialog"" aria-controls=""search-modal"" aria-label=""{HtmlEncode(l.SearchAria)}"">
-                <svg viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" aria-hidden=""true""><circle cx=""11"" cy=""11"" r=""7""/><path d=""M21 21l-4.3-4.3""/></svg>
-            </button>
-            {socialLinksHtml}
-            {localeSwitcherHtml}
-            {themeToggleHtml}
+        <div class=""topbar-inner"">
+            <div class=""topbar-left"">
+                {menuToggleHtml}
+                <div class=""brand""><a href=""{homeHref}"">{(brandImageSrc is not null ? $"<img src=\"{HtmlEncode(brandImageSrc)}\" alt=\"\">" : "")}{brandText ?? "Bark"}</a></div>
+                {searchTriggerHtml}
+            </div>
+            {topNavHtml}
+            <div class=""topbar-right"">
+                <button type=""button"" class=""search-trigger-mobile icon-btn"" id=""search-trigger-mobile""
+                        aria-haspopup=""dialog"" aria-controls=""search-modal"" aria-label=""{HtmlEncode(l.SearchAria)}"">
+                    <svg viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" aria-hidden=""true""><circle cx=""11"" cy=""11"" r=""7""/><path d=""M21 21l-4.3-4.3""/></svg>
+                </button>
+                {socialLinksHtml}
+                {repoWidgetHtml}
+                {localeSwitcherHtml}
+                {themeToggleHtml}
+            </div>
         </div>
     </header>
     <div class=""search-overlay"" id=""search-overlay"" hidden>
@@ -241,16 +257,18 @@ public static partial class LayoutProvider
     <div class=""sidebar-overlay"" id=""sidebar-overlay""></div>
     <div class=""{layoutClass}"">
         {sidebarLeftHtml}
-        <main class=""main-container"" id=""main-content"" tabindex=""-1"">
-            {breadcrumbAndTocHtml}
-            <article class=""{contentClass}"">
-                {content}
-                {pageMetaBlock}
-                {paginationBlock}
-                {footerHtml}
-            </article>
-        </main>
-        {sidebarRightHtml}
+        <div class=""content-shell"">
+            <main class=""main-container"" id=""main-content"" tabindex=""-1"">
+                {breadcrumbAndTocHtml}
+                <article class=""{contentClass}"">
+                    {content}
+                    {pageMetaBlock}
+                    {paginationBlock}
+                </article>
+            </main>
+            {sidebarRightHtml}
+        </div>
+        {(string.IsNullOrWhiteSpace(footerHtml) ? "" : $@"<footer class=""site-footer"">{footerHtml}</footer>")}
     </div>
     {GetScriptsTag(enableLiveReload, toggleEnabled, buildVersion, basePath, staticSearch, l, isRootLocale)}
 </body>

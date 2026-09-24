@@ -34,6 +34,7 @@ public class Config
     public string? Image { get; set; }
     public string? Footer { get; set; }
     public string? Favicon { get; set; }
+    public string? Repo { get; set; }
 
     /// <summary>Markdown for a dismissible announcement bar above the header; null disables it</summary>
     public string? Promo { get; set; }

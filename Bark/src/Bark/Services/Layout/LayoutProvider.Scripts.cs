@@ -68,6 +68,19 @@ public static partial class LayoutProvider
             var sidebarLeft = document.getElementById('sidebar-left');
             var sidebarOverlay = document.getElementById('sidebar-overlay');
             var themeToggle = document.getElementById('theme-toggle');
+            var topbarEl = document.querySelector('.topbar');
+            var mainContainerEl = document.querySelector('.main-container');
+            var sidebarRightEl = document.getElementById('sidebar-right');
+            var sidebarLastFocused = null;
+
+            function setInert(nodes, active) {{
+                nodes.forEach(function(n) {{ if (n) n.inert = active; }});
+            }}
+
+            function getFocusable(container) {{
+                return Array.prototype.slice.call(
+                    container.querySelectorAll('a[href], button:not([disabled]), input, [tabindex]:not([tabindex=""-1""])'));
+            }}
 
             if ({(enableLiveReload ? "true" : "false")}) {{
                 var currentBuildVersion = {buildVersion};
@@ -108,14 +121,22 @@ public static partial class LayoutProvider
                     sidebarOverlay.classList.remove('open');
                     menuToggle.setAttribute('aria-expanded', 'false');
                     document.documentElement.style.overflow = '';
+                    setInert([topbarEl, mainContainerEl, sidebarRightEl], false);
+                    if (sidebarLastFocused && typeof sidebarLastFocused.focus === 'function') {{
+                        sidebarLastFocused.focus();
+                    }}
                 }}
 
                 function openSidebar() {{
+                    sidebarLastFocused = document.activeElement;
                     sidebarLeft.classList.add('open');
                     sidebarOverlay.classList.add('open');
                     menuToggle.setAttribute('aria-expanded', 'true');
                     // Drawer is position:fixed; without this, touch-scroll on it scrolls <body> underneath.
                     document.documentElement.style.overflow = 'hidden';
+                    setInert([topbarEl, mainContainerEl, sidebarRightEl], true);
+                    var focusable = getFocusable(sidebarLeft);
+                    (focusable[0] || sidebarLeft).focus();
                 }}
 
                 menuToggle.addEventListener('click', function() {{
@@ -123,7 +144,15 @@ public static partial class LayoutProvider
                 }});
                 sidebarOverlay.addEventListener('click', closeSidebar);
                 document.addEventListener('keydown', function(e) {{
-                    if (e.key === 'Escape') closeSidebar();
+                    if (!sidebarLeft.classList.contains('open')) return;
+                    if (e.key === 'Escape') {{ closeSidebar(); return; }}
+                    if (e.key === 'Tab') {{
+                        var focusable = getFocusable(sidebarLeft);
+                        if (!focusable.length) return;
+                        var first = focusable[0], last = focusable[focusable.length - 1];
+                        if (e.shiftKey && document.activeElement === first) {{ e.preventDefault(); last.focus(); }}
+                        else if (!e.shiftKey && document.activeElement === last) {{ e.preventDefault(); first.focus(); }}
+                    }}
                 }});
                 sidebarLeft.querySelectorAll('.nav-item a').forEach(function(link) {{
                     link.addEventListener('click', closeSidebar);
@@ -158,7 +187,7 @@ public static partial class LayoutProvider
                 var winScroll = document.documentElement.scrollTop || document.body.scrollTop;
                 var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
                 var scrolled = height > 0 ? (winScroll / height) * 100 : 0;
-                scrollIndicator.style.width = scrolled + '%';
+                scrollIndicator.style.transform = 'scaleX(' + (scrolled / 100) + ')';
             }}
 
             window.addEventListener('scroll', updateScrollProgress);
@@ -172,8 +201,7 @@ public static partial class LayoutProvider
                 }}
                 var wrapperTop = tocListWrapper.getBoundingClientRect().top;
                 var linkRect = activeLink.getBoundingClientRect();
-                tocIndicator.style.transform = 'translateY(' + (linkRect.top - wrapperTop) + 'px)';
-                tocIndicator.style.height = linkRect.height + 'px';
+                tocIndicator.style.transform = 'translateY(' + (linkRect.top - wrapperTop) + 'px) scaleY(' + linkRect.height + ')';
                 tocIndicator.classList.add('visible');
             }}
 
@@ -216,6 +244,46 @@ public static partial class LayoutProvider
             window.addEventListener('scroll', checkScrolledToBottom, {{ passive: true }});
             window.addEventListener('resize', updateTocIndicator);
             checkScrolledToBottom();
+
+            var pageLayout = document.querySelector('.layout');
+            var tocCollapseToggle = document.getElementById('toc-collapse-toggle');
+            if (pageLayout && sidebarRightEl && tocCollapseToggle) {{
+                function applyTocCollapsed(collapsed) {{
+                    pageLayout.classList.toggle('toc-collapsed', collapsed);
+                    sidebarRightEl.hidden = collapsed;
+                    tocCollapseToggle.setAttribute('aria-expanded', String(!collapsed));
+                    var label = tocCollapseToggle.getAttribute(collapsed ? 'data-label-show' : 'data-label-hide');
+                    tocCollapseToggle.setAttribute('aria-label', label);
+                    tocCollapseToggle.setAttribute('title', label);
+                    if (!collapsed) updateTocIndicator();
+                }}
+
+                var storedToc = null;
+                try {{ storedToc = localStorage.getItem('bark-toc-collapsed'); }} catch (_) {{}}
+                if (storedToc === '1') applyTocCollapsed(true);
+
+                tocCollapseToggle.addEventListener('click', function() {{
+                    var collapsed = !pageLayout.classList.contains('toc-collapsed');
+                    applyTocCollapsed(collapsed);
+                    try {{ localStorage.setItem('bark-toc-collapsed', collapsed ? '1' : '0'); }} catch (_) {{}}
+                }});
+            }}
+
+            document.querySelectorAll('.top-nav-item.has-dropdown').forEach(function(item) {{
+                var trigger = item.querySelector('.top-nav-link');
+                var menu = item.querySelector('.top-nav-dropdown-menu');
+                if (!trigger || !menu) return;
+                item.addEventListener('focusin', function() {{ trigger.setAttribute('aria-expanded', 'true'); }});
+                item.addEventListener('focusout', function(e) {{
+                    if (!item.contains(e.relatedTarget)) trigger.setAttribute('aria-expanded', 'false');
+                }});
+                item.addEventListener('keydown', function(e) {{
+                    if (e.key === 'Escape') {{
+                        trigger.setAttribute('aria-expanded', 'false');
+                        trigger.focus();
+                    }}
+                }});
+            }});
 
             tocItems.forEach(function(item) {{
                 var link = item.querySelector('a');
@@ -396,12 +464,14 @@ public static partial class LayoutProvider
                 searchModalInput.removeAttribute('aria-activedescendant');
                 searchModalStatus.textContent = '';
                 searchActiveIndex = -1;
+                setInert([topbarEl, sidebarLeft, mainContainerEl, sidebarRightEl], true);
             }}
 
             function closeSearchModal() {{
                 searchOverlay.classList.remove('open');
                 searchOverlay.hidden = true;
                 document.documentElement.style.overflow = '';
+                setInert([topbarEl, sidebarLeft, mainContainerEl, sidebarRightEl], false);
                 if (searchLastFocused && typeof searchLastFocused.focus === 'function') {{
                     searchLastFocused.focus();
                 }}
@@ -698,7 +768,7 @@ public static partial class LayoutProvider
                 function openLocaleMenu() {{
                     localeDropdown.hidden = false;
                     localeToggle.setAttribute('aria-expanded', 'true');
-                    var first = localeDropdown.querySelector('.locale-option');
+                    var first = localeDropdown.querySelector('.locale-option--current') || localeDropdown.querySelector('.locale-option');
                     if (first) first.focus();
                 }}
                 localeToggle.addEventListener('click', function(e) {{
@@ -713,11 +783,15 @@ public static partial class LayoutProvider
                     if (e.key === 'Escape' && !localeDropdown.hidden) {{ closeLocaleMenu(); localeToggle.focus(); }}
                 }});
                 localeDropdown.addEventListener('keydown', function(e) {{
-                    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-                    e.preventDefault();
+                    if (e.key === 'Tab') {{ closeLocaleMenu(); return; }}
                     var items = Array.prototype.slice.call(localeDropdown.querySelectorAll('.locale-option'));
                     var idx = items.indexOf(document.activeElement);
-                    idx = e.key === 'ArrowDown' ? (idx + 1) % items.length : (idx - 1 + items.length) % items.length;
+                    if (e.key === 'ArrowDown') idx = (idx + 1) % items.length;
+                    else if (e.key === 'ArrowUp') idx = (idx - 1 + items.length) % items.length;
+                    else if (e.key === 'Home') idx = 0;
+                    else if (e.key === 'End') idx = items.length - 1;
+                    else return;
+                    e.preventDefault();
                     items[idx].focus();
                 }});
             }}
@@ -725,83 +799,91 @@ public static partial class LayoutProvider
             var pageControlsToggle = document.querySelector('.page-controls-toggle');
             var pageControlsMenu = document.querySelector('.page-controls-menu');
             if (pageControlsToggle && pageControlsMenu) {{
-                function closePageControls() {{
+                var pageControlsStatus = document.querySelector('[data-page-controls-status]');
+                var pageControlsItems = Array.prototype.slice.call(pageControlsMenu.querySelectorAll('.page-controls-item'));
+
+                function focusPageControlsItem(idx) {{
+                    pageControlsItems.forEach(function(item, i) {{ item.tabIndex = i === idx ? 0 : -1; }});
+                    if (pageControlsItems[idx]) pageControlsItems[idx].focus();
+                }}
+                function closePageControls(restoreFocus) {{
+                    if (pageControlsMenu.hidden) return;
                     pageControlsMenu.hidden = true;
                     pageControlsToggle.setAttribute('aria-expanded', 'false');
+                    if (restoreFocus) pageControlsToggle.focus();
                 }}
-                function openPageControls() {{
+                function openPageControls(focusLast) {{
                     pageControlsMenu.hidden = false;
                     pageControlsToggle.setAttribute('aria-expanded', 'true');
-                    var rect = pageControlsMenu.getBoundingClientRect();
-                    if (rect.left < 8) {{
+                    pageControlsMenu.style.right = '';
+                    pageControlsMenu.style.left = '';
+                    if (pageControlsMenu.getBoundingClientRect().left < 8) {{
                         pageControlsMenu.style.right = 'auto';
                         pageControlsMenu.style.left = '0';
-                    }} else {{
-                        pageControlsMenu.style.right = '';
-                        pageControlsMenu.style.left = '';
                     }}
-                    var first = pageControlsMenu.querySelector('.page-controls-item');
-                    if (first) first.focus();
+                    focusPageControlsItem(focusLast ? pageControlsItems.length - 1 : 0);
                 }}
                 pageControlsToggle.addEventListener('click', function(e) {{
                     e.stopPropagation();
-                    if (!pageControlsMenu.hidden) {{ closePageControls(); }} else {{ openPageControls(); }}
+                    if (!pageControlsMenu.hidden) {{ closePageControls(true); }} else {{ openPageControls(false); }}
                 }});
-                document.addEventListener('click', function(e) {{
-                    if (!pageControlsMenu.hidden && !pageControlsMenu.contains(e.target))
-                        closePageControls();
-                }});
-                document.addEventListener('keydown', function(e) {{
-                    if (e.key === 'Escape' && !pageControlsMenu.hidden) {{ closePageControls(); pageControlsToggle.focus(); }}
-                }});
-                pageControlsMenu.addEventListener('keydown', function(e) {{
-                    var items = Array.prototype.slice.call(pageControlsMenu.querySelectorAll('.page-controls-item'));
+                pageControlsToggle.addEventListener('keydown', function(e) {{
                     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {{
                         e.preventDefault();
-                        var idx = items.indexOf(document.activeElement);
-                        idx = e.key === 'ArrowDown' ? (idx + 1) % items.length : (idx - 1 + items.length) % items.length;
-                        items[idx].focus();
-                    }} else if (e.key === 'Enter' || e.key === ' ') {{
-                        var focused = document.activeElement;
-                        if (focused && pageControlsMenu.contains(focused) && !focused.href) {{
-                            e.preventDefault();
-                            focused.click();
-                        }}
+                        openPageControls(e.key === 'ArrowUp');
                     }}
                 }});
+                document.addEventListener('click', function(e) {{
+                    if (!pageControlsMenu.contains(e.target)) closePageControls(false);
+                }});
+                pageControlsMenu.addEventListener('keydown', function(e) {{
+                    var idx = pageControlsItems.indexOf(document.activeElement);
+                    var last = pageControlsItems.length - 1;
+                    if (e.key === 'ArrowDown') {{ e.preventDefault(); focusPageControlsItem(idx >= last ? 0 : idx + 1); }}
+                    else if (e.key === 'ArrowUp') {{ e.preventDefault(); focusPageControlsItem(idx <= 0 ? last : idx - 1); }}
+                    else if (e.key === 'Home') {{ e.preventDefault(); focusPageControlsItem(0); }}
+                    else if (e.key === 'End') {{ e.preventDefault(); focusPageControlsItem(last); }}
+                    else if (e.key === 'Escape') {{ e.preventDefault(); closePageControls(true); }}
+                    else if (e.key === 'Tab') {{ closePageControls(false); }}
+                }});
+                pageControlsMenu.querySelectorAll('a.page-controls-item').forEach(function(link) {{
+                    link.addEventListener('click', function() {{ closePageControls(true); }});
+                }});
 
-            var copiedHtml = '<svg viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" aria-hidden=""true"" width=""14"" height=""14""><polyline points=""20 6 9 17 4 12""/></svg>{Localization.JsEncode(l.Copied)}';
-                var errorHtml = '<svg viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" aria-hidden=""true"" width=""14"" height=""14""><line x1=""18"" y1=""6"" x2=""6"" y2=""18""/><line x1=""6"" y1=""6"" x2=""18"" y2=""18""/></svg>{Localization.JsEncode(l.CopyFailed)}';
-                function showCopied(btn, savedHtml) {{
-                    btn.innerHTML = copiedHtml;
-                    setTimeout(function() {{ closePageControls(); }}, 600);
-                    setTimeout(function() {{ btn.innerHTML = savedHtml; }}, 2000);
+                function announce(message) {{
+                    if (!pageControlsStatus) return;
+                    pageControlsStatus.textContent = '';
+                    setTimeout(function() {{ pageControlsStatus.textContent = message; }}, 50);
                 }}
-                function showError(btn, savedHtml) {{
-                    btn.innerHTML = errorHtml;
-                    setTimeout(function() {{ btn.innerHTML = savedHtml; }}, 2000);
+                function showResult(btn, ok) {{
+                    var label = btn.querySelector('.page-controls-label');
+                    var saved = label.textContent;
+                    var message = ok ? '{Localization.JsEncode(l.Copied)}' : '{Localization.JsEncode(l.CopyFailed)}';
+                    label.textContent = message;
+                    btn.classList.toggle('is-done', ok);
+                    announce(message);
+                    if (ok) setTimeout(function() {{ closePageControls(true); }}, 700);
+                    setTimeout(function() {{ label.textContent = saved; btn.classList.remove('is-done'); }}, 2000);
                 }}
 
                 pageControlsMenu.querySelectorAll('[data-copy-url]').forEach(function(btn) {{
                     btn.addEventListener('click', function() {{
-                        if (btn.classList.contains('loading')) return;
-                        var savedHtml = btn.innerHTML;
-                        btn.classList.add('loading');
+                        if (btn.getAttribute('aria-busy') === 'true') return;
+                        btn.setAttribute('aria-busy', 'true');
                         fetch(btn.getAttribute('data-copy-url'))
                             .then(function(r) {{ if (!r.ok) throw new Error(); return r.text(); }})
                             .then(function(text) {{ return navigator.clipboard.writeText(text); }})
-                            .then(function() {{ btn.classList.remove('loading'); showCopied(btn, savedHtml); }})
-                            ['catch'](function() {{ btn.classList.remove('loading'); showError(btn, savedHtml); }});
+                            .then(function() {{ btn.removeAttribute('aria-busy'); showResult(btn, true); }})
+                            ['catch'](function() {{ btn.removeAttribute('aria-busy'); showResult(btn, false); }});
                     }});
                 }});
 
                 pageControlsMenu.querySelectorAll('[data-copy-value]').forEach(function(btn) {{
                     btn.addEventListener('click', function() {{
-                        var savedHtml = btn.innerHTML;
                         var value = new URL(btn.getAttribute('data-copy-value'), window.location.href).href;
                         navigator.clipboard.writeText(value)
-                            .then(function() {{ showCopied(btn, savedHtml); }})
-                            ['catch'](function() {{ showError(btn, savedHtml); }});
+                            .then(function() {{ showResult(btn, true); }})
+                            ['catch'](function() {{ showResult(btn, false); }});
                     }});
                 }});
             }}

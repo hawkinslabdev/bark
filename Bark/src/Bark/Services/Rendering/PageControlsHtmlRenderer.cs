@@ -16,6 +16,11 @@ public static class PageControlsHtmlRenderer
         "<line x1=\"10\" y1=\"14\" x2=\"21\" y2=\"3\"/>" +
         "</svg>";
 
+    private const string ExternalIcon =
+        "<svg class=\"page-controls-external\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" " +
+        "stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\">" +
+        "<path d=\"M7 17L17 7M9 7h8v8\"/></svg>";
+
     public static string BuildPageControlsHtml(
         DocumentationPage page,
         PageControlsConfig? config,
@@ -41,13 +46,15 @@ public static class PageControlsHtmlRenderer
         var relPath = page.OriginalRelativePath ?? string.Empty;
         var sb = new StringBuilder();
 
+        var newTab = $"<span class=\"sr-only\"> ({LayoutProvider.HtmlEncode(l.OpensInNewTab)})</span>{ExternalIcon}";
+
         sb.Append("<div class=\"page-controls\">");
-        sb.Append("<button type=\"button\" class=\"page-controls-toggle icon-btn\" " +
-                  $"aria-expanded=\"false\" aria-haspopup=\"true\" aria-label=\"{LayoutProvider.HtmlEncode(l.PageOptions)}\">" +
+        sb.Append("<button type=\"button\" class=\"page-controls-toggle icon-btn\" id=\"page-controls-toggle\" " +
+                  $"aria-expanded=\"false\" aria-haspopup=\"menu\" aria-controls=\"page-controls-menu\" aria-label=\"{LayoutProvider.HtmlEncode(l.PageOptions)}\">" +
                   "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\" width=\"16\" height=\"16\">" +
                   "<circle cx=\"12\" cy=\"5\" r=\"1.5\"/><circle cx=\"12\" cy=\"12\" r=\"1.5\"/><circle cx=\"12\" cy=\"19\" r=\"1.5\"/>" +
                   "</svg></button>");
-        sb.Append("<div class=\"page-controls-menu\" hidden role=\"menu\">");
+        sb.Append("<div class=\"page-controls-menu\" id=\"page-controls-menu\" hidden role=\"menu\" aria-labelledby=\"page-controls-toggle\">");
 
         // ── Group 1: file access (Copy, View, RSS) ──
         if (hasFileGroup)
@@ -55,26 +62,26 @@ public static class PageControlsHtmlRenderer
             var rawHref = LayoutProvider.HtmlEncode($"{basePath}/raw/{relPath.TrimStart('/')}");
             var viewHref = LayoutProvider.HtmlEncode($"{basePath}/raw/{relPath.TrimStart('/')}?view=true");
 
-            sb.Append($"<a class=\"page-controls-item\" role=\"menuitem\" tabindex=\"0\" data-copy-url=\"{rawHref}\">")
+            sb.Append($"<button type=\"button\" class=\"page-controls-item\" role=\"menuitem\" tabindex=\"-1\" data-copy-url=\"{rawHref}\">")
               .Append("<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" width=\"14\" height=\"14\">")
               .Append("<rect x=\"9\" y=\"2\" width=\"6\" height=\"4\" rx=\"1\"/>")
               .Append("<path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/>")
-              .Append($"</svg>{LayoutProvider.HtmlEncode(l.CopyPage)}</a>");
+              .Append($"</svg><span class=\"page-controls-label\">{LayoutProvider.HtmlEncode(l.CopyPage)}</span></button>");
 
-            sb.Append($"<a class=\"page-controls-item\" role=\"menuitem\" href=\"{viewHref}\" target=\"_blank\" rel=\"noopener noreferrer\">")
+            sb.Append($"<a class=\"page-controls-item\" role=\"menuitem\" tabindex=\"-1\" href=\"{viewHref}\" target=\"_blank\" rel=\"noopener noreferrer\">")
               .Append("<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" width=\"14\" height=\"14\">")
               .Append("<path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"/>")
               .Append("<circle cx=\"12\" cy=\"12\" r=\"3\"/>")
-              .Append($"</svg>{LayoutProvider.HtmlEncode(l.ViewAsMarkdown)}</a>");
+              .Append($"</svg><span class=\"page-controls-label\">{LayoutProvider.HtmlEncode(l.ViewAsMarkdown)}</span>{newTab}</a>");
         }
 
         if (hasRss)
         {
             var feedPath = LayoutProvider.HtmlEncode($"{basePath}/feed.xml");
-            sb.Append($"<a class=\"page-controls-item\" role=\"menuitem\" tabindex=\"0\" data-copy-value=\"{feedPath}\">")
+            sb.Append($"<button type=\"button\" class=\"page-controls-item\" role=\"menuitem\" tabindex=\"-1\" data-copy-value=\"{feedPath}\">")
               .Append("<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\" width=\"14\" height=\"14\">")
               .Append("<path d=\"M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20 4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z\"/>")
-              .Append($"</svg>{LayoutProvider.HtmlEncode(l.CopyRssUrl)}</a>");
+              .Append($"</svg><span class=\"page-controls-label\">{LayoutProvider.HtmlEncode(l.CopyRssUrl)}</span></button>");
         }
 
         // ── Group 2: edit link (URL from top-level editLink config; label/icon from pageControls.editLink) ──
@@ -89,13 +96,14 @@ public static class PageControlsHtmlRenderer
                 ? resolvedEditIcon
                 : DefaultEditLinkIcon;
 
-            sb.Append($"<a class=\"page-controls-item\" role=\"menuitem\" href=\"{editHref}\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">")
+            sb.Append($"<a class=\"page-controls-item\" role=\"menuitem\" tabindex=\"-1\" href=\"{editHref}\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">")
               .Append(editIcon)
-              .Append(editLabel)
+              .Append($"<span class=\"page-controls-label\">{editLabel}</span>")
+              .Append(newTab)
               .Append("</a>");
         }
 
-        sb.Append("</div></div>");
+        sb.Append("</div><span class=\"sr-only\" role=\"status\" aria-live=\"polite\" data-page-controls-status></span></div>");
         return sb.ToString();
     }
 }
