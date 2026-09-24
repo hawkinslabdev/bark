@@ -74,7 +74,7 @@ Site identity and `<head>` output. Details: [Global Meta Tags](/reference/site-m
 | `titleTemplate` | `string?` | Custom title pattern using `:title` and `:siteName` as placeholders. For example, `":title · :siteName"` produces `Getting Started · Bark`. Overrides the default suffix format when set. |
 | `description` | `string?` | Site-wide fallback `<meta name="description">`. Per-page frontmatter descriptions take priority over this value. |
 | `lang` | `string?` | `lang` attribute on `<html>`. Defaults to `"en"`. |
-| `theme` | `string?` | Built-in theme name: `default`, `forest-ledger`, `signal-dark`, `blueprint-grid`, `ocean`, `deep-space`, `solarized`, `laserwave` or `limelight`. Defaults to `default`. Unknown names log a warning and fall back to the default. Overridden by `Docs:Themes:Name` and the `--theme` flag. See [Themes](/guide/themes#picking-a-theme). |
+| `theme` | `string?` | Built-in theme name: `default`, `forest`, `signal`, `blueprint`, `ocean`, `space`, `solarized`, `laserwave` or `limelight`. Defaults to `default`. Unknown names log a warning and fall back to the default. Overridden by `Docs:Themes:Name` and the `--theme` flag. See [Themes](/guide/themes#picking-a-theme). |
 | `head` | `HeadTag[]?` | Extra tags injected into `<head>` on every page, for example verification tags or structured data. Canonical, Open Graph, Twitter Card and JSON-LD tags are generated automatically. |
 | `brand` | `string?` | Sidebar and header brand label. Falls back to `title` if unset, then to `Docs:Themes:BrandText`. |
 | `brandImage` | `string?` | An image URL or path to display alongside the brand label in the header, placed to the left of the text. |

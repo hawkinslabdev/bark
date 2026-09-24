@@ -26,7 +26,7 @@ public class Config
         };
     }
 
-    /// <summary>Theme name, e.g. <c>"forest-ledger"</c>. Unknown names fall back to the default theme.</summary>
+    /// <summary>Theme name, e.g. <c>"forest"</c>. Unknown names fall back to the default theme.</summary>
     public string? Theme { get; set; }
 
     public string? Brand { get; set; }

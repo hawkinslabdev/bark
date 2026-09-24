@@ -176,7 +176,7 @@ public sealed partial class MarkdownService
                     .Append("</div>");
             }
 
-            // `name` is the kicker, so `text` takes the <h1>; a name-only hero keeps it.
+            // `name` is the first headline line, so `text` takes the <h1>; a name-only hero keeps it.
             var hasHeadline = !string.IsNullOrWhiteSpace(hero.Text);
             if (!string.IsNullOrWhiteSpace(hero.Name))
             {

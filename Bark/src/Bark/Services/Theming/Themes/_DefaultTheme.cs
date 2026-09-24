@@ -7,32 +7,16 @@ public sealed class DefaultTheme : IBarkTheme
 
     public string Label => "Default";
 
-    public IReadOnlyDictionary<string, string> LightTokens { get; } = new Dictionary<string, string>(StringComparer.Ordinal)
+    private static readonly ThemePalette Palette = new()
     {
-        ["--bg-color"] = "#fafafa",
-        ["--sidebar-bg"] = "#f2f4f2",
-        ["--text-color"] = "#1a1d1f",
-        // Spec's lighter #75807a reads 3.6:1 on white, under the floor for body copy.
-        ["--text-muted"] = "#565f59",
-        ["--accent"] = "#1f6b4a",
-        ["--accent-light"] = "#eef1ee",
-        ["--border"] = "#e2e7e2",
-        ["--code-bg"] = "#f4f6f4",
-        ["--search-bg"] = "#f4f6f4"
+        Neutral = new(150, 0.005),
+        Accent = new(160, 0.12),
+        DarkGround = 0.17
     };
 
-    public IReadOnlyDictionary<string, string> DarkTokens { get; } = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["--bg-color"] = "#0e100f",
-        ["--sidebar-bg"] = "#141615",
-        ["--text-color"] = "#e6e9e7",
-        ["--text-muted"] = "#99a29c",
-        ["--accent"] = "#4fb187",
-        ["--accent-light"] = "#17211c",
-        ["--border"] = "#262b28",
-        ["--code-bg"] = "#151817",
-        ["--search-bg"] = "#151817"
-    };
+    public IReadOnlyDictionary<string, string> LightTokens { get; } = Palette.Light();
+
+    public IReadOnlyDictionary<string, string> DarkTokens { get; } = Palette.Dark();
 
     /// <summary>Empty: the base stylesheet is this theme.</summary>
     public string ComponentCss => string.Empty;

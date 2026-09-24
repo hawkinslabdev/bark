@@ -2,7 +2,7 @@ using Bark.Models;
 
 namespace Bark.Services.Theming;
 
-/// <summary>Splits a theme value like <c>"forest-ledger dark"</c> into its palette name and a forced light/dark mode,
+/// <summary>Splits a theme value like <c>"forest dark"</c> into its palette name and a forced light/dark mode,
 /// so <c>"dark"</c>/<c>"light"</c> pins the color scheme wherever a theme is named (appsettings, <c>--theme</c>, <c>config.json</c>).</summary>
 public static class ThemeSelection
 {

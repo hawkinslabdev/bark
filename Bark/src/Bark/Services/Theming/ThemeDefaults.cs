@@ -25,7 +25,9 @@ public static class ThemeDefaults
         ["--shadow-md"] = "0 8px 24px rgba(0, 0, 0, 0.12)",
         ["--shadow-lg"] = "0 24px 64px rgba(0, 0, 0, 0.3)",
         ["--promo-bg"] = "var(--accent-light)",
-        ["--promo-text"] = "var(--accent)"
+        ["--promo-text"] = "var(--accent)",
+        ["--selection"] = "var(--accent-light)",
+        ["--callout-tint"] = "8%"
     };
 
     /// <summary>Dark deltas only. Absent keys inherit the light block, which is right for alias vars and wrong for literals.</summary>
@@ -37,6 +39,7 @@ public static class ThemeDefaults
         ["--alert-warning"] = "#d4a72c",
         ["--alert-caution"] = "#f85149",
         ["--shadow-md"] = "0 8px 24px rgba(0, 0, 0, 0.45)",
-        ["--shadow-lg"] = "0 24px 64px rgba(0, 0, 0, 0.55)"
+        ["--shadow-lg"] = "0 24px 64px rgba(0, 0, 0, 0.55)",
+        ["--callout-tint"] = "14%"
     };
 }

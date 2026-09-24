@@ -22,12 +22,12 @@ public sealed class ThemeRegistryTests
     }
 
     [Theory]
-    [InlineData("forest-ledger")]
-    [InlineData("FOREST-LEDGER")]
-    [InlineData("  Forest-Ledger  ")]
+    [InlineData("forest")]
+    [InlineData("FOREST")]
+    [InlineData("  Forest  ")]
     public void Resolve_IsCaseAndWhitespaceInsensitive(string name)
     {
-        Assert.Equal("forest-ledger", ThemeRegistry.Resolve(name).Name);
+        Assert.Equal("forest", ThemeRegistry.Resolve(name).Name);
     }
 
     [Fact]
@@ -37,6 +37,14 @@ public sealed class ThemeRegistryTests
         Assert.Equal(names.Count, names.Distinct(StringComparer.OrdinalIgnoreCase).Count());
         Assert.All(names, n => Assert.Matches("^[a-z][a-z0-9-]*$", n));
     }
+
+    [Theory]
+    [InlineData("signal-dark", "signal")]
+    [InlineData("Blueprint-Grid", "blueprint")]
+    [InlineData("forest-ledger", "forest")]
+    [InlineData("deep-space", "space")]
+    public void Resolve_RenamedTheme_StillResolves(string old, string current) =>
+        Assert.Equal(current, ThemeRegistry.Resolve(old).Name);
 
     [Fact]
     public void Default_IsTheDefaultTheme() => Assert.Equal("default", ThemeRegistry.Default.Name);
@@ -64,12 +72,24 @@ public sealed class ThemeTokenTests
     public void EveryLiteralColourHasBothModes(string name)
     {
         var theme = ThemeRegistry.Resolve(name);
-        var lightLiterals = theme.LightTokens.Where(t => t.Value.StartsWith('#')).Select(t => t.Key);
-        var darkLiterals = theme.DarkTokens.Where(t => t.Value.StartsWith('#')).Select(t => t.Key);
+        var lightLiterals = theme.LightTokens.Where(t => IsLiteral(t.Value)).Select(t => t.Key);
+        var darkLiterals = theme.DarkTokens.Where(t => IsLiteral(t.Value)).Select(t => t.Key);
 
         Assert.Empty(lightLiterals.Except(theme.DarkTokens.Keys));
         Assert.Empty(darkLiterals.Except(theme.LightTokens.Keys));
     }
+
+    [Theory]
+    [MemberData(nameof(ThemeNames))]
+    public void GeneratedColoursStayInSrgbGamut(string name)
+    {
+        var theme = ThemeRegistry.Resolve(name);
+        var colours = theme.LightTokens.Concat(theme.DarkTokens).Where(t => t.Value.StartsWith("oklch(", StringComparison.Ordinal));
+        Assert.All(colours, t => Assert.True(Oklch.Parse(t.Value).InSrgbGamut, $"{name} {t.Key} {t.Value} is outside sRGB"));
+    }
+
+    private static bool IsLiteral(string value) =>
+        value.StartsWith('#') || value.StartsWith("oklch(", StringComparison.Ordinal);
 }
 
 public sealed class ThemeContrastTests
@@ -102,10 +122,24 @@ public sealed class ThemeContrastTests
         AssertRatio(tokens["--text-color"], tokens["--sidebar-bg"], 4.5, $"{theme.Name}/{mode} text on sidebar");
         AssertRatio(tokens["--text-color"], tokens["--code-bg"], 4.5, $"{theme.Name}/{mode} text on code");
         AssertRatio(tokens["--text-color"], tokens["--accent-light"], 4.5, $"{theme.Name}/{mode} text on accent tint");
+        AssertRatio(tokens["--accent"], tokens["--accent-light"], 4.5, $"{theme.Name}/{mode} accent on accent tint");
+
+        foreach (var alert in new[] { "--accent", "--alert-note", "--alert-tip", "--alert-important", "--alert-warning", "--alert-caution" })
+        {
+            if (!tokens.TryGetValue(alert, out var colour))
+                continue;
+            AssertRatio(colour, bg, 4.5, $"{theme.Name}/{mode} {alert}");
+            if (colour.StartsWith("oklch(", StringComparison.Ordinal) && bg.StartsWith("oklch(", StringComparison.Ordinal))
+            {
+                var tint = MixOklab(Oklch.Parse(colour), Oklch.Parse(bg), dark ? 0.14 : 0.08).ToString();
+                AssertRatio(colour, tint, 4.5, $"{theme.Name}/{mode} {alert} on its callout tint");
+                AssertRatio(tokens["--text-color"], tint, 4.5, $"{theme.Name}/{mode} text on {alert} callout tint");
+            }
+        }
 
         // Only when both are literals; otherwise they alias tokens the assertions above already cover.
-        if (tokens.TryGetValue("--promo-bg", out var promoBg) && promoBg.StartsWith('#')
-            && tokens.TryGetValue("--promo-text", out var promoText) && promoText.StartsWith('#'))
+        if (tokens.TryGetValue("--promo-bg", out var promoBg) && IsLiteral(promoBg)
+            && tokens.TryGetValue("--promo-text", out var promoText) && IsLiteral(promoText))
             AssertRatio(promoText, promoBg, 4.5, $"{theme.Name}/{mode} promo bar");
     }
 
@@ -117,6 +151,22 @@ public sealed class ThemeContrastTests
         foreach (var (key, value) in overrides)
             merged[key] = value;
         return merged;
+    }
+
+    private static bool IsLiteral(string value) =>
+        value.StartsWith('#') || value.StartsWith("oklch(", StringComparison.Ordinal);
+
+    private static Oklch MixOklab(Oklch a, Oklch b, double amountOfA)
+    {
+        static (double L, double A, double B) Lab(Oklch c) =>
+            (c.L, c.C * Math.Cos(c.H * Math.PI / 180), c.C * Math.Sin(c.H * Math.PI / 180));
+
+        var (la, aa, ba) = Lab(a);
+        var (lb, ab, bb) = Lab(b);
+        var l = (la * amountOfA) + (lb * (1 - amountOfA));
+        var x = (aa * amountOfA) + (ab * (1 - amountOfA));
+        var y = (ba * amountOfA) + (bb * (1 - amountOfA));
+        return new Oklch(l, Math.Sqrt((x * x) + (y * y)), Math.Atan2(y, x) * 180 / Math.PI);
     }
 
     private static void AssertRatio(string foreground, string background, double floor, string label)
@@ -133,9 +183,12 @@ public sealed class ThemeContrastTests
         return (high + 0.05) / (low + 0.05);
     }
 
-    private static double RelativeLuminance(string hex)
+    private static double RelativeLuminance(string colour)
     {
-        var value = hex.TrimStart('#');
+        if (colour.StartsWith("oklch(", StringComparison.Ordinal))
+            return Oklch.Parse(colour).RelativeLuminance;
+
+        var value = colour.TrimStart('#');
         if (value.Length == 3)
             value = string.Concat(value.Select(c => new string(c, 2)));
 
@@ -240,10 +293,10 @@ public sealed partial class ThemeCssIntegrityTests
 public sealed class ThemeSelectionTests
 {
     [Theory]
-    [InlineData("forest-ledger dark", "forest-ledger", ThemeMode.Dark)]
-    [InlineData("forest-ledger light", "forest-ledger", ThemeMode.Light)]
-    [InlineData("dark forest-ledger", "forest-ledger", ThemeMode.Dark)]
-    [InlineData("forest-ledger", "forest-ledger", ThemeMode.Auto)]
+    [InlineData("forest dark", "forest", ThemeMode.Dark)]
+    [InlineData("forest light", "forest", ThemeMode.Light)]
+    [InlineData("dark forest", "forest", ThemeMode.Dark)]
+    [InlineData("forest", "forest", ThemeMode.Auto)]
     [InlineData("dark", null, ThemeMode.Dark)]
     [InlineData(null, null, ThemeMode.Auto)]
     [InlineData("  ", null, ThemeMode.Auto)]

@@ -21,6 +21,15 @@ public static partial class LayoutProvider
         html, body {{
             overflow-x: clip;
         }}
+        html {{
+            accent-color: var(--accent);
+            caret-color: var(--accent);
+            scrollbar-color: color-mix(in oklab, var(--text-muted) 45%, transparent) transparent;
+        }}
+        ::selection {{
+            background-color: var(--selection);
+            color: var(--text-color);
+        }}
         body {{
             display: flex;
             flex-direction: column;
@@ -42,11 +51,15 @@ public static partial class LayoutProvider
             outline: 2px solid var(--accent);
             outline-offset: 2px;
         }}
+        .sidebar-left :focus-visible,
+        .sidebar-right :focus-visible {{
+            outline-offset: -2px;
+        }}
         .skip-link {{
             position: absolute; top: 0; left: 0; z-index: 1100;
             width: 1px; height: 1px; overflow: hidden;
             clip-path: inset(50%); white-space: nowrap;
-            background: var(--accent); color: #fff; padding: 0.75rem 1.25rem;
+            background: var(--accent); color: var(--bg-color); padding: 0.75rem 1.25rem;
             border-radius: 0 0 6px 0; text-decoration: none; font-size: 0.9rem;
         }}
         .skip-link:focus {{
@@ -78,7 +91,7 @@ public static partial class LayoutProvider
         .promo-bar {{
             display: grid; grid-template-rows: 1fr;
             background-color: var(--promo-bg); color: var(--promo-text);
-            box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--promo-text) 14%, transparent);
+            box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--promo-text) 14%, transparent);
             font-size: 0.875rem; line-height: 1.4; text-align: center;
             transition: grid-template-rows 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease-out;
         }}
@@ -94,7 +107,7 @@ public static partial class LayoutProvider
         }}
         .promo-bar-content a:hover {{ text-decoration-thickness: 2px; }}
         .promo-bar-content code {{
-            background-color: color-mix(in srgb, var(--promo-text) 16%, transparent);
+            background-color: color-mix(in oklab, var(--promo-text) 16%, transparent);
             color: inherit; padding: 0.1em 0.35em; border-radius: 4px;
             font-family: var(--font-mono); font-size: 0.85em;
         }}
@@ -105,7 +118,7 @@ public static partial class LayoutProvider
         }}
         .promo-bar-close:hover {{
             color: inherit; opacity: 1;
-            background-color: color-mix(in srgb, var(--promo-text) 15%, transparent);
+            background-color: color-mix(in oklab, var(--promo-text) 15%, transparent);
         }}
         .promo-bar-close:focus-visible {{
             outline-color: var(--promo-text); opacity: 1;
@@ -552,8 +565,12 @@ public static partial class LayoutProvider
             max-height: 200px;
         }}
         .bark-hero-name {{
-            font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em;
-            color: var(--accent); margin-bottom: 1.1rem;
+            font-size: 3rem; font-weight: 700; color: var(--accent);
+            letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 0;
+            text-wrap: balance;
+        }}
+        .bark-hero-name:has(+ .bark-hero-text) {{
+            margin-bottom: 0.1em;
         }}
         .bark-hero-text {{
             font-size: 3rem; font-weight: 700; color: var(--text-color);
@@ -570,6 +587,7 @@ public static partial class LayoutProvider
             .bark-hero {{
                 padding: 7rem 1.5rem 6.5rem;
             }}
+            .bark-hero-name,
             .bark-hero-text {{
                 font-size: 3.5rem;
             }}
@@ -901,7 +919,7 @@ public static partial class LayoutProvider
             margin-top: 2.75rem; margin-bottom: 1rem; padding-bottom: 0.3rem;
             border-bottom: 1px solid var(--border); scroll-margin-top: calc(var(--topbar-height) + 1rem);
         }}
-        .content p:not(.bark-hero-tagline):not(.bark-feature-details) {{
+        .content p:not(.bark-hero-tagline):not(.bark-feature-details):not(.bark-hero-name):not(.custom-block-title) {{
             color: var(--text-color); margin-bottom: 1.25rem;
             text-decoration-color: var(--border); text-underline-offset: 2px;
         }}
@@ -976,7 +994,7 @@ public static partial class LayoutProvider
             font-family: var(--font-mono);
             font-size: 0.875em;
             color: var(--accent);
-            background-color: color-mix(in srgb, var(--text-color) 7%, transparent);
+            background-color: color-mix(in oklab, var(--text-color) 7%, transparent);
             padding: 0.1875rem 0.375rem;
             border-radius: 4px;
             unicode-bidi: plaintext;
@@ -1065,10 +1083,10 @@ public static partial class LayoutProvider
             width: calc(100% + 2.5rem);
         }}
         .content .line.diff.add {{
-            background-color: color-mix(in srgb, var(--alert-tip) 15%, transparent);
+            background-color: color-mix(in oklab, var(--alert-tip) 15%, transparent);
         }}
         .content .line.diff.remove {{
-            background-color: color-mix(in srgb, var(--alert-caution) 15%, transparent);
+            background-color: color-mix(in oklab, var(--alert-caution) 15%, transparent);
             opacity: 0.7;
         }}
         .content div[class^=""language-""].has-focused-lines .line {{
@@ -1104,32 +1122,23 @@ public static partial class LayoutProvider
             user-select: none;
         }}
         .content .custom-block {{
+            --block: var(--accent);
             margin: 1rem 0; padding: 1rem; border-radius: 8px;
-            line-height: 1.5; font-size: 0.9rem; color: var(--text-muted);
-            background-color: var(--accent-light);
+            line-height: 1.5; font-size: 0.9rem; color: var(--text-color);
+            background-color: color-mix(in oklab, var(--block) var(--callout-tint), var(--bg-color));
         }}
         .content .custom-block p:not(.custom-block-title) {{
             margin: 0;
         }}
-        .content .custom-block.tip {{
-            color: var(--alert-tip);
-            background-color: color-mix(in srgb, var(--alert-tip) 10%, var(--bg-color));
-        }}
-        .content .custom-block.info {{
-            color: var(--alert-note);
-            background-color: color-mix(in srgb, var(--alert-note) 10%, var(--bg-color));
-        }}
-        .content .custom-block.warning {{
-            color: var(--alert-warning);
-            background-color: color-mix(in srgb, var(--alert-warning) 10%, var(--bg-color));
-        }}
-        .content .custom-block.danger {{
-            color: var(--alert-caution);
-            background-color: color-mix(in srgb, var(--alert-caution) 10%, var(--bg-color));
-        }}
+        .content .custom-block.tip {{ --block: var(--alert-tip); }}
+        .content .custom-block.info {{ --block: var(--alert-note); }}
+        .content .custom-block.warning {{ --block: var(--alert-warning); }}
+        .content .custom-block.danger {{ --block: var(--alert-caution); }}
+        .content .custom-block.details {{ --block: var(--text-muted); }}
         .content .custom-block-title {{
             font-weight: 700;
             margin: 0 0 0.5rem;
+            color: var(--block);
         }}
         .content .custom-block a {{
             color: inherit; font-weight: 600; text-decoration: underline;
@@ -1139,7 +1148,7 @@ public static partial class LayoutProvider
             opacity: 0.75;
         }}
         .content details.custom-block summary {{
-            font-weight: 700;
+            font-weight: 700; color: var(--block);
             cursor: pointer;
             margin: 0 0 0.5rem;
         }}
@@ -1258,78 +1267,50 @@ public static partial class LayoutProvider
             .code-block-buttons .spin {{ animation: none; }}
         }}
         .markdown-alert {{
+            --block: var(--accent);
             padding: 0.75rem 1rem; margin: 1.5rem 0;
-            border-radius: 0 8px 8px 0;
-            background-color: var(--accent-light);
+            border-radius: 8px;
+            background-color: color-mix(in oklab, var(--block) var(--callout-tint), var(--bg-color));
         }}
         .markdown-alert-title {{
             display: flex; align-items: center; gap: 0.5rem;
             font-weight: 600; margin-bottom: 0.25rem;
+            color: var(--block);
         }}
         .markdown-alert-title svg {{
             width: 18px; height: 18px; flex-shrink: 0;
             fill: currentColor;
         }}
-        .markdown-alert-note {{
-            border-left-color: var(--alert-note);
-            background-color: color-mix(in srgb, var(--alert-note) 10%, var(--bg-color));
-        }}
-        .markdown-alert-tip {{
-            border-left-color: var(--alert-tip);
-            background-color: color-mix(in srgb, var(--alert-tip) 10%, var(--bg-color));
-        }}
-        .markdown-alert-important {{
-            border-left-color: var(--alert-important);
-            background-color: color-mix(in srgb, var(--alert-important) 10%, var(--bg-color));
-        }}
-        .markdown-alert-warning {{
-            border-left-color: var(--alert-warning);
-            background-color: color-mix(in srgb, var(--alert-warning) 10%, var(--bg-color));
-        }}
-        .markdown-alert-caution {{
-            border-left-color: var(--alert-caution);
-            background-color: color-mix(in srgb, var(--alert-caution) 10%, var(--bg-color));
-        }}
-        .markdown-alert-note .markdown-alert-title svg {{
-            color: var(--alert-note);
-        }}
-        .markdown-alert-tip .markdown-alert-title svg {{
-            color: var(--alert-tip);
-        }}
-        .markdown-alert-important .markdown-alert-title svg {{
-            color: var(--alert-important);
-        }}
-        .markdown-alert-warning .markdown-alert-title svg {{
-            color: var(--alert-warning);
-        }}
-        .markdown-alert-caution .markdown-alert-title svg {{
-            color: var(--alert-caution);
-        }}
+        .markdown-alert-note {{ --block: var(--alert-note); }}
+        .markdown-alert-tip {{ --block: var(--alert-tip); }}
+        .markdown-alert-important {{ --block: var(--alert-important); }}
+        .markdown-alert-warning {{ --block: var(--alert-warning); }}
+        .markdown-alert-caution {{ --block: var(--alert-caution); }}
         .markdown-alert > :last-child {{
             margin-bottom: 0;
         }}
         badge {{
             display: inline-flex; align-items: center; vertical-align: middle;
             margin: 0 0.3rem; padding: 0.15rem 0.55rem; border-radius: 6px;
-            background-color: color-mix(in srgb, var(--alert-tip) 16%, var(--code-bg));
+            background-color: color-mix(in oklab, var(--alert-tip) 16%, var(--code-bg));
             color: var(--alert-tip); font-family: var(--font-sans);
             font-size: 0.7rem; font-weight: 600; letter-spacing: 0.02em;
             line-height: 1.5;
         }}
         badge[type=""info""] {{
-            background-color: color-mix(in srgb, var(--alert-note) 16%, var(--code-bg));
+            background-color: color-mix(in oklab, var(--alert-note) 16%, var(--code-bg));
             color: var(--alert-note);
         }}
         badge[type=""tip""] {{
-            background-color: color-mix(in srgb, var(--alert-tip) 16%, var(--code-bg));
+            background-color: color-mix(in oklab, var(--alert-tip) 16%, var(--code-bg));
             color: var(--alert-tip);
         }}
         badge[type=""warning""] {{
-            background-color: color-mix(in srgb, var(--alert-warning) 16%, var(--code-bg));
+            background-color: color-mix(in oklab, var(--alert-warning) 16%, var(--code-bg));
             color: var(--alert-warning);
         }}
         badge[type=""danger""] {{
-            background-color: color-mix(in srgb, var(--alert-caution) 16%, var(--code-bg));
+            background-color: color-mix(in oklab, var(--alert-caution) 16%, var(--code-bg));
             color: var(--alert-caution);
         }}
         h1 badge, h2 badge, h3 badge, h4 badge {{
@@ -1506,7 +1487,7 @@ public static partial class LayoutProvider
             .pagination-link svg {{
                 margin-top: 0;
             }}
-            .icon-btn {{
+            .icon-btn, .repo-widget {{
                 width: 44px;
                 height: 44px;
             }}
@@ -1570,15 +1551,14 @@ public static partial class LayoutProvider
                 display: block;
             }}
             .main-container,
-            .site-footer {{
+            .site-footer,
+            .bark-home-layout .site-footer {{
                 padding: 2rem 1.5rem;
             }}
             .bark-hero {{
                 padding: 2.5rem 1.5rem 3rem;
             }}
-            .bark-hero-name {{
-                font-size: 0.72rem;
-            }}
+            .bark-hero-name,
             .bark-hero-text {{
                 font-size: 1.9rem;
             }}
@@ -1649,8 +1629,19 @@ public static partial class LayoutProvider
                 padding: 1.25rem 0 0.25rem;
                 border-top: 1px solid var(--border);
             }}
-            .repo-widget {{
-                display: none;
+        }}
+        @media (max-width: 380px) {{
+            .topbar-inner {{
+                padding: 0 0.75rem;
+            }}
+            .topbar-left {{
+                gap: 0.5rem;
+            }}
+            .topbar-right {{
+                gap: 0;
+            }}
+            .brand a {{
+                white-space: nowrap;
             }}
         }}
         @media (prefers-reduced-motion: reduce) {{

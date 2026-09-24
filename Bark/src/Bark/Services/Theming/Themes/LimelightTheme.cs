@@ -1,48 +1,34 @@
 namespace Bark.Services.Theming.Themes;
 
-/// <summary>Pale off-white ground, sage-lime accent with a cyan counterpart, squared corners.</summary>
+/// <summary>Pale off-white ground, electric lime accent with a cyan counterpart, squared corners.</summary>
 public sealed class LimelightTheme : IBarkTheme
 {
     public string Name => "limelight";
 
     public string Label => "Limelight";
 
-    public IReadOnlyDictionary<string, string> LightTokens { get; } = new Dictionary<string, string>(StringComparer.Ordinal)
+    private static readonly ThemePalette Palette = new()
     {
-        ["--bg-color"] = "#f7f8f4",
-        ["--sidebar-bg"] = "#eff2e9",
-        ["--text-color"] = "#1d201b",
-        ["--text-muted"] = "#5b6155",
-        ["--accent"] = "#42700e",
-        ["--accent-alt"] = "#0b6a86",
-        ["--accent-light"] = "#e8eedb",
-        ["--border"] = "#dee3d3",
-        ["--code-bg"] = "#f1f4ec"
+        Neutral = new(120, 0.008),
+        Accent = new(128, 0.2),
+        AccentAlt = new(215, 0.13),
+        LightAccentTone = 0.55,
+        DarkGround = 0.17,
+        DarkAccentTone = 0.86
     };
 
-    public IReadOnlyDictionary<string, string> DarkTokens { get; } = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["--bg-color"] = "#12140f",
-        ["--sidebar-bg"] = "#191c15",
-        ["--text-color"] = "#dde1d6",
-        ["--text-muted"] = "#969c8c",
-        ["--accent"] = "#9fbe3f",
-        ["--accent-alt"] = "#67b9d8",
-        ["--accent-light"] = "#1f2618",
-        ["--border"] = "#292e21",
-        ["--code-bg"] = "#181b14"
-    };
+    public IReadOnlyDictionary<string, string> LightTokens { get; } = Palette.Light();
+
+    public IReadOnlyDictionary<string, string> DarkTokens { get; } = Palette.Dark();
 
     public string ComponentCss => """
                 .bark-features {
                     gap: 0;
-                    border-top: 1px solid var(--border);
                 }
                 .bark-feature {
-                    padding: 1.75rem 1.5rem;
+                    padding: 0.25rem 1.5rem 1.75rem;
                     border-top: 0;
                     border-left: 1px solid var(--border);
-                    border-radius: 0;
                 }
                 .bark-feature:first-child {
                     border-left: 0;
@@ -52,28 +38,21 @@ public sealed class LimelightTheme : IBarkTheme
                     background-color: var(--accent-light);
                 }
                 .bark-feature-icon {
-                    color: var(--accent);
-                    border-radius: 0;
-                }
-                .bark-feature-title {
-                    letter-spacing: -0.02em;
-                }
-                /* The cyan-to-lime pair reads as one mark rather than two accents. */
-                .bark-hero {
-                    border-bottom: 2px solid transparent;
-                    border-image: linear-gradient(90deg, var(--accent-alt), var(--accent)) 1;
-                }
-                .bark-hero-name {
-                    text-transform: uppercase;
-                    letter-spacing: 0.12em;
-                    color: var(--accent);
+                    color: var(--accent-alt);
                 }
                 #scroll-indicator {
-                    background: linear-gradient(90deg, var(--accent-alt), var(--accent));
+                    background-color: var(--accent-alt);
                 }
                 .bark-hero-action.brand,
                 .bark-hero-action.alt {
                     border-radius: 0;
+                }
+                @media (max-width: 768px) {
+                    .bark-feature {
+                        padding: 1.5rem 0;
+                        border-left: 0;
+                        border-top: 1px solid var(--border);
+                    }
                 }
         """;
 }

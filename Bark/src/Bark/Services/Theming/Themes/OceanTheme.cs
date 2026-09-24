@@ -1,55 +1,44 @@
 namespace Bark.Services.Theming.Themes;
 
-/// <summary>Cool blue-grey paper, deep harbour accent, tinted feature band.</summary>
+/// <summary>Sea-mist blue ground, deep petrol accent, feature row set on one tinted band.</summary>
 public sealed class OceanTheme : IBarkTheme
 {
     public string Name => "ocean";
 
     public string Label => "Ocean";
 
-    public IReadOnlyDictionary<string, string> LightTokens { get; } = new Dictionary<string, string>(StringComparer.Ordinal)
+    private static readonly ThemePalette Palette = new()
     {
-        ["--bg-color"] = "#f6fafc",
-        ["--sidebar-bg"] = "#e9f1f6",
-        ["--text-color"] = "#0d2130",
-        ["--text-muted"] = "#48626f",
-        ["--accent"] = "#0a6382",
-        ["--accent-light"] = "#e0edf4",
-        ["--border"] = "#cfe0ea",
-        ["--code-bg"] = "#edf4f8"
+        Neutral = new(222, 0.024),
+        DarkNeutral = new(232, 0.05),
+        Accent = new(212, 0.12),
+        LightGround = 0.95,
+        LightAccentTone = 0.42,
+        DarkGround = 0.2,
+        DarkAccentTone = 0.78
     };
 
-    public IReadOnlyDictionary<string, string> DarkTokens { get; } = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["--bg-color"] = "#0a1620",
-        ["--sidebar-bg"] = "#0f1e2b",
-        ["--text-color"] = "#dfeaf2",
-        ["--text-muted"] = "#8ba6b9",
-        ["--accent"] = "#4fb3d9",
-        ["--accent-light"] = "#12293a",
-        ["--border"] = "#1d3242",
-        ["--code-bg"] = "#0d1c28"
-    };
+    public IReadOnlyDictionary<string, string> LightTokens { get; } = Palette.Light();
+
+    public IReadOnlyDictionary<string, string> DarkTokens { get; } = Palette.Dark();
 
     public string ComponentCss => """
                 .bark-features {
-                    gap: 0;
+                    padding: 2.5rem;
                     background-color: var(--accent-light);
                     border-radius: 10px;
-                    overflow: hidden;
                 }
                 .bark-feature {
-                    padding: 1.75rem;
+                    padding-top: 0;
                     border-top: 0;
-                }
-                a.bark-feature:hover {
-                    background-color: var(--sidebar-bg);
                 }
                 .bark-feature-icon {
                     color: var(--accent);
                 }
-                .bark-hero-name {
-                    color: var(--accent);
+                @media (max-width: 768px) {
+                    .bark-features {
+                        padding: 1.75rem 1.5rem;
+                    }
                 }
         """;
 }
