@@ -24,6 +24,33 @@ public sealed class BarkMarkdownCompatibilityTests
     }
 
     [Fact]
+    public void Heading_WithBracesInCodeSpan_KeepsBracesOutOfTocAndId()
+    {
+        var result = _service.Parse("## `GET /{path}`\n");
+
+        var heading = Assert.Single(result.Headings);
+        Assert.Equal("GET /{path}", heading.Text);
+        Assert.DoesNotContain("bark_", heading.Id);
+        Assert.Contains($"id=\"{heading.Id}\"", result.Html);
+    }
+
+    [Fact]
+    public void Heading_WithBracesInCodeSpan_DoesNotReuseAnExistingId()
+    {
+        var result = _service.Parse("## `{a}`\n\n## `a`\n");
+
+        Assert.Equal(2, result.Headings.Select(h => h.Id).Distinct().Count());
+    }
+
+    [Fact]
+    public void FrontMatter_WithBracesInCodeSpan_KeepsBraces()
+    {
+        var result = _service.Parse("---\ntitle: \"`{a}` title\"\n---\n# H\n");
+
+        Assert.Equal("`{a}` title", result.Title);
+    }
+
+    [Fact]
     public void Container_WithCustomTitle_OverridesDefaultTitle()
     {
         var md = "::: tip Custom Title Here\nContent\n:::\n";
