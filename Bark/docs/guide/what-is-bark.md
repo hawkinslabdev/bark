@@ -24,4 +24,4 @@ Pages are held in memory. Requests do not read from disk.
 
 ## Ready to try it out?
 
-Next: [Getting Started](/guide/getting-started).
+If you are, the head over to [getting started](/guide/getting-started) to continue.

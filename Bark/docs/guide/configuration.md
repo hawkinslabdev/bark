@@ -7,8 +7,8 @@ description: appsettings.json options, docs/config.json, and theming
 
 Configuration is split across two files:
 
-- **`appsettings.json`**: host settings (content root, hot reload, theme colors). Per deployment; applied on restart.
-- **`docs/config.json`**: content settings (title, metadata, brand, navigation, footer, social links). Per project; applied through hot reload.
+- `appsettings.json`: host settings, which include: content root, hot reload, theme colors. Per deployment; applied on restart.
+- `docs/config.json`: content settings, which include: title, metadata, brand, navigation, footer, social links. Per project; applied through hot reload.
 
 Content settings do not require deployment access.
 
