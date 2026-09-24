@@ -766,7 +766,7 @@ public static partial class LayoutProvider
         }}
         .page-meta {{
             display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-            margin-top: 4rem; padding-bottom: 1.125rem;
+            margin-top: 5rem; padding-bottom: 1.125rem;
             flex-wrap: wrap;
         }}
         .page-meta + .pagination {{
@@ -776,14 +776,15 @@ public static partial class LayoutProvider
             margin-left: auto;
         }}
         .last-updated {{
-            font-size: 0.8rem;
+            font-size: 0.875rem;
             color: var(--text-muted);
         }}
-        .edit-link {{
+        .content a.edit-link {{
             display: inline-flex; align-items: center; gap: 0.35rem;
-            font-size: 0.85rem; color: var(--text-muted); text-decoration: none;
+            font-size: 0.875rem; color: var(--text-muted); text-decoration: none;
+            transition: color 0.15s ease;
         }}
-        .edit-link:hover {{
+        .content a.edit-link:hover {{
             color: var(--accent);
         }}
         .breadcrumb {{
@@ -1338,7 +1339,7 @@ public static partial class LayoutProvider
         }}
         .pagination {{
             display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem;
-            margin-top: 4rem; padding-top: 1.5rem;
+            margin-top: 4rem; padding-top: 1.5rem; margin-bottom: 2.5rem;
             border-top: 1px solid var(--border);
         }}
         .pagination .pagination-link {{
