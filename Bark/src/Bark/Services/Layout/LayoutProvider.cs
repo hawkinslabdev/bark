@@ -258,17 +258,19 @@ public static partial class LayoutProvider
     <div class=""{layoutClass}"">
         {sidebarLeftHtml}
         <div class=""content-shell"">
-            <main class=""main-container"" id=""main-content"" tabindex=""-1"">
-                {breadcrumbAndTocHtml}
-                <article class=""{contentClass}"">
-                    {content}
-                    {pageMetaBlock}
-                    {paginationBlock}
-                </article>
-            </main>
+            <div class=""main-column"">
+                <main class=""main-container"" id=""main-content"" tabindex=""-1"">
+                    {breadcrumbAndTocHtml}
+                    <article class=""{contentClass}"">
+                        {content}
+                        {pageMetaBlock}
+                        {paginationBlock}
+                    </article>
+                </main>
+                {(string.IsNullOrWhiteSpace(footerHtml) ? "" : $@"<footer class=""site-footer"">{footerHtml}</footer>")}
+            </div>
             {sidebarRightHtml}
         </div>
-        {(string.IsNullOrWhiteSpace(footerHtml) ? "" : $@"<footer class=""site-footer"">{footerHtml}</footer>")}
     </div>
     {GetScriptsTag(enableLiveReload, toggleEnabled, buildVersion, basePath, staticSearch, l, isRootLocale)}
 </body>

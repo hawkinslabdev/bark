@@ -193,6 +193,9 @@
       }
     ]
   },
+  "bottomNav": [                                                                                                                                                
+      { "text": "Privacy", "link": "/privacy" }                                                                             
+  ], 
   "socialLinks": [
     {
       "icon": "mastodon",

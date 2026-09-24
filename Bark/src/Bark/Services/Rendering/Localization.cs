@@ -21,6 +21,7 @@ public sealed class Localization
         ["navToggle"] = "Toggle navigation menu",
         ["sidebarAria"] = "Documentation navigation",
         ["topNavAria"] = "Main navigation",
+        ["footerNavAria"] = "Footer navigation",
         ["breadcrumbAria"] = "Breadcrumb",
         ["breadcrumbHome"] = "Home",
         ["themeToggle"] = "Toggle dark mode",
@@ -126,6 +127,7 @@ public sealed class Localization
     public string NavToggle => this["navToggle"];
     public string SidebarAria => this["sidebarAria"];
     public string TopNavAria => this["topNavAria"];
+    public string FooterNavAria => this["footerNavAria"];
     public string BreadcrumbAria => this["breadcrumbAria"];
     public string BreadcrumbHome => this["breadcrumbHome"];
     public string ThemeToggle => this["themeToggle"];

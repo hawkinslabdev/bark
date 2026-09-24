@@ -10,6 +10,8 @@ public static class NavigationHtmlRenderer
         "stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>" +
         "<path d=\"M15 3h6v6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M10 14 21 3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>";
 
+    private const string CaretSvg = "<span class=\"caret-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" " +
+        "stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M9 6l6 6-6 6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></span>";
     internal const string ExternalLinkRel = " target=\"_blank\" rel=\"noopener noreferrer\"";
 
     internal static string LocalizeLink(string localePrefix, string path)
@@ -124,14 +126,11 @@ public static class NavigationHtmlRenderer
         var headerClass = $"sidebar-group-title level-{level}{(hasActiveDescendant ? " has-active" : "")}";
         var headingTag = level == 0 ? "h2" : "h3";
 
-        const string caretSvg = "<span class=\"caret-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" " +
-            "stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M9 6l6 6-6 6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></span>";
-
         // .sidebar-group-title stays a plain <div>; UA-default <summary> styling can't be fully overridden, so <summary> only wraps it as a near-invisible click target.
         if (isCollapsible)
             html.AppendLine($"<details class=\"sidebar-group\"{(startsOpen ? " open" : "")}>")
                 .AppendLine("<summary class=\"sidebar-group-summary\">")
-                .AppendLine($"<div class=\"{headerClass}\"><{headingTag}>{LayoutProvider.HtmlEncode(l.Label(entry.Title))}</{headingTag}>{caretSvg}</div>")
+                .AppendLine($"<div class=\"{headerClass}\"><{headingTag}>{LayoutProvider.HtmlEncode(l.Label(entry.Title))}</{headingTag}>{CaretSvg}</div>")
                 .AppendLine("</summary>");
         else
             html.AppendLine("<div class=\"sidebar-group no-caret\">")
@@ -182,7 +181,7 @@ public static class NavigationHtmlRenderer
             if (isMobile)
             {
                 html.AppendLine("<details class=\"mobile-top-nav-group\">");
-                html.AppendLine($"<summary>{LayoutProvider.HtmlEncode(l.Label(item.Text))}</summary>");
+                html.AppendLine($"<summary><span>{LayoutProvider.HtmlEncode(l.Label(item.Text))}</span>{CaretSvg}</summary>");
                 foreach (var child in children)
                     AppendTopNavLink(html, child, currentPath, "mobile-top-nav-link", basePath, localePrefix: localePrefix, localization: l);
                 html.AppendLine("</details>");
@@ -202,6 +201,27 @@ public static class NavigationHtmlRenderer
         }
 
         AppendTopNavLink(html, item, currentPath, isMobile ? "mobile-top-nav-link" : "top-nav-link", basePath, wrapInItemDiv: !isMobile, localePrefix: localePrefix, localization: l);
+    }
+
+    public static string BuildBottomNavHtml(List<TopNavItem> bottomNav, string basePath, Localization? localization = null, string localePrefix = "")
+    {
+        var l = localization ?? Localization.Default;
+        var links = bottomNav.Where(item => !string.IsNullOrWhiteSpace(item.Text) && !string.IsNullOrWhiteSpace(item.Link)).ToList();
+        if (links.Count == 0)
+            return string.Empty;
+
+        var html = new StringBuilder();
+        html.Append($"<nav class=\"footer-nav\" aria-label=\"{LayoutProvider.HtmlEncode(l.FooterNavAria)}\">");
+        foreach (var item in links)
+        {
+            var isExternal = UrlPaths.IsExternal(item.Link!);
+            var href = isExternal ? item.Link! : UrlPaths.Href(basePath, LocalizeLink(localePrefix, item.Link!));
+            html.Append($"<a href=\"{LayoutProvider.HtmlEncode(href)}\"{(isExternal ? ExternalLinkRel : "")}>")
+                .Append(LayoutProvider.HtmlEncode(l.Label(item.Text)))
+                .Append(isExternal ? ExternalLinkIcon : "")
+                .Append("</a>");
+        }
+        return html.Append("</nav>").ToString();
     }
 
     public static void AppendTopNavLink(StringBuilder html, TopNavItem item, string currentPath, string cssClass, string basePath, bool wrapInItemDiv = false, string localePrefix = "", Localization? localization = null)

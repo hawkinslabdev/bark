@@ -243,9 +243,15 @@ public sealed class PageRequestHandler
         var socialLinksHtml = await SocialLinksHtmlRenderer.BuildSocialLinksHtmlAsync(config?.SocialLinks, _iconsDir, _fallbackIconsDir, l);
         var repoStats = config?.Repo is { Length: > 0 } repoUrl ? await _repoStats.GetStatsAsync(repoUrl, context.RequestAborted) : null;
         var repoWidgetHtml = await RepoWidgetHtmlRenderer.BuildAsync(config?.Repo, repoStats, _iconsDir, _fallbackIconsDir, l);
-        var footerHtml = config?.Footer is { } footer
+        var footerNoteHtml = config?.Footer is { } footer
             ? $"<div class=\"content-footer\">{_markdown.ToHtml(ExpandFooterVariables(l.Label(footer), brandText, config?.Title))}</div>"
             : string.Empty;
+        var bottomNavHtml = config?.BottomNav is { } bottomNav
+            ? NavigationHtmlRenderer.BuildBottomNavHtml(bottomNav, basePath, l, route.Prefix)
+            : string.Empty;
+        var footerHtml = footerNoteHtml.Length + bottomNavHtml.Length == 0
+            ? string.Empty
+            : $"<div class=\"footer-bar{(config?.BottomNav is null ? "" : " footer-bar--split")}\">{footerNoteHtml}{bottomNavHtml}</div>";
 
         var lastUpdatedHtml = !isHomePage && config?.LastUpdated == true && page.ShowLastUpdated && page.LastModified is { } lastModified
             ? $"<div class=\"last-updated\">{LayoutProvider.HtmlEncode(l.LastUpdated)} {lastModified:yyyy-MM-dd}</div>"

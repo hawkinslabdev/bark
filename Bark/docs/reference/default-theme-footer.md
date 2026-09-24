@@ -21,7 +21,29 @@ description: The content footer, configured via footer in config.json
 }
 ```
 
-Without `footer`, no footer is rendered. There is no default text.
+Without `footer` or `bottomNav`, no footer is rendered. There is no default text.
+
+## Footer links
+
+`bottomNav` adds a row of links. Items use the `topNav` shape (`text`, `link`); dropdown `items` are ignored.
+
+```json
+{
+  "footer": "© {year} {brand}",
+  "bottomNav": [
+    { "text": "Privacy", "link": "/privacy" },
+    { "text": "GitHub", "link": "https://github.com/hawkinslabdev/bark" }
+  ]
+}
+```
+
+| `bottomNav` | Layout |
+|---|---|
+| omitted | `footer` text centred. |
+| `[]` | `footer` text left-aligned, no links. |
+| one or more items | `footer` text left-aligned, links right-aligned. Wraps below the text on narrow screens. |
+
+Internal links receive the base path and the current locale prefix. External links open in a new tab and carry an external-link icon. Link text passes through the locale string table, like `topNav`. The link list is a `<nav>` labelled by the `footerNavAria` locale string.
 
 ## Variables
 

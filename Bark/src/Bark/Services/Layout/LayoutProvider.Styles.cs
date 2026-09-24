@@ -519,19 +519,27 @@ public static partial class LayoutProvider
         .sidebar-link.is-active a {{
             color: var(--accent); background-color: var(--nav-active-bg); font-weight: 500;
         }}
-        .main-container {{
-            padding: 3rem 3rem 3rem 4rem;
+        .main-column {{
+            display: flex; flex-direction: column;
             flex: 1 1 auto; max-width: 960px;
             min-width: 0;
         }}
-        .toc-collapsed .main-container {{
+        .toc-collapsed .main-column {{
             max-width: 1200px;
+        }}
+        .main-container {{
+            padding: 3rem 3rem 3rem 4rem;
+            flex: 1 0 auto;
+            min-width: 0;
         }}
         .bark-home-layout {{
             grid-template-columns: 1fr;
         }}
         .bark-home-layout .sidebar-left {{
             display: none;
+        }}
+        .bark-home-layout .main-column {{
+            max-width: 100%;
         }}
         .bark-home-layout .main-container {{
             max-width: 100%;
@@ -1326,7 +1334,7 @@ public static partial class LayoutProvider
         .pagination .pagination-link {{
             display: inline-flex; align-items: flex-start; gap: 0.5rem;
             min-width: 0; max-width: 50%; min-height: 24px;
-            font-size: 0.875rem; font-weight: 600; line-height: 1.5;
+            font-size: 0.95rem; font-weight: 600; line-height: 1.5;
             color: var(--text-color); text-decoration: none; border-radius: 4px;
             transition: color 0.15s ease;
         }}
@@ -1455,12 +1463,34 @@ public static partial class LayoutProvider
             display: none;
         }}
         .site-footer {{
-            grid-column: -2 / -1;
-            border-top: 1px solid var(--border);
-            padding: 1.25rem 0 1.25rem 4rem;
+            padding: 0 3rem 1.25rem 4rem;
         }}
         .bark-home-layout .site-footer {{
-            padding-left: 0;
+            width: 100%; max-width: 960px; margin: 0 auto;
+            padding: 0 2rem 1.25rem;
+        }}
+        @media (min-width: 1500px) {{
+            .bark-home-layout .site-footer {{
+                max-width: 1180px;
+            }}
+        }}
+        .footer-bar {{
+            border-top: 1px solid var(--border); padding-top: 1.25rem;
+            display: flex; flex-wrap: wrap; align-items: center;
+            justify-content: center; gap: 0.5rem 1.5rem; text-align: center;
+        }}
+        .footer-bar--split {{
+            justify-content: space-between; text-align: left;
+        }}
+        .footer-nav {{
+            display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem;
+        }}
+        .footer-nav a {{
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            font-size: 0.8rem; color: var(--text-muted); text-decoration: none;
+        }}
+        .footer-nav a:hover {{
+            color: var(--text-color);
         }}
         .content-footer {{
             font-size: 0.8rem; color: var(--text-muted);
@@ -1502,8 +1532,8 @@ public static partial class LayoutProvider
             .toc-column {{
                 display: none;
             }}
-            .main-container,
-            .toc-collapsed .main-container {{
+            .main-column,
+            .toc-collapsed .main-column {{
                 max-width: 960px;
             }}
         }}
@@ -1515,7 +1545,7 @@ public static partial class LayoutProvider
                 padding: 2rem 0 2rem 1.5rem;
             }}
             .site-footer {{
-                padding-left: 1.5rem;
+                padding: 0 0 1.25rem 1.5rem;
             }}
         }}
         @media (min-width: 769px) and (max-width: 1279px) {{
@@ -1550,10 +1580,12 @@ public static partial class LayoutProvider
             .bark-home-layout .sidebar-left {{
                 display: block;
             }}
-            .main-container,
+            .main-container {{
+                padding: 2rem 1.5rem;
+            }}
             .site-footer,
             .bark-home-layout .site-footer {{
-                padding: 2rem 1.5rem;
+                padding: 0 1.5rem 2rem;
             }}
             .bark-hero {{
                 padding: 2.5rem 1.5rem 3rem;
@@ -1580,20 +1612,38 @@ public static partial class LayoutProvider
             .mobile-top-nav:has(+ .sidebar-social-links) {{
                 margin-bottom: 0; padding-bottom: 0; border-bottom: none;
             }}
-            .mobile-top-nav-link {{
-                display: block; padding: 0.5rem 0; font-size: 0.95rem;
-                font-weight: 500; color: var(--text-color); text-decoration: none;
+            .mobile-top-nav-link,
+            .mobile-top-nav-group summary {{
+                display: flex; align-items: center; gap: 0.4rem;
+                min-height: 44px; padding: 0 1rem; border-radius: 6px;
+                font-size: 0.875rem; font-weight: 600; line-height: 1.4;
+                color: var(--text-color); text-decoration: none;
+                transition: background-color 0.15s ease, color 0.15s ease;
+            }}
+            .mobile-top-nav-link:hover,
+            .mobile-top-nav-group summary:hover {{
+                background-color: var(--nav-hover-bg);
             }}
             .mobile-top-nav-link.active {{
-                color: var(--accent);
+                color: var(--accent); background-color: var(--nav-active-bg);
             }}
             .mobile-top-nav-group summary {{
-                padding: 0.5rem 0; font-size: 0.95rem; font-weight: 500;
-                color: var(--text-color); cursor: pointer; list-style: none;
+                cursor: pointer; list-style: none;
+            }}
+            .mobile-top-nav-group summary::-webkit-details-marker {{
+                display: none;
+            }}
+            .mobile-top-nav-group summary > span:first-child {{
+                flex: 1;
+            }}
+            .mobile-top-nav-group[open] > summary .caret-icon {{
+                transform: rotate(90deg);
             }}
             .mobile-top-nav-group .mobile-top-nav-link {{
-                padding-left: 1rem;
-                font-weight: 400;
+                font-weight: 400; color: var(--text-muted);
+            }}
+            .mobile-top-nav-group .mobile-top-nav-link.active {{
+                color: var(--accent);
             }}
             .sidebar-left {{
                 position: fixed; top: var(--drawer-top); left: 0;

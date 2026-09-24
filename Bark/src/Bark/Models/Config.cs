@@ -50,6 +50,8 @@ public class Config
 
     public List<SocialLink>? SocialLinks { get; set; }
 
+    public List<TopNavItem>? BottomNav { get; set; }
+
     public PageControlsConfig? PageControls { get; set; }
 
     /// <summary>Site-wide "Last updated" stamp toggle (uses file mtime). Off by default; a page can opt out via <c>lastUpdated: false</c>.</summary>

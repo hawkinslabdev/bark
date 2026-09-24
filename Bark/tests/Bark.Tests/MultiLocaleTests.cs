@@ -64,6 +64,11 @@ public sealed class MultiLocaleWebApplicationFactory : WebApplicationFactory<Pro
               },
               "brand": "Docs",
               "footer": "Written in English.",
+              "bottomNav": [
+                { "text": "Deploy", "link": "/guide/deploy" },
+                { "text": "Source", "link": "https://example.com/repo" },
+                { "text": "", "link": "/ignored" }
+              ],
               "promo": "**New:** an English announcement."
             }
             """);
@@ -98,6 +103,20 @@ public sealed class MultiLocaleTests : IClassFixture<MultiLocaleWebApplicationFa
         Assert.Contains("Nederlandse startpagina", html);
         Assert.Contains("lang=\"nl\"", html);
         Assert.DoesNotContain("translation-notice", html);
+    }
+
+    [Fact]
+    public async Task BottomNav_SplitsTheFooterAndLocalizesInternalLinks()
+    {
+        var client = _factory.CreateClient();
+        var en = await client.GetStringAsync("/guide/install");
+        var nl = await client.GetStringAsync("/nl/guide/install");
+
+        Assert.Contains("class=\"footer-bar footer-bar--split\"", en);
+        Assert.Contains("<a href=\"/guide/deploy/\">Deploy</a>", en);
+        Assert.Contains("<a href=\"https://example.com/repo\" target=\"_blank\" rel=\"noopener noreferrer\">Source", en);
+        Assert.DoesNotContain("/ignored", en);
+        Assert.Contains("<a href=\"/nl/guide/deploy/\">Uitrollen</a>", nl);
     }
 
     [Fact]
@@ -409,4 +428,11 @@ public sealed class MultiLocaleTests : IClassFixture<MultiLocaleWebApplicationFa
         Assert.Contains("/guide/install/", text);
         Assert.DoesNotContain("/nl/", text);
     }
+}
+
+public sealed class BottomNavRendererTests
+{
+    [Fact]
+    public void EmptyBottomNav_RendersNoNavLandmark() =>
+        Assert.Equal(string.Empty, Bark.Services.Rendering.NavigationHtmlRenderer.BuildBottomNavHtml([], basePath: ""));
 }

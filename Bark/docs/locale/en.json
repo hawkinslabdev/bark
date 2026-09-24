@@ -3,6 +3,7 @@
   "navToggle": "Toggle navigation menu",
   "sidebarAria": "Documentation navigation",
   "topNavAria": "Main navigation",
+  "footerNavAria": "Footer navigation",
   "breadcrumbAria": "Breadcrumb",
   "breadcrumbHome": "Home",
   "themeToggle": "Toggle dark mode",
