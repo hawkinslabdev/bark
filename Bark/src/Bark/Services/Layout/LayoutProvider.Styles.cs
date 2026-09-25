@@ -24,6 +24,7 @@ public static partial class LayoutProvider
         html {{
             accent-color: var(--accent);
             caret-color: var(--accent);
+            -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
             scrollbar-color: color-mix(in oklab, var(--text-muted) 45%, transparent) transparent;
         }}
         ::selection {{
@@ -1582,6 +1583,17 @@ public static partial class LayoutProvider
             }}
             .main-container {{
                 padding: 2rem 1.5rem;
+            }}
+            pre {{
+                padding: 1rem; font-size: 0.8125rem;
+            }}
+            .content .line.highlighted,
+            .content .line.diff {{
+                margin: 0 -1rem; padding: 0 1rem; width: calc(100% + 2rem);
+            }}
+            .content .line-numbers-mode .line.highlighted,
+            .content .line-numbers-mode .line.diff {{
+                margin-left: -3.25rem; padding-left: 3.25rem; width: calc(100% + 4.25rem);
             }}
             .site-footer,
             .bark-home-layout .site-footer {{
