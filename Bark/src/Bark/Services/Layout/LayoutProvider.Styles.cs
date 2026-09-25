@@ -1022,6 +1022,7 @@ public static partial class LayoutProvider
         .content h1 code, .content h2 code, .content h3 code,
         .content h4 code, .content h5 code, .content h6 code {{
             font-size: 0.9em; color: inherit;
+            background-color: transparent; padding: 0;
         }}
         .content div[class^=""language-""] {{
             --line-start: 0;
