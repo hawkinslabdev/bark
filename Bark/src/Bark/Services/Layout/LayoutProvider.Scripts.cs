@@ -180,6 +180,11 @@ public static partial class LayoutProvider
                 }}, {{ passive: true }});
                 sidebarLeft.addEventListener('touchend', function() {{ touchStartX = null; }});
 
+                // Full page loads reset scrollTop; the inline script after the sidebar restores it before first paint.
+                window.addEventListener('pagehide', function() {{
+                    try {{ sessionStorage.setItem('bark-sidebar-scroll', String(sidebarLeft.scrollTop)); }} catch (_) {{}}
+                }});
+
                 var activeNavItem = sidebarLeft.querySelector('.nav-item.active, .sidebar-link.is-active');
                 if (activeNavItem) {{
                     var itemRect = activeNavItem.getBoundingClientRect();

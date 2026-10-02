@@ -99,12 +99,14 @@ public static partial class LayoutProvider
             <span class=""search-trigger-label"">{HtmlEncode(l.SearchTrigger)}</span>
             <kbd class=""search-trigger-kbd"" id=""search-trigger-kbd"" aria-hidden=""true"">Ctrl K</kbd>
         </button>";
+        var nonceAttr = nonce is { Length: > 0 } ? $" nonce=\"{nonce}\"" : "";
         var sidebarLeftHtml = $@"
         <aside class=""sidebar-left"" id=""sidebar-left"" tabindex=""-1"" aria-label=""{HtmlEncode(l.SidebarAria)}"">
             {mobileTopNavHtml}
             {drawerNavigationHtml}
             {mobileSocialHtml}
-        </aside>";
+        </aside>
+        <script{nonceAttr}>try{{var s=sessionStorage.getItem('bark-sidebar-scroll');if(s)document.getElementById('sidebar-left').scrollTop=+s;}}catch(e){{}}</script>";
         var breadcrumbAndTocHtml = isHomePage ? "" : $@"
             <nav class=""breadcrumb"" aria-label=""{HtmlEncode(l.BreadcrumbAria)}"">
                 {breadcrumbHtml}
@@ -151,7 +153,6 @@ public static partial class LayoutProvider
         var activeTheme = theme ?? ThemeRegistry.Default;
         var themeTokenCss = ThemeCssBuilder.BuildTokenCss(activeTheme, enableDarkMode);
 
-        var nonceAttr = nonce is { Length: > 0 } ? $" nonce=\"{nonce}\"" : "";
         // Pre-<style> so no transition can fire; without a stored theme, data-theme stays unset so CSS follows live OS changes.
         var themeInitScript = toggleEnabled
             ? "<script" + nonceAttr + ">(function(){try{var t=localStorage.getItem('bark-theme');if(t==='dark'||t==='light'){var r=document.documentElement;r.setAttribute('data-theme',t);r.style.colorScheme=t;}}catch(e){}})();</script>"
