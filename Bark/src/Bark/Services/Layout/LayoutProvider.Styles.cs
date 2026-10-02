@@ -1274,7 +1274,7 @@ public static partial class LayoutProvider
             border-bottom: 1px solid var(--border);
             scroll-margin-top: calc(var(--topbar-height) + 1rem);
         }}
-        .content p:not(.bark-hero-tagline):not(.bark-feature-details):not(.bark-hero-name):not(.custom-block-title) {{
+        .content p:not(:where(.bark-hero-tagline, .bark-feature-details, .bark-hero-name, .custom-block-title)) {{
             color: var(--text-color);
             margin-bottom: 1.25rem;
             text-decoration-color: var(--border);
@@ -1525,8 +1525,8 @@ public static partial class LayoutProvider
             color: var(--text-color);
             background-color: color-mix(in oklab, var(--block) var(--callout-tint), var(--bg-color));
         }}
-        .content .custom-block p:not(.custom-block-title) {{
-            margin: 0;
+        .content .custom-block > :last-child {{
+            margin-bottom: 0;
         }}
         .content .custom-block.tip {{
             --block: var(--alert-tip);
