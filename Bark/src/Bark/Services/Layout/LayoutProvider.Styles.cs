@@ -931,6 +931,43 @@ public static partial class LayoutProvider
             color: var(--text-muted);
             line-height: 1.55;
         }}
+        .content .bark-cards {{
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0 2rem;
+        }}
+        .content .bark-cards[style*=""--cols""] {{
+            grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+        }}
+        @media (max-width: 640px) {{
+            .content .bark-cards[style*=""--cols""] {{
+                grid-template-columns: 1fr;
+            }}
+        }}
+        .content .bark-cards .bark-feature {{
+            display: block;
+            padding: 1.25rem 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: transparent;
+            transition: border-color 0.15s ease;
+        }}
+        .content .bark-cards a.bark-feature:hover {{
+            border-color: var(--accent);
+        }}
+        .content .bark-cards a.bark-feature:hover .bark-feature-title {{
+            color: inherit;
+        }}
+        .content .bark-cards .bark-feature-title {{
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }}
+        .content .bark-cards .bark-feature-details {{
+            margin-top: 0.35rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }}
         .page-controls {{
             position: relative;
             margin-left: auto;
@@ -1274,7 +1311,7 @@ public static partial class LayoutProvider
             border-bottom: 1px solid var(--border);
             scroll-margin-top: calc(var(--topbar-height) + 1rem);
         }}
-        .content p:not(:where(.bark-hero-tagline, .bark-feature-details, .bark-hero-name, .custom-block-title)) {{
+        .content p:not(:where(.bark-hero-tagline, .bark-feature-title, .bark-feature-details, .bark-hero-name, .custom-block-title)) {{
             color: var(--text-color);
             margin-bottom: 1.25rem;
             text-decoration-color: var(--border);

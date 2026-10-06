@@ -55,4 +55,15 @@ public sealed class ContainerRendererTests
         Assert.DoesNotContain($"{options.BaseUrl}/sharp.{options.Format}", html);
         Assert.Contains("data-title=\"csharp\"", html);
     }
+
+    [Theory]
+    [InlineData("3", " style=\"--cols:3\"")]
+    [InlineData("", "")]
+    [InlineData("9", "")]
+    [InlineData("x", "")]
+    public void Cards_ColumnArgument_SetsColsOnlyForOneToSix(string arg, string expectedAttr)
+    {
+        var (html, _, _, _) = new MarkdownService().Parse($"::: cards {arg}\n- [A](/a)\n:::\n");
+        Assert.Contains($"<div class=\"bark-features bark-cards\"{expectedAttr}>", html);
+    }
 }

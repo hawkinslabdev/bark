@@ -4,10 +4,11 @@ using Markdig.Extensions.CustomContainers;
 using Markdig.Renderers;
 using Markdig.Renderers.Html;
 using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
 
 namespace Bark.Services.MarkdownExtensions;
 
-/// <summary>Renders <c>::: name</c> ... <c>:::</c> blocks: tip/info/warning/danger/details and code-group.</summary>
+/// <summary>Renders <c>::: name</c> ... <c>:::</c> blocks: tip/info/warning/danger/details, code-group and cards.</summary>
 public sealed partial class ContainerRenderer : HtmlObjectRenderer<CustomContainer>
 {
     private static readonly Dictionary<string, string> DefaultTitles = new(StringComparer.OrdinalIgnoreCase)
@@ -37,6 +38,12 @@ public sealed partial class ContainerRenderer : HtmlObjectRenderer<CustomContain
         if (name == "code-group")
         {
             WriteCodeGroup(renderer, obj);
+            return;
+        }
+
+        if (name == "cards")
+        {
+            WriteCards(renderer, obj);
             return;
         }
 
@@ -78,6 +85,54 @@ public sealed partial class ContainerRenderer : HtmlObjectRenderer<CustomContain
             renderer.WriteLine("</div>");
         }
 
+        renderer.EnsureLine();
+    }
+
+    // Leading link or bold text: card title. Remaining content: card body.
+    private static void WriteCards(HtmlRenderer renderer, CustomContainer obj)
+    {
+        renderer.EnsureLine();
+        renderer.Write("<div class=\"bark-features bark-cards\"");
+        if (int.TryParse(obj.Arguments, out var cols) && cols is >= 1 and <= 6)
+            renderer.Write(" style=\"--cols:").Write(cols.ToString()).Write('"');
+        renderer.Write('>');
+
+        foreach (var item in obj.OfType<ListBlock>().SelectMany(list => list.OfType<ListItemBlock>()))
+        {
+            var lead = (item.FirstOrDefault() as ParagraphBlock)?.Inline;
+            Inline? title = lead?.FirstChild is LinkInline { IsImage: false } or EmphasisInline { DelimiterCount: 2 } ? lead.FirstChild : null;
+            var link = title as LinkInline;
+
+            if (link is not null)
+                renderer.Write("<a class=\"bark-feature\" href=\"").WriteEscapeUrl(link.GetDynamicUrl?.Invoke() ?? link.Url).Write("\">");
+            else
+                renderer.Write("<div class=\"bark-feature\">");
+
+            if (title is ContainerInline titleInline)
+            {
+                renderer.Write("<p class=\"bark-feature-title\">");
+                renderer.WriteChildren(titleInline);
+                renderer.Write("</p>");
+            }
+
+            var body = title?.NextSibling ?? lead?.FirstChild;
+            while (body is LineBreakInline)
+                body = body.NextSibling;
+            if (body is not null)
+            {
+                renderer.Write("<p class=\"bark-feature-details\">");
+                for (; body is not null; body = body.NextSibling)
+                    renderer.Write(body);
+                renderer.Write("</p>");
+            }
+
+            foreach (var block in item.Skip(1))
+                renderer.Render(block);
+
+            renderer.Write(link is not null ? "</a>" : "</div>");
+        }
+
+        renderer.Write("</div>");
         renderer.EnsureLine();
     }
 

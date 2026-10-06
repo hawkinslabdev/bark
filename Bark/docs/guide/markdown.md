@@ -208,6 +208,43 @@ Quick setup: [Getting Started](/guide/getting-started).
 
 A blank line is required after the opening `<div>` and before the closing `</div>`; otherwise the content is treated as raw HTML and Markdown inside is not rendered.
 
+## Cards
+
+`::: cards` renders a Markdown list as a grid of bordered cards. Each list item is one card.
+
+| Item content | Card output |
+|---|---|
+| Leading link `[Title](/path)` | Card title. The card is a link to `/path`. |
+| Leading bold text `**Title**` | Card title. The card has no link. |
+| Remaining text and blocks | Card body. |
+
+The optional argument sets the column count: `::: cards 3`. Accepted values: `1` to `6`. Other values are ignored.
+
+- If no argument is set: the content width sets the column count. Minimum card width: `260px`.
+- If the viewport is narrower than `640px`: the grid has one column.
+
+```md
+::: cards 2
+- [🙋 How to ask for help](/guide/getting-started)
+  Read this guide to learn how to ask for help.
+- [🧩 Configuration](/guide/configuration)
+  Every `config.json` option.
+- **📖 No link**
+  A card without a target.
+:::
+```
+
+Renders as:
+
+::: cards 2
+- [🙋 How to ask for help](/guide/getting-started)
+  Read this guide to learn how to ask for help.
+- [🧩 Configuration](/guide/configuration)
+  Every `config.json` option.
+- **📖 No link**
+  A card without a target.
+:::
+
 ## Badges
 
 Inline labels written as HTML; `<badge>` is styled by the Bark stylesheet. See [Badge](/reference/default-theme-badge).
