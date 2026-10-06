@@ -124,7 +124,7 @@ public sealed class Localization
         ["apiInvalidJson"] = "Invalid JSON.",
         ["apiCookieBlocked"] = "Not sent. Browsers block the Cookie header.",
         ["apiResponseHeaders"] = "Response headers",
-        ["apiCredentialsNote"] = "Credentials are kept in memory only. Reloading the page clears them.",
+        ["apiCredentialsNote"] = "Credentials are stored in-memory only and cleared upon page refresh.",
         ["apiTime"] = "{0} ms",
         ["apiSize"] = "{0} bytes"
     };
