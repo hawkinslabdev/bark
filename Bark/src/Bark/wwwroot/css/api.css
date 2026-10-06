@@ -1,5 +1,3 @@
-/* API reference pages: endpoint bar, attribute lists, sample panels, playground dialog. */
-
 .bark-api-layout .main-column {
     max-width: 1320px;
 }
@@ -8,8 +6,6 @@
     --api-radius: 8px;
     --api-hover-bg: color-mix(in oklab, var(--text-color) 7%, transparent);
 }
-
-/* Columns: reference left, samples right, both from the top of the page */
 
 .api-columns {
     display: grid;
@@ -64,8 +60,6 @@
     margin-top: 1.5rem;
 }
 
-/* Status pills (method pills are global: the sidebar shows them on every page) */
-
 .api-status {
     display: inline-flex;
     align-items: center;
@@ -82,8 +76,6 @@
 .api-status[data-status="3"] { --status: var(--alert-note); }
 .api-status[data-status="4"] { --status: var(--alert-warning); }
 .api-status[data-status="5"] { --status: var(--alert-caution); }
-
-/* Endpoint bar */
 
 .api-endpoint {
     display: flex;
@@ -145,8 +137,6 @@
     height: 0.75rem;
 }
 
-/* Sections */
-
 .api-section {
     margin-top: 3rem;
 }
@@ -206,8 +196,6 @@
     margin: 0;
     color: inherit;
 }
-
-/* Attribute lists */
 
 .api-field {
     padding-top: 1.25rem;
@@ -330,8 +318,6 @@ details[open] > summary > .api-chevron {
     margin-top: 1.1rem;
     border-top: 1px solid var(--border);
 }
-
-/* Sample panels */
 
 .api-panel {
     display: flex;
@@ -475,8 +461,6 @@ details[open] > summary > .api-chevron {
         max-height: 30rem;
     }
 }
-
-/* Playground dialog */
 
 .api-playground {
     margin: auto;
@@ -628,15 +612,19 @@ select.api-pg-server {
         gap: 1.25rem;
         align-items: start;
     }
+    .api-pg-label {
+        padding-top: 0.55rem;
+    }
 }
 .api-pg-label {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 0.35rem;
+    align-items: baseline;
+    gap: 0.25rem 0.45rem;
 }
 .api-pg-label .api-pg-desc {
     flex-basis: 100%;
+    margin-top: 0.15rem;
 }
 .api-pg-name {
     font-family: var(--font-mono);
@@ -652,6 +640,9 @@ select.api-pg-server {
     font-size: 0.82rem;
     color: var(--text-color);
     background: var(--bg-color);
+}
+.api-pg-secret:not(:placeholder-shown) {
+    -webkit-text-security: disc;
 }
 .api-pg-input::placeholder {
     color: color-mix(in oklab, var(--text-muted) 75%, transparent);
@@ -689,8 +680,6 @@ select.api-pg-server {
 .api-pg-result .api-panel-body {
     max-height: none;
 }
-
-/* Code editor: a transparent textarea over a highlighted copy of its text */
 
 .api-editor {
     position: relative;
@@ -798,13 +787,33 @@ select.api-pg-server {
     }
     .api-pg-head {
         flex-wrap: wrap;
+        padding: 0.75rem;
     }
     .api-pg-url {
-        order: 3;
-        flex-basis: 100%;
+        flex-basis: 0;
+        flex-wrap: wrap;
+        row-gap: 0.2rem;
+        white-space: normal;
+    }
+    .api-pg-url .api-pg-server + .api-pg-path {
+        margin-left: 0;
+    }
+    .api-pg-path {
+        overflow-wrap: anywhere;
     }
     .api-pg-send {
-        margin-left: auto;
+        order: 3;
+        flex-basis: 100%;
+        justify-content: center;
+        padding-block: 0.65rem;
+    }
+    .api-pg-body {
+        padding-inline: 0.75rem;
+    }
+    .api-pg-input,
+    .api-editor-view,
+    .api-editor-input {
+        font-size: 16px;
     }
 }
 

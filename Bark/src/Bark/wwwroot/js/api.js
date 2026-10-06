@@ -1,5 +1,3 @@
-// API reference pages: sample panels, response switching and the playground.
-// Playground requests go from the browser to the API; Bark never proxies them.
 (function () {
     'use strict';
 
@@ -24,7 +22,6 @@
         return node;
     }
 
-    // Token colors of Bark's github-light/github-dark highlighter, so browser-rendered JSON matches server-rendered JSON.
     var BASE_STYLE = '--shiki-light:#24292e;--shiki-dark:#e1e4e8;';
     var TOKEN_STYLE = {
         key: '--shiki-light:#005CC5;--shiki-dark:#79B8FF',
@@ -67,7 +64,6 @@
         return pre;
     }
 
-    // A Bark code block; copy and download come from Bark's own code block script.
     function codeBlock(text, json) {
         var code = el('code');
         fillCode(code, text, json);
@@ -78,7 +74,6 @@
         return block;
     }
 
-    // Language dropdowns: one choice shared by every panel on the page. Nothing is persisted.
     function setIcon(select) {
         var option = select.options[select.selectedIndex];
         var label = select.closest('.api-lang');
@@ -113,11 +108,9 @@
         select.addEventListener('change', function () { applyLang(select.value); });
     });
 
-    // Response status: tabs in the example panel and the dropdown in the Response section select together.
     var statusSelect = root.querySelector('[data-api-status]');
     var contentTypeLabel = root.querySelector('[data-api-content-type]');
     var statusPanel = root.querySelector('[data-api-responses]');
-    // Captured before Bark's code block script runs, so the playground copy gets live buttons of its own.
     var statusPanelSource = statusPanel ? statusPanel.cloneNode(true) : null;
 
     function wireStatusTabs(panel, onSelect) {
@@ -162,7 +155,6 @@
         if (selectStatusTab) selectStatusTab(statusSelect.value);
     });
 
-    // Playground.
     var dataEl = root.querySelector('.bark-api-data');
     var tryButtons = root.querySelectorAll('[data-api-try]');
     if (!dataEl || !tryButtons.length) return;
@@ -172,7 +164,6 @@
     var L = data.labels;
     var dialog = null;
     var controller = null;
-    // Credentials live in memory only: gone on reload or navigation, never written to browser storage.
     var state = { values: {}, auth: {} };
 
     var uid = 0;
@@ -204,13 +195,12 @@
             return select;
         }
         var node = el('input', {
-            class: 'api-pg-input',
-            type: options.secret ? 'password' : 'text',
+            class: 'api-pg-input' + (options.secret ? ' api-pg-secret' : ''),
+            type: 'text',
             value: value || '',
             placeholder: options.placeholder || '',
-            autocomplete: options.secret ? 'new-password' : 'off',
+            autocomplete: 'off',
             spellcheck: 'false',
-            // Tokens typed here are not site logins; keep password managers from offering to fill or save them.
             'data-bwignore': 'true',
             'data-1p-ignore': 'true',
             'data-lpignore': 'true',
@@ -221,7 +211,6 @@
         return node;
     }
 
-    // Textarea over a highlighted copy of its own text; the textarea keeps native editing, selection and undo.
     function editor(value, onInput, rows, json, label) {
         var code = el('code');
         var view = shikiPre({ class: 'api-editor-view', 'aria-hidden': 'true' });
