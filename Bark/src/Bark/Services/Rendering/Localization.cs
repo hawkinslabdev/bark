@@ -76,7 +76,57 @@ public sealed class Localization
         ["translationStale"] = "The original of this page changed after this translation was written, so parts of it may be out of date.",
         ["translationStaleLink"] = "Compare with the original",
         ["translationMachine"] = "This page was translated by a machine, so some sentences may read badly. Corrections are welcome.",
-        ["repoWidgetAria"] = "{0} repository"
+        ["repoWidgetAria"] = "{0} repository",
+        ["apiTryIt"] = "Try it",
+        ["apiWebhook"] = "Webhook",
+        ["apiDeprecated"] = "Deprecated",
+        ["apiAuthorizations"] = "Authorizations",
+        ["apiPathParameters"] = "Path parameters",
+        ["apiQueryParameters"] = "Query parameters",
+        ["apiQueryString"] = "Query string",
+        ["apiHeaders"] = "Headers",
+        ["apiCookies"] = "Cookies",
+        ["apiArguments"] = "Arguments",
+        ["apiBody"] = "Body",
+        ["apiResponse"] = "Response",
+        ["apiAttributes"] = "Attributes",
+        ["apiRequired"] = "required",
+        ["apiReadOnly"] = "read-only",
+        ["apiShowChildren"] = "Show child attributes",
+        ["apiHideChildren"] = "Hide child attributes",
+        ["apiAllowed"] = "Available options:",
+        ["apiDefault"] = "Default:",
+        ["apiExample"] = "Example:",
+        ["apiExamplesAria"] = "Request and response examples",
+        ["apiRequestExample"] = "Request",
+        ["apiResponseExample"] = "Response",
+        ["apiPayload"] = "Payload",
+        ["apiGroupEndpoints"] = "Endpoints",
+        ["apiGroupWebhooks"] = "Webhooks",
+        ["apiGroupObjects"] = "Objects",
+        ["apiGroupQueries"] = "Queries",
+        ["apiGroupMutations"] = "Mutations",
+        ["apiGroupSubscriptions"] = "Subscriptions",
+        ["apiGroupTypes"] = "Types",
+        ["apiGroupOperations"] = "Operations",
+        ["apiStatusCode"] = "Status code",
+        ["apiLanguage"] = "Language",
+        ["apiBearerDescription"] = "Bearer authentication header of the form `Bearer <token>`.",
+        ["apiBasicDescription"] = "Basic authentication header of the form `Basic <encoded-value>`. `<encoded-value>` is the base64-encoded string `username:password`.",
+        ["apiSend"] = "Send",
+        ["apiSending"] = "Sending…",
+        ["apiClose"] = "Close",
+        ["apiServer"] = "Server",
+        ["apiVariables"] = "Variables",
+        ["apiQuery"] = "Query",
+        ["apiResponseEmpty"] = "Send the request to display the response.",
+        ["apiRequestFailed"] = "Request failed. The API must allow this origin (CORS). The server must be listed in the spec.",
+        ["apiInvalidJson"] = "Invalid JSON.",
+        ["apiCookieBlocked"] = "Not sent. Browsers block the Cookie header.",
+        ["apiResponseHeaders"] = "Response headers",
+        ["apiCredentialsNote"] = "Credentials are kept in memory only. Reloading the page clears them.",
+        ["apiTime"] = "{0} ms",
+        ["apiSize"] = "{0} bytes"
     };
 
     private readonly IReadOnlyDictionary<string, string> _map;
@@ -122,6 +172,9 @@ public sealed class Localization
 
     private string Format(string key, params object[] args) =>
         string.Format(CultureInfo.InvariantCulture, this[key], args);
+
+    /// <summary>Localized string by key, for renderers with many labels.</summary>
+    public string Text(string key) => this[key];
 
     public string SkipToContent => this["skipToContent"];
     public string NavToggle => this["navToggle"];

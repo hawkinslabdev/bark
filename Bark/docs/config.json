@@ -90,6 +90,10 @@
           {
             "title": "Assets",
             "path": "guide/assets"
+          },
+          {
+            "title": "API's",
+            "path": "guide/api-reference-pages"
           }
         ]
       },
@@ -188,6 +192,43 @@
                 "path": "reference/default-theme-badge"
               }
             ]
+          }
+        ]
+      }
+    ],
+    "/examples/api/": [
+      {
+        "title": "Start",
+        "items": [
+          {
+            "title": "Example API",
+            "path": "examples/api"
+          }
+        ]
+      },
+      {
+        "title": "Tasks",
+        "items": [
+          {
+            "title": "Get task",
+            "path": "examples/api/get-task"
+          },
+          {
+            "title": "Update task",
+            "path": "examples/api/update-task"
+          }
+        ]
+      },
+      {
+        "title": "Objects",
+        "items": [
+          {
+            "title": "TaskUpdate",
+            "path": "examples/api/task-update"
+          },
+          {
+            "title": "Echo",
+            "path": "examples/api/echo"
           }
         ]
       }

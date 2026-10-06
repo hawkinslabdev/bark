@@ -14,7 +14,8 @@ public sealed record MarkdownParseResult(
     DateTime? FrontmatterDate = null,
     bool ShowToc = true,
     string? Image = null,
-    bool MachineTranslated = false)
+    bool MachineTranslated = false,
+    FrontMatter? FrontMatter = null)
 {
     public void Deconstruct(out string html, out string? title, out string? description, out List<HeadingInfo> headings)
     {

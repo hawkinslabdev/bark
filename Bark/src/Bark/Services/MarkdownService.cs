@@ -128,7 +128,8 @@ public sealed partial class MarkdownService
             frontMatter?.Updated ?? frontMatter?.Date,
             frontMatter?.Toc ?? true,
             frontMatter?.Image,
-            frontMatter?.MachineTranslated ?? false);
+            frontMatter?.MachineTranslated ?? false,
+            frontMatter);
     }
 
     // Attributes `{...}` may set. Anything added here is contributor-writable: no handlers, no href/src.

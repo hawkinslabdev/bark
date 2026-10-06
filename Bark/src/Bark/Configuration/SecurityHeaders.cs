@@ -3,9 +3,7 @@ using System.Text;
 
 namespace Bark.Configuration;
 
-/// <summary>
-/// Derives an unpredictable CSP nonce from the ETag, so it stays unique per response and consistent across 304s.
-/// </summary>
+/// <summary>Derives an unpredictable CSP nonce from the ETag, so it stays unique per response and consistent across 304s.</summary>
 public static class CspNonce
 {
     private static readonly byte[] Key = RandomNumberGenerator.GetBytes(32);
@@ -83,9 +81,25 @@ public static class SecurityHeaders
         return string.Join(";", result);
     }
 
-    /// <summary>
-    /// Allows unnonced <c>&lt;style&gt;</c> elements, for the diagram pages where Mermaid injects its own; scripts stay nonce-only.
-    /// </summary>
+    /// <summary>Adds origins to connect-src only, for API pages whose playground calls the API from the browser.</summary>
+    public static string WithConnectSources(string csp, IReadOnlyList<string>? origins)
+    {
+        if (origins is not { Count: > 0 })
+            return csp;
+        var extra = " " + string.Join(' ', origins);
+        var directives = csp.Split(';');
+        for (var i = 0; i < directives.Length; i++)
+        {
+            if (directives[i].TrimStart().StartsWith("connect-src ", StringComparison.Ordinal))
+            {
+                directives[i] = directives[i].TrimEnd() + extra;
+                return string.Join(";", directives);
+            }
+        }
+        return csp.TrimEnd().TrimEnd(';') + "; connect-src 'self'" + extra;
+    }
+
+    /// <summary>Allows unnonced <c>&lt;style&gt;</c> elements, for the diagram pages where Mermaid injects its own; scripts stay nonce-only.</summary>
     public static string WithInlineStyleElements(string csp)
     {
         var directives = csp.Split(';');
@@ -102,9 +116,7 @@ public static class SecurityHeaders
         return csp + "; style-src-elem 'self' 'unsafe-inline'";
     }
 
-    /// <summary>
-    /// Appends or swaps per-response nonces into script-src/style-src CSP directives to avoid breaking inline scripts.
-    /// </summary>
+    /// <summary>Appends or swaps per-response nonces into script-src/style-src CSP directives to avoid breaking inline scripts.</summary>
     public static string BuildNonceCsp(string baseCsp, string nonce)
     {
         var noncePart = $"'nonce-{nonce}'";

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -6,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Channels;
 using Bark.Configuration;
 using Bark.Models;
+using Bark.Services.Api;
 using Bark.Services.Extensions;
 using Bark.Services.Rendering;
 
@@ -67,6 +69,10 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
 
     public Config? SiteConfig => _snapshot.Config;
     public ExtensionSet Extensions => _snapshot.Extensions;
+
+    /// <summary>HTTP method of the API page at <paramref name="path"/>, for sidebar badges; null for other pages.</summary>
+    public string? ApiMethodOf(string path) =>
+        _snapshot.Pages.TryGetValue(path, out var page) ? page.ApiMethod : null;
     public long BuildVersion { get; private set; }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -83,8 +89,10 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
             {
                 IncludeSubdirectories = true,
                 Filter = "*.md",
-                EnableRaisingEvents = true
             };
+            foreach (var extension in ApiSpecLoader.OpenApiExtensions.Concat(ApiSpecLoader.GraphQlExtensions).Concat(ApiSpecLoader.ODataExtensions))
+                _watcher.Filters.Add("*" + extension);
+            _watcher.EnableRaisingEvents = true;
             _watcher.Changed += OnFileChanged;
             _watcher.Created += OnFileChanged;
             _watcher.Deleted += OnFileChanged;
@@ -214,6 +222,100 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
         }
     }
 
+    private sealed record ApiPageResult(string Html, string? Title, IReadOnlyList<string>? ConnectSources, bool Failed, string? Method = null);
+
+    private ApiPageResult RenderApiPage(ApiSpecLoader specs, string api, MarkdownParseResult parsed, string relativePath, Localization localization)
+    {
+        var frontMatter = parsed.FrontMatter!;
+        try
+        {
+            var model = specs.Load(api, relativePath);
+            var html = ApiPageRenderer.Render(model, parsed.Html,
+                new ApiPageRenderer.Options(localization, _markdown.ToHtml, frontMatter.Title, frontMatter.Server, frontMatter.Auth));
+            var method = model.Operation is { } op ? (op.Webhook ? "webhook" : op.Method) : null;
+            return new ApiPageResult(html, frontMatter.Title ?? ApiPageRenderer.DefaultTitle(model), ApiPageRenderer.Origins(model, frontMatter.Server), false, method);
+        }
+        catch (ApiSpecException ex)
+        {
+            _logger.LogWarning("API page {Path}: {Message}", relativePath, ex.Message);
+            var error = $"<div class=\"danger custom-block\"><p class=\"custom-block-title\">API</p><p>{WebUtility.HtmlEncode(ex.Message)}</p></div>";
+            return new ApiPageResult(error + parsed.Html, null, null, true);
+        }
+    }
+
+    [GeneratedRegex("(?<=[a-z0-9])(?=[A-Z])")]
+    private static partial Regex CamelBoundary();
+
+    private sealed record ApiSection(string RelativePath, string PagePath, string Spec, string LocalePrefix, string Title, DateTime LastModified, Localization Localization, string? Server, string? Auth);
+
+    // One page per catalog entry unless a Markdown file already has that path, plus the folder sidebar unless config.json defines one.
+    private void AddApiSection(ApiSection section, ApiSpecLoader specs, Dictionary<string, DocumentationPage> pageMap, List<DocumentationPage> pages, Config config)
+    {
+        (string SpecKey, IReadOnlyList<ApiCatalogEntry> Entries) catalog;
+        try
+        {
+            catalog = specs.Catalog(section.Spec, section.RelativePath);
+        }
+        catch (ApiSpecException ex)
+        {
+            _logger.LogWarning("API section {Path}: {Message}", section.RelativePath, ex.Message);
+            return;
+        }
+
+        var l = section.Localization;
+        var dir = Path.GetDirectoryName(section.RelativePath)?.Replace('\\', '/') ?? "";
+        var slugs = new HashSet<string>(StringComparer.Ordinal);
+        var groups = new List<NavEntry>();
+        foreach (var entry in catalog.Entries)
+        {
+            var baseSlug = MarkdownService.Slugify(CamelBoundary().Replace(entry.Slug, "-")) is { Length: > 0 } s ? s : "page";
+            var slug = baseSlug;
+            for (var n = 2; !slugs.Add(slug); n++)
+                slug = $"{baseSlug}-{n}";
+
+            var relativePath = dir.Length == 0 ? $"{slug}.md" : $"{dir}/{slug}.md";
+            var pagePath = PagePath.FromFile(relativePath);
+            if (!pageMap.TryGetValue(pagePath, out var page))
+            {
+                var api = $"{section.Spec} {entry.Selector}";
+                // The index page's server and auth apply to every generated page; GraphQL and OData specs carry no server.
+                var frontMatter = $"api: {api}\n"
+                    + (section.Server is { Length: > 0 } server ? $"server: {server}\n" : "")
+                    + (section.Auth is { Length: > 0 } auth ? $"auth: {auth}\n" : "");
+                var parsed = _markdown.Parse($"---\n{frontMatter}---\n", entry.Title, filePath: relativePath, localePrefix: section.LocalePrefix);
+                var rendered = RenderApiPage(specs, api, parsed, relativePath, l);
+                page = new DocumentationPage(
+                    Path: pagePath,
+                    Title: rendered.Title ?? entry.Title,
+                    HtmlContent: VersionAssets(WrapTables(rendered.Html)),
+                    LastModified: section.LastModified,
+                    Headings: parsed.Headings,
+                    Layout: rendered.Failed ? null : "api",
+                    OriginalRelativePath: catalog.SpecKey,
+                    ShowToc: false,
+                    ConnectSources: rendered.ConnectSources,
+                    ApiMethod: rendered.Method);
+                pageMap[pagePath] = page;
+                pages.Add(page);
+            }
+
+            var groupTitle = entry.Group.StartsWith('@')
+                ? l.Text("apiGroup" + char.ToUpperInvariant(entry.Group[1]) + entry.Group[2..])
+                : entry.Group;
+            var group = groups.FirstOrDefault(g => g.Title == groupTitle);
+            if (group is null)
+                groups.Add(group = new NavEntry { Title = groupTitle, Items = [] });
+            group.Items!.Add(new NavEntry { Title = page.Title, Path = LocaleRouting.Delocalize(section.LocalePrefix, pagePath) });
+        }
+
+        var prefix = LocaleRouting.Delocalize(section.LocalePrefix, dir).Trim('/');
+        config.Sidebar ??= [];
+        if (prefix.Length == 0 || config.Sidebar.Keys.Any(k => k.Trim('/').Equals(prefix, StringComparison.OrdinalIgnoreCase)))
+            return;
+        var overview = new NavEntry { Items = [new NavEntry { Title = section.Title, Path = LocaleRouting.Delocalize(section.LocalePrefix, section.PagePath) }] };
+        config.Sidebar[$"/{prefix}/"] = [overview, .. groups];
+    }
+
     // Caller must hold _buildLock; builds a complete snapshot off to the side, then swaps it in
     private async Task BuildAsync(CancellationToken cancellationToken)
     {
@@ -237,6 +339,8 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
         var pages = new List<DocumentationPage>();
         var pageMap = new Dictionary<string, DocumentationPage>();
         var hashInput = new StringBuilder();
+        var apiSpecs = new ApiSpecLoader(docsPath);
+        var apiSections = new List<ApiSection>();
 
         foreach (var file in allFiles)
         {
@@ -271,32 +375,50 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
             var pageLocale = LocaleRouting.LocaleOf(pagePath, configuredLocales, configuredRootLocale);
             var localePrefix = pageLocale == configuredRootLocale ? string.Empty : pageLocale;
             var parsed = _markdown.Parse(content, defaultTitle, filePath: normalizedRelativePath, localePrefix: localePrefix);
+            var api = parsed.FrontMatter?.Api is { Length: > 0 } apiValue
+                ? RenderApiPage(apiSpecs, apiValue, parsed, normalizedRelativePath, locales.For(pageLocale))
+                : null;
 
-            var html = WrapTables(parsed.Html);
+            var html = WrapTables(api?.Html ?? parsed.Html);
             html = VersionAssets(html);
             var lastModified = parsed.FrontmatterDate ?? File.GetLastWriteTimeUtc(file);
 
             var page = new DocumentationPage(
                 Path: pagePath,
-                Title: parsed.Title ?? defaultTitle,
+                Title: api?.Title ?? parsed.Title ?? defaultTitle,
                 HtmlContent: html,
                 Description: parsed.Description,
                 LastModified: lastModified,
                 Headings: parsed.Headings,
-                Layout: parsed.Layout,
+                Layout: api is { Failed: false } ? "api" : parsed.Layout,
                 ShowLastUpdated: parsed.ShowLastUpdated,
                 OriginalRelativePath: normalizedRelativePath,
                 Keywords: parsed.Keywords,
                 ShowPagination: parsed.ShowPagination,
                 Redirect: parsed.Redirect,
-                ShowToc: parsed.ShowToc,
+                ShowToc: api is { Failed: false } ? false : parsed.ShowToc,
                 Image: parsed.Image,
-                MachineTranslated: parsed.MachineTranslated
+                MachineTranslated: parsed.MachineTranslated,
+                ConnectSources: api?.ConnectSources,
+                ApiMethod: api?.Method
             );
 
             pageMap[pagePath] = page;
             pages.Add(page);
+
+            if (parsed.FrontMatter?.ApiSpec is { Length: > 0 } apiSpec)
+                apiSections.Add(new ApiSection(normalizedRelativePath, pagePath, apiSpec, localePrefix, page.Title, lastModified, locales.For(pageLocale), parsed.FrontMatter.Server, parsed.FrontMatter.Auth));
         }
+
+        if (apiSections.Count > 0)
+        {
+            config ??= new Config();
+            foreach (var section in apiSections)
+                AddApiSection(section, apiSpecs, pageMap, pages, config);
+        }
+
+        foreach (var (specPath, specText) in apiSpecs.Contents.OrderBy(kv => kv.Key, StringComparer.Ordinal))
+            hashInput.Append(specPath).Append('\0').Append(specText).Append('\0');
 
         var configPath = Path.Combine(docsPath, "config.json");
         if (File.Exists(configPath))

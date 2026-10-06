@@ -7,9 +7,7 @@ public sealed record DocsOptions
     public bool EnableHotReload { get; init; } = true;
     public string? BasePath { get; init; }
 
-    /// <summary>
-    /// Public origin for canonical URLs, feeds and robots.txt; unset builds them from the caller-supplied Host header.
-    /// </summary>
+    /// <summary>Public origin for canonical URLs, feeds and robots.txt; unset builds them from the caller-supplied Host header.</summary>
     public string? PublicBaseUrl { get; init; }
 
     // Static export: pages load a prebuilt search index instead of /api/search.

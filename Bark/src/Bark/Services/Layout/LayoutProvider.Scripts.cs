@@ -607,8 +607,8 @@ public static partial class LayoutProvider
             }});
 
 
-            var codeBlocks = document.querySelectorAll('.content pre');
-            codeBlocks.forEach(function(pre) {{
+            // Exposed so content rendered after load (the API playground output) gets the same copy and download buttons.
+            function enhanceCodeBlock(pre) {{
                 var wrapper = document.createElement('div');
                 wrapper.className = 'code-block-wrapper';
                 pre.parentNode.insertBefore(wrapper, pre);
@@ -704,7 +704,9 @@ public static partial class LayoutProvider
                 buttons.appendChild(downloadBtn);
 
                 wrapper.appendChild(buttons);
-            }});
+            }}
+            window.barkEnhanceCodeBlock = enhanceCodeBlock;
+            document.querySelectorAll('.content pre').forEach(enhanceCodeBlock);
 
             var codeGroups = document.querySelectorAll('.bark-code-group');
             codeGroups.forEach(function(group) {{

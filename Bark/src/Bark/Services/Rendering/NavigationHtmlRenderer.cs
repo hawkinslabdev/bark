@@ -22,7 +22,7 @@ public static class NavigationHtmlRenderer
         return LocaleRouting.Localize(localePrefix, path);
     }
 
-    public static string BuildNavigationHtml(NavigationNode node, string currentPath, Config? config, string basePath, string localePrefix = "", Localization? localization = null)
+    public static string BuildNavigationHtml(NavigationNode node, string currentPath, Config? config, string basePath, string localePrefix = "", Localization? localization = null, Func<string, string?>? methodOf = null)
     {
         var l = localization ?? Localization.Default;
         var configPath = LocaleRouting.Delocalize(localePrefix, currentPath);
@@ -31,11 +31,11 @@ public static class NavigationHtmlRenderer
         {
             var matchedSections = SidebarResolver.Resolve(sidebars, configPath);
             if (matchedSections is not null)
-                return BuildNavFromConfig(matchedSections, configPath, basePath, localePrefix, l);
+                return BuildNavFromConfig(matchedSections, configPath, basePath, localePrefix, l, methodOf);
         }
 
         if (config?.Nav is { Count: > 0 } sections)
-            return BuildNavFromConfig(sections, configPath, basePath, localePrefix, l);
+            return BuildNavFromConfig(sections, configPath, basePath, localePrefix, l, methodOf);
 
         if (node.Children.Count == 0) return string.Empty;
 
@@ -54,7 +54,7 @@ public static class NavigationHtmlRenderer
                 {
                     var isActive = sub.Path == currentPath;
                     html.AppendLine($"<li class=\"nav-item{(isActive ? " active" : "")}\">");
-                    html.AppendLine($"<a href=\"{UrlPaths.Href(basePath, sub.Path ?? "")}\">{LayoutProvider.HtmlEncode(sub.Title)}</a>");
+                    html.AppendLine($"<a href=\"{UrlPaths.Href(basePath, sub.Path ?? "")}\">{MethodBadge(methodOf, sub.Path)}{LayoutProvider.HtmlEncode(sub.Title)}</a>");
                     html.AppendLine("</li>");
                 }
                 html.AppendLine("</ul>");
@@ -66,16 +66,21 @@ public static class NavigationHtmlRenderer
         return html.ToString();
     }
 
-    public static string BuildNavFromConfig(List<NavEntry> entries, string currentPath, string basePath, string localePrefix = "", Localization? localization = null)
+    public static string BuildNavFromConfig(List<NavEntry> entries, string currentPath, string basePath, string localePrefix = "", Localization? localization = null, Func<string, string?>? methodOf = null)
     {
         var l = localization ?? Localization.Default;
         var html = new StringBuilder();
         html.AppendLine("<div class=\"sidebar-tree\">");
         foreach (var entry in entries)
-            AppendSidebarEntry(html, entry, currentPath, level: 0, basePath, localePrefix, l);
+            AppendSidebarEntry(html, entry, currentPath, level: 0, basePath, localePrefix, l, methodOf);
         html.AppendLine("</div>");
         return html.ToString();
     }
+
+    private static string MethodBadge(Func<string, string?>? methodOf, string? path) =>
+        methodOf is not null && path is not null && methodOf(path.Trim('/')) is { } method
+            ? $"<span class=\"api-method nav-method\" data-method=\"{LayoutProvider.HtmlEncode(method.ToLowerInvariant())}\">{LayoutProvider.HtmlEncode(method == "webhook" ? "HOOK" : method.ToUpperInvariant())}</span>"
+            : "";
 
     public static bool SidebarPathMatches(string entryPath, string currentPath)
     {
@@ -94,7 +99,7 @@ public static class NavigationHtmlRenderer
         return entry.Items?.Any(child => ContainsActiveDescendant(child, currentPath)) ?? false;
     }
 
-    public static void AppendSidebarEntry(StringBuilder html, NavEntry entry, string currentPath, int level, string basePath, string localePrefix = "", Localization? localization = null)
+    public static void AppendSidebarEntry(StringBuilder html, NavEntry entry, string currentPath, int level, string basePath, string localePrefix = "", Localization? localization = null, Func<string, string?>? methodOf = null)
     {
         var l = localization ?? Localization.Default;
         if (entry.Items is not { Count: > 0 } children)
@@ -106,6 +111,7 @@ public static class NavigationHtmlRenderer
             html.AppendLine(
                 $"<div class=\"sidebar-link level-{level}{(isActive ? " is-active" : "")}\">" +
                 $"<a href=\"{href}\"{(isExternal ? ExternalLinkRel : "")}>" +
+                $"{(isExternal ? "" : MethodBadge(methodOf, LocalizeLink(localePrefix, path)))}" +
                 $"{LayoutProvider.HtmlEncode(l.Label(entry.Title))}{(isExternal ? ExternalLinkIcon : "")}</a></div>");
             return;
         }
@@ -115,7 +121,7 @@ public static class NavigationHtmlRenderer
             html.AppendLine("<div class=\"sidebar-group no-caret\">")
                 .AppendLine("<div class=\"sidebar-group-items\">");
             foreach (var child in children)
-                AppendSidebarEntry(html, child, currentPath, level + 1, basePath, localePrefix, l);
+                AppendSidebarEntry(html, child, currentPath, level + 1, basePath, localePrefix, l, methodOf);
             html.AppendLine("</div>").AppendLine("</div>");
             return;
         }
@@ -138,7 +144,7 @@ public static class NavigationHtmlRenderer
 
         html.AppendLine("<div class=\"sidebar-group-items\">");
         foreach (var child in children)
-            AppendSidebarEntry(html, child, currentPath, level + 1, basePath, localePrefix, l);
+            AppendSidebarEntry(html, child, currentPath, level + 1, basePath, localePrefix, l, methodOf);
         html.AppendLine("</div>");
         html.AppendLine(isCollapsible ? "</details>" : "</div>");
     }

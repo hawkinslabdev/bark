@@ -40,6 +40,7 @@ public static partial class LayoutProvider
         string? nonce = null,
         bool hasMath = false,
         bool hasMermaid = false,
+        bool isApiPage = false,
         string? pageControlsHtml = null,
         string? rssDiscoveryHtml = null,
         string? promoBarHtml = null,
@@ -77,6 +78,8 @@ public static partial class LayoutProvider
         var layoutClass = isHomePage
             ? "layout bark-home-layout"
             : hasLeftNav ? "layout" : "layout no-left-sidebar";
+        if (isApiPage)
+            layoutClass += " bark-api-layout";
         var mobileSocialHtml = !string.IsNullOrWhiteSpace(socialLinksHtml)
             ? $@"<div class=""sidebar-social-links"">{socialLinksHtml}</div>"
             : "";
@@ -198,6 +201,7 @@ public static partial class LayoutProvider
     {themeCss}
     {(hasMath ? $"<link rel=\"stylesheet\" href=\"{basePath}/css/katex.min.css\">" : "")}
     {(hasMermaid ? $"<script defer src=\"{basePath}/js/mermaid.min.js\"></script>" : "")}
+    {(isApiPage ? $"<link rel=\"stylesheet\" href=\"{basePath}/css/api.css\"><script defer src=\"{basePath}/js/api.js\"></script>" : "")}
 </head>
 <body>
     <a href=""#main-content"" class=""skip-link"">{HtmlEncode(l.SkipToContent)}</a>

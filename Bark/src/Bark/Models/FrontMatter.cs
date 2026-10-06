@@ -40,4 +40,16 @@ public sealed record FrontMatter
     public DateTime? Updated { get; init; }
 
     public bool? MachineTranslated { get; init; }
+
+    /// <summary>API reference source: <c>&lt;spec file&gt; &lt;selector&gt; &lt;name&gt;</c>, for example <c>openapi.yaml POST /tasks</c>.</summary>
+    public string? Api { get; init; }
+
+    /// <summary>API section source: a spec file. Generates one page per operation and object in this folder, and the folder sidebar.</summary>
+    public string? ApiSpec { get; init; }
+
+    /// <summary>API base URL. Overrides the spec servers; required for GraphQL and OData specs without one.</summary>
+    public string? Server { get; init; }
+
+    /// <summary>API authentication: <c>bearer</c>, <c>basic</c> or <c>apiKey &lt;header|query&gt; &lt;name&gt;</c>. Overrides the spec security.</summary>
+    public string? Auth { get; init; }
 }

@@ -4,9 +4,7 @@ namespace Bark.Services.Rendering;
 
 public static class UrlPaths
 {
-    /// <summary>
-    /// True for an absolute http/https nav target; every other scheme falls through to <see cref="Href"/> as a relative path, keeping <c>javascript:</c> inert.
-    /// </summary>
+    /// <summary>True for an absolute http/https nav target; every other scheme falls through to <see cref="Href"/> as a relative path, keeping <c>javascript:</c> inert.</summary>
     public static bool IsExternal(string? link) =>
         link is not null
         && (link.StartsWith("http://", StringComparison.OrdinalIgnoreCase)

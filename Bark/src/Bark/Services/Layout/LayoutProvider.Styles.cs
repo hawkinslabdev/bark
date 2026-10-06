@@ -968,6 +968,34 @@ public static partial class LayoutProvider
             font-size: 0.95rem;
             line-height: 1.6;
         }}
+        .api-method {{
+            flex: none;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.1rem 0.45rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            --method: var(--text-muted);
+            color: var(--method);
+            background: color-mix(in oklab, var(--method) 16%, transparent);
+        }}
+        .api-method[data-method=""get""] {{ --method: var(--alert-tip); }}
+        .api-method[data-method=""post""] {{ --method: var(--alert-note); }}
+        .api-method[data-method=""put""], .api-method[data-method=""patch""] {{ --method: var(--alert-warning); }}
+        .api-method[data-method=""delete""] {{ --method: var(--alert-caution); }}
+        .api-method[data-method=""query""] {{ --method: var(--alert-important); }}
+        .nav-method {{
+            min-width: 2.9rem;
+            justify-content: center;
+            margin-right: 0.55rem;
+            padding: 0 0.3rem;
+            font-size: 0.62rem;
+            line-height: 1.6;
+            vertical-align: 0.1em;
+        }}
         .page-controls {{
             position: relative;
             margin-left: auto;
@@ -1403,9 +1431,9 @@ public static partial class LayoutProvider
         code {{
             font-family: var(--font-mono);
             font-size: 0.875em;
-            color: var(--accent);
-            background-color: color-mix(in oklab, var(--text-color) 7%, transparent);
-            padding: 0.1875rem 0.375rem;
+            color: color-mix(in oklab, var(--text-color) 78%, var(--accent));
+            background-color: color-mix(in oklab, var(--accent-light) 55%, transparent);
+            padding: 0.125rem 0.3rem;
             border-radius: 4px;
             unicode-bidi: plaintext;
             -webkit-box-decoration-break: clone;

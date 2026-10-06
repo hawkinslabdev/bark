@@ -28,9 +28,7 @@ public sealed record PageRequestSettings(
     public static string? ResolvePublicBaseUrl(string? cliBaseUrl, string? docsOption, string? alias) =>
         Normalize(cliBaseUrl) ?? Normalize(docsOption) ?? Normalize(alias);
 
-    /// <summary>
-    /// Absolute origin for canonical URLs, feeds and sitemaps; <c>PublicBaseUrl</c> wins because the Host header is caller-supplied and unfiltered unless <c>AllowedHosts</c> is set.
-    /// </summary>
+    /// <summary>Absolute origin for canonical URLs, feeds and sitemaps; <c>PublicBaseUrl</c> wins because the Host header is caller-supplied and unfiltered unless <c>AllowedHosts</c> is set.</summary>
     public string Origin(HttpContext context) =>
         Normalize(PublicBaseUrl) ?? $"{context.Request.Scheme}://{context.Request.Host}";
 }
@@ -194,7 +192,9 @@ public sealed class PageRequestHandler
         var nonce = CspNonce.Derive(etag);
         var hasMermaid = page.HtmlContent.Contains("class=\"mermaid\"", StringComparison.Ordinal);
         var hasInlineStyleTag = page.HtmlContent.Contains("<style", StringComparison.OrdinalIgnoreCase);
-        var baseCsp = SecurityHeaders.WithExtraSources(_settings.CustomCsp ?? SecurityHeaders.DefaultCsp, extensions.CspSources);
+        var baseCsp = SecurityHeaders.WithConnectSources(
+            SecurityHeaders.WithExtraSources(_settings.CustomCsp ?? SecurityHeaders.DefaultCsp, extensions.CspSources),
+            page.ConnectSources);
         var pageCsp = SecurityHeaders.BuildNonceCsp(baseCsp, nonce);
         context.Response.Headers.ContentSecurityPolicy = hasMermaid || hasInlineStyleTag
             ? SecurityHeaders.WithInlineStyleElements(pageCsp)
@@ -207,7 +207,7 @@ public sealed class PageRequestHandler
         }
 
         var nav = await _docs.GetNavigationAsync(route.Code, context.RequestAborted);
-        var navHtml = NavigationHtmlRenderer.BuildNavigationHtml(nav, path, config, basePath, route.Prefix, l);
+        var navHtml = NavigationHtmlRenderer.BuildNavigationHtml(nav, path, config, basePath, route.Prefix, l, _docs.ApiMethodOf);
         var topNavHtml = NavigationHtmlRenderer.BuildTopNavHtml(config?.TopNav, path, basePath, l, route.Prefix);
         var mobileTopNavHtml = NavigationHtmlRenderer.BuildMobileTopNavHtml(config?.TopNav, path, basePath, l, route.Prefix);
 
@@ -356,6 +356,7 @@ public sealed class PageRequestHandler
             nonce: nonce,
             hasMath: page.HtmlContent.Contains("class=\"katex\"", StringComparison.Ordinal),
             hasMermaid: hasMermaid,
+            isApiPage: page.Layout == "api",
             pageControlsHtml: pageControlsHtml,
             rssDiscoveryHtml: rssDiscoveryHtml,
             promoBarHtml: promoBarHtml,

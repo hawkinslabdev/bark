@@ -1,0 +1,92 @@
+openapi: 3.1.0
+info:
+  title: Echo API
+  version: 1.0.0
+servers:
+  - url: https://httpbin.org
+security:
+  - BearerAuth: []
+tags:
+  - name: Tasks
+    description: Create, read and update tasks.
+paths:
+  /anything/{taskId}:
+    get:
+      tags: [Tasks]
+      summary: Get task
+      description: Returns a task. The server returns the received request as JSON.
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Task identifier.
+          schema: { type: string, example: task_123 }
+      responses:
+        '200':
+          description: Received request.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Echo' }
+        '401':
+          description: Missing or invalid token.
+    post:
+      tags: [Tasks]
+      summary: Update task
+      description: Updates a task. The server returns the received request as JSON.
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Task identifier.
+          schema: { type: string, example: task_123 }
+        - name: notify
+          in: query
+          description: Sends a notification to the task owner.
+          schema: { type: boolean, default: false }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TaskUpdate' }
+      responses:
+        '200':
+          description: Received request.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Echo' }
+        '401':
+          description: Missing or invalid token.
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    TaskUpdate:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string, description: Task title., example: Write release notes }
+        status:
+          type: string
+          description: Task status.
+          enum: [open, in_progress, done]
+          default: open
+        labels:
+          type: array
+          description: Task labels.
+          items: { type: string, example: docs }
+        assignee:
+          type: object
+          description: Assigned user.
+          properties:
+            id: { type: integer, example: 42 }
+            email: { type: string, format: email }
+    Echo:
+      type: object
+      properties:
+        method: { type: string, enum: [GET, POST], description: Request method. }
+        url: { type: string, format: uri, example: 'https://httpbin.org/anything/task_123?notify=false' }
+        args: { type: object, description: Query parameters. }
+        headers: { type: object, description: Request headers. }
+        json: { $ref: '#/components/schemas/TaskUpdate' }

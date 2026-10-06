@@ -3,9 +3,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Bark.Services;
 
-/// <summary>
-/// Keeps symlinks in contributor-writable trees from being followed into served content.
-/// </summary>
+/// <summary>Keeps symlinks in contributor-writable trees from being followed into served content.</summary>
 /// <remarks>
 /// A contributor can commit a symlink (git pull restores it as-is) pointing at /proc/self/environ or any file the process can read; the check has to happen where content is read, not only at clone time.
 /// </remarks>

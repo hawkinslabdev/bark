@@ -157,7 +157,7 @@ public sealed partial class ContainerRenderer : HtmlObjectRenderer<CustomContain
                 renderer.Write(" checked");
             renderer.Write("><label data-title=\"").WriteEscape(title).Write("\" for=\"").Write(tabId).Write("\">");
 
-            if (_icons.Enabled)
+            if (_icons.Enabled && meta.IconSlug != "none")
                 renderer.Write(BuildIconTag(title, meta.IconSlug));
 
             renderer.WriteEscape(title).Write("</label>");

@@ -2,9 +2,7 @@ using System.Net;
 
 namespace Bark.Configuration;
 
-/// <summary>
-/// Decides whether a request came from the machine Bark runs on, for controls that expose server-side detail.
-/// </summary>
+/// <summary>Decides whether a request came from the machine Bark runs on, for controls that expose server-side detail.</summary>
 /// <remarks>
 /// Loopback alone is not enough: a same-host reverse proxy makes every visitor look local, so the request must also carry no proxy hop markers and address Bark by a loopback host.
 /// </remarks>

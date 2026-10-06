@@ -15,7 +15,9 @@ public sealed record DocumentationPage(
     string? Redirect = null,
     bool ShowToc = true,
     string? Image = null,
-    bool MachineTranslated = false
+    bool MachineTranslated = false,
+    IReadOnlyList<string>? ConnectSources = null,
+    string? ApiMethod = null
 )
 {
     public DocumentationPage(
@@ -48,5 +50,6 @@ public sealed record DocumentationPage(
         redirect,
         showToc,
         image
-    ) { }
+    )
+    { }
 }
