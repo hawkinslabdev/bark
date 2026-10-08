@@ -326,6 +326,12 @@ public static partial class LayoutProvider
         .layout.no-left-sidebar {{
             grid-template-columns: minmax(0, 1fr);
         }}
+        .layout.no-left-sidebar .content-shell {{
+            justify-content: center;
+        }}
+        .bark-prose-layout .main-column {{
+            max-width: 52rem;
+        }}
         .content-shell {{
             display: flex;
             min-width: 0;
@@ -734,6 +740,14 @@ public static partial class LayoutProvider
         }}
         .toc-collapsed .main-column {{
             max-width: 1200px;
+        }}
+        .bark-wide-layout .main-column {{
+            max-width: none;
+        }}
+        @media (min-width: 1025px) {{
+            .layout.bark-custom-width .main-column {{
+                max-width: var(--bark-content-width);
+            }}
         }}
         .main-container {{
             padding: 3rem 3rem 3rem 4rem;
@@ -1376,6 +1390,57 @@ public static partial class LayoutProvider
             border: none;
             border-top: 1px solid var(--border);
             margin: 2.5rem 0;
+        }}
+        .content > :first-child {{
+            margin-top: 0;
+        }}
+        .content li > p {{
+            margin-bottom: 0.5rem;
+        }}
+        .content li:has(> p) {{
+            margin-bottom: 0.9rem;
+        }}
+        .content li > div[class^=""language-""] {{
+            margin: 0.75rem 0;
+        }}
+        .content li > :last-child,
+        .content dd > :last-child,
+        .content blockquote > :last-child,
+        .content figure > :last-child {{
+            margin-bottom: 0;
+        }}
+        .content blockquote {{
+            margin: 1.5rem 0;
+            padding: 0.25rem 0 0.25rem 1.25rem;
+            border-left: 2px solid var(--border);
+        }}
+        .content dl {{
+            margin-bottom: 1.25rem;
+        }}
+        .content dd + dt {{
+            margin-top: 0.75rem;
+        }}
+        :where(.content) img {{
+            max-width: 100%;
+            height: auto;
+        }}
+        .content figure {{
+            margin: 1.75rem 0;
+        }}
+        .content figcaption {{
+            margin-top: 0.6rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }}
+        .content kbd {{
+            font-family: var(--font-mono);
+            font-size: 0.8em;
+            padding: 0.1rem 0.4rem;
+            border: 1px solid var(--border);
+            border-bottom-width: 2px;
+            border-radius: 4px;
+            background-color: var(--code-bg);
+            white-space: nowrap;
         }}
         .content video {{
             display: block;

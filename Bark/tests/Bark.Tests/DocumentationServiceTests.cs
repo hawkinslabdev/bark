@@ -263,6 +263,20 @@ public sealed class DocumentationServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task StartAsync_PageWithSidebarFalse_ShowSidebarFalse()
+    {
+        await CreateTestFiles();
+        await File.WriteAllTextAsync(Path.Combine(_tempDir, "getting-started", "installation.md"),
+            "---\ntitle: Installation\nsidebar: false\nwidth: 80%\n---\n\n# Installation Guide\n");
+        await _service.StartAsync(CancellationToken.None);
+
+        var page = await _service.GetPageAsync("getting-started/installation");
+        Assert.NotNull(page);
+        Assert.False(page!.ShowSidebar);
+        Assert.Equal(80, page.ContentWidth);
+    }
+
+    [Fact]
     public async Task StartAsync_PageWithoutToc_ShowTocTrue()
     {
         await CreateTestFiles();

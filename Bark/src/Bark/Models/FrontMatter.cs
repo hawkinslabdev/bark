@@ -26,6 +26,17 @@ public sealed record FrontMatter
     /// <summary>Set to <c>false</c> to hide the table of contents on this page.</summary>
     public bool? Toc { get; init; }
 
+    /// <summary>Set to <c>false</c> to hide the left sidebar on this page.</summary>
+    public bool? Sidebar { get; init; }
+
+    /// <summary>Content width as a percentage of the available width, for example <c>80%</c>. Accepts 10 to 100.</summary>
+    public string? Width { get; init; }
+
+    public int? WidthPercent =>
+        int.TryParse(Width?.Trim().TrimEnd('%'), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var n) && n is >= 10 and <= 100
+            ? n
+            : null;
+
     /// <summary>When set, the page issues a 307 redirect to this URL instead of rendering.
     /// Root-relative paths (starting with <c>/</c>) are prefixed with the configured base path.
     /// Absolute URLs are used as-is.</summary>

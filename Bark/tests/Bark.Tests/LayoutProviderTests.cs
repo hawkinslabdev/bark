@@ -17,6 +17,45 @@ public sealed class LayoutProviderTests
         Assert.Contains("Test Title", html);
     }
 
+    [Theory]
+    [InlineData("", null, true)]
+    [InlineData("", "<li>toc</li>", false)]
+    [InlineData("<nav>nav</nav>", null, false)]
+    public void GetLayout_ProseLayout_RequiresNoSidebarAndNoToc(string nav, string? toc, bool expected)
+    {
+        var html = LayoutProvider.GetLayout("Title", "<p>x</p>", nav, toc, "", "", null);
+
+        Assert.Equal(expected, html.Contains("bark-prose-layout"));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("<nav>nav</nav>")]
+    public void GetLayout_Wide_ReplacesProseLayout(string nav)
+    {
+        var html = LayoutProvider.GetLayout("Title", "<p>x</p>", nav, null, "", "", null, isWide: true);
+
+        Assert.Contains("bark-wide-layout", html);
+        Assert.DoesNotContain("bark-prose-layout", html);
+    }
+
+    [Fact]
+    public void GetLayout_ContentWidth_SetsCustomProperty()
+    {
+        var html = LayoutProvider.GetLayout("Title", "<p>x</p>", "", null, "", "", null, contentWidth: 80);
+
+        Assert.Contains("bark-custom-width", html);
+        Assert.Contains("style=\"--bark-content-width: 80%\"", html);
+    }
+
+    [Fact]
+    public void GetLayout_ContentWidth_IgnoredOnHome()
+    {
+        var html = LayoutProvider.GetLayout("Title", "<p>x</p>", "", null, "", "", null, isHomePage: true, contentWidth: 80);
+
+        Assert.DoesNotContain("bark-content-width", html);
+    }
+
     [Fact]
     public void GetLayout_ContainsContent()
     {

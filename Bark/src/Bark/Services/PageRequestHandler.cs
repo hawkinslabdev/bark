@@ -207,7 +207,9 @@ public sealed class PageRequestHandler
         }
 
         var nav = await _docs.GetNavigationAsync(route.Code, context.RequestAborted);
-        var navHtml = NavigationHtmlRenderer.BuildNavigationHtml(nav, path, config, basePath, route.Prefix, l, _docs.ApiMethodOf);
+        var navHtml = page.ShowSidebar
+            ? NavigationHtmlRenderer.BuildNavigationHtml(nav, path, config, basePath, route.Prefix, l, _docs.ApiMethodOf)
+            : "";
         var topNavHtml = NavigationHtmlRenderer.BuildTopNavHtml(config?.TopNav, path, basePath, l, route.Prefix);
         var mobileTopNavHtml = NavigationHtmlRenderer.BuildMobileTopNavHtml(config?.TopNav, path, basePath, l, route.Prefix);
 
@@ -357,6 +359,8 @@ public sealed class PageRequestHandler
             hasMath: page.HtmlContent.Contains("class=\"katex\"", StringComparison.Ordinal),
             hasMermaid: hasMermaid,
             isApiPage: page.Layout == "api",
+            isWide: page.Layout == "wide",
+            contentWidth: page.ContentWidth,
             pageControlsHtml: pageControlsHtml,
             rssDiscoveryHtml: rssDiscoveryHtml,
             promoBarHtml: promoBarHtml,

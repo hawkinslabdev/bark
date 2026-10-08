@@ -41,6 +41,8 @@ public static partial class LayoutProvider
         bool hasMath = false,
         bool hasMermaid = false,
         bool isApiPage = false,
+        bool isWide = false,
+        int? contentWidth = null,
         string? pageControlsHtml = null,
         string? rssDiscoveryHtml = null,
         string? promoBarHtml = null,
@@ -144,6 +146,16 @@ public static partial class LayoutProvider
                 </div>
             </nav>
         </div>";
+        if (isWide && !isHomePage)
+            layoutClass += " bark-wide-layout";
+        else if (!hasLeftNav && !isHomePage && !isApiPage && sidebarRightHtml.Length == 0)
+            layoutClass += " bark-prose-layout";
+        var layoutStyle = "";
+        if (contentWidth is >= 10 and <= 100 && !isHomePage)
+        {
+            layoutClass += " bark-custom-width";
+            layoutStyle = $" style=\"--bark-content-width: {contentWidth}%\"";
+        }
         var contentClass = isHomePage ? "content bark-home-content" : "content";
         // Home pages never show "last updated" or prev/next pagination, regardless of caller input.
         var paginationBlock = isHomePage ? "" : paginationHtml;
@@ -260,7 +272,7 @@ public static partial class LayoutProvider
         </div>
     </div>
     <div class=""sidebar-overlay"" id=""sidebar-overlay""></div>
-    <div class=""{layoutClass}"">
+    <div class=""{layoutClass}""{layoutStyle}>
         {sidebarLeftHtml}
         <div class=""content-shell"">
             <div class=""main-column"">
