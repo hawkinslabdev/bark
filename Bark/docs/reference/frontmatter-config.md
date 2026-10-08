@@ -25,13 +25,15 @@ Keys are camelCase (`lastUpdated`, not `last_updated`). Unrecognized keys are ig
 | `title` | `string` | filename or nav-configured title | Page title. Used in the document title, breadcrumbs and pagination links. |
 | `description` | `string` | none | Meta description. Also used in search results and `llms.txt`. |
 | `image` | `string` | site `image`, then `brandImage` | Social preview image for this page (`og:image` / `twitter:image`). An absolute URL, or a root-relative path such as `/og.png`, resolved against the request origin. When set, the Twitter card type is `summary_large_image`. |
-| `layout` | `string` | none | `home` renders a hero and features grid instead of the doc interface. See [Home Page](/reference/default-theme-home-page). |
+| `layout` | `string` | none | `home` renders a hero and features grid instead of the doc interface. See [Home Page](/reference/default-theme-home-page). `wide` removes the content width limit. See [Layout](/reference/default-theme-layout#wide). |
 | `hero` | `object` | none | Hero content. Only used when `layout: home`. |
 | `features` | `array` | none | Feature cards. Only used when `layout: home`. |
 | `keywords` | `string[]` | none | Page keywords. Emitted as `<meta name="keywords">` (capped at 20 entries) and indexed by search at weight 4. |
 | `lastUpdated` | `bool` | inherits site-wide setting | `false` hides the "Last updated" stamp, overriding the site-wide setting. See [Last Updated Timestamp](/reference/default-theme-last-updated). |
 | `pagination` | `bool` | `true` | `false` hides the previous and next links on this page. |
 | `toc` | `bool` | `true` | `false` hides the table of contents on this page. |
+| `width` | `string` | none | Content width as a percentage of the available width, for example `80%`. Accepts whole numbers from `10%` to `100%`. Applies from 1025px viewport width. See [Layout](/reference/default-theme-layout#content-width). |
+| `sidebar` | `bool` | `true` | `false` hides the left sidebar on this page. With `toc: false`, the content renders as a centered reading column. See [Layout](/reference/default-theme-layout#prose-pages). |
 | `redirect` | `string` | none | Redirects to the given URL instead of rendering the page. See [Redirects](#redirects). |
 | `date` | `string` (ISO 8601) | none | Content creation date. Overrides the file system timestamp for the "Last updated" display when `updated` is not also set. |
 | `updated` | `string` (ISO 8601) | none | Last-modified date. Takes priority over `date` and the file system timestamp for the "Last updated" display. |

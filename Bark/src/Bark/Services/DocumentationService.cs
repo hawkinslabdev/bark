@@ -400,7 +400,9 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
                 Image: parsed.Image,
                 MachineTranslated: parsed.MachineTranslated,
                 ConnectSources: api?.ConnectSources,
-                ApiMethod: api?.Method
+                ApiMethod: api?.Method,
+                ShowSidebar: parsed.FrontMatter?.Sidebar ?? true,
+                ContentWidth: parsed.FrontMatter?.WidthPercent
             );
 
             pageMap[pagePath] = page;

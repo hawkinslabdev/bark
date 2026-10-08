@@ -17,7 +17,9 @@ public sealed record DocumentationPage(
     string? Image = null,
     bool MachineTranslated = false,
     IReadOnlyList<string>? ConnectSources = null,
-    string? ApiMethod = null
+    string? ApiMethod = null,
+    bool ShowSidebar = true,
+    int? ContentWidth = null
 )
 {
     public DocumentationPage(
