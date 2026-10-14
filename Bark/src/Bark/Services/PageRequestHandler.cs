@@ -137,11 +137,18 @@ public sealed class PageRequestHandler
         if (page == null && isRootRequest)
             page = await BuildSafeRootPage(_docs, basePath, l, context.RequestAborted);
 
+        if (page == null && VersionSwitcherRenderer.LatestAlias(VersionSwitcherRenderer.Active(config), basePath, path) is { } latestTarget)
+        {
+            context.Response.Redirect(latestTarget + context.Request.QueryString);
+            return;
+        }
+
         if (page == null)
         {
+            var notFoundCss = ThemeProvider.BuildThemeCss(_themeOptions) + ThemeProvider.BuildCustomCssLink(_themeOptions, _settings.ThemeDir, basePath);
             context.Response.StatusCode = 404;
             context.Response.ContentType = "text/html; charset=utf-8";
-            await context.Response.WriteAsync(LayoutProvider.Get404Layout(LayoutProvider.HtmlEncode, basePath, htmlLang, theme, themeMode, l, route.Prefix));
+            await context.Response.WriteAsync(LayoutProvider.Get404Layout(LayoutProvider.HtmlEncode, basePath, htmlLang, theme, themeMode, l, route.Prefix, notFoundCss));
             return;
         }
 
@@ -251,9 +258,15 @@ public sealed class PageRequestHandler
         var bottomNavHtml = config?.BottomNav is { } bottomNav
             ? NavigationHtmlRenderer.BuildBottomNavHtml(bottomNav, basePath, l, route.Prefix)
             : string.Empty;
-        var footerHtml = footerNoteHtml.Length + bottomNavHtml.Length == 0
+        // Socials sit at the bottom of the sidebar; pages without one carry them in the footer instead.
+        var socialsInSidebar = !isHomePage && !string.IsNullOrWhiteSpace(navHtml);
+        var footerSocialHtml = socialsInSidebar ? string.Empty : socialLinksHtml;
+        var footerEndHtml = bottomNavHtml.Length + footerSocialHtml.Length == 0
             ? string.Empty
-            : $"<div class=\"footer-bar{(config?.BottomNav is null ? "" : " footer-bar--split")}\">{footerNoteHtml}{bottomNavHtml}</div>";
+            : $"<div class=\"footer-end\">{bottomNavHtml}{footerSocialHtml}</div>";
+        var footerHtml = footerNoteHtml.Length + footerEndHtml.Length == 0
+            ? string.Empty
+            : $"<div class=\"footer-bar{(footerEndHtml.Length == 0 ? "" : " footer-bar--split")}\">{footerNoteHtml}{footerEndHtml}</div>";
 
         var lastUpdatedHtml = !isHomePage && config?.LastUpdated == true && page.ShowLastUpdated && page.LastModified is { } lastModified
             ? $"<div class=\"last-updated\">{LayoutProvider.HtmlEncode(l.LastUpdated)} {lastModified:yyyy-MM-dd}</div>"
@@ -325,9 +338,15 @@ public sealed class PageRequestHandler
         var localeSwitcherHtml = LocaleSwitcherRenderer.Build(
             config, route.Code, route.ContentPath, basePath, l);
 
+        var versions = VersionSwitcherRenderer.Active(config);
+        var versionIndex = VersionSwitcherRenderer.CurrentIndex(versions, basePath);
+        var versionSwitcherHtml = VersionSwitcherRenderer.Build(versions, versionIndex, basePath, l);
+        var versionNoticeHtml = isHomePage ? string.Empty : VersionSwitcherRenderer.Notice(versions, versionIndex, basePath, l);
+        var noIndexHtml = versionIndex > 0 ? "<meta name=\"robots\" content=\"noindex\">" : string.Empty;
+
         var fullHtml = LayoutProvider.GetLayout(
             title: PageTitleRenderer.ComputeTitle(page.Title, config, l),
-            content: noticeHtml + page.HtmlContent,
+            content: versionNoticeHtml + noticeHtml + page.HtmlContent,
             navigationHtml: navHtml,
             topNavHtml: topNavHtml,
             mobileTopNavHtml: mobileTopNavHtml,
@@ -340,7 +359,7 @@ public sealed class PageRequestHandler
             enableDarkMode: ThemeProvider.UseDarkMode(_themeOptions),
             showScrollIndicator: ThemeProvider.ShowScrollIndicator(_themeOptions),
             footerHtml: footerHtml,
-            socialLinksHtml: socialLinksHtml,
+            socialLinksHtml: socialsInSidebar ? socialLinksHtml : null,
             repoWidgetHtml: repoWidgetHtml,
             enableLiveReload: _docsOptions.EnableHotReload,
             staticSearch: _docsOptions.IsStaticExport,
@@ -352,7 +371,7 @@ public sealed class PageRequestHandler
             editLinkHtml: editLinkHtml,
             basePath: basePath,
             lang: htmlLang,
-            headTagsHtml: HeadTagHtmlRenderer.BuildHeadTagsHtml(config?.Head) + ExtensionHeadRenderer.Build(extensions, nonce),
+            headTagsHtml: noIndexHtml + HeadTagHtmlRenderer.BuildHeadTagsHtml(config?.Head) + ExtensionHeadRenderer.Build(extensions, nonce),
             keywordsHtml: keywordsHtml,
             canonicalUrl: canonicalUrl,
             nonce: nonce,
@@ -370,6 +389,7 @@ public sealed class PageRequestHandler
             themeMode: themeMode,
             localization: l,
             localeSwitcherHtml: localeSwitcherHtml,
+            versionSwitcherHtml: versionSwitcherHtml,
             isRootLocale: route.Prefix.Length == 0,
             localePrefix: route.Prefix
         );

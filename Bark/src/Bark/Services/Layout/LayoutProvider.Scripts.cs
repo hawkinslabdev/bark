@@ -773,33 +773,31 @@ public static partial class LayoutProvider
                 window.mermaid.run();
             }}
 
-            var localeToggle = document.getElementById('locale-toggle');
-            var localeDropdown = document.getElementById('locale-dropdown');
-            if (localeToggle && localeDropdown) {{
-                function closeLocaleMenu() {{
-                    localeDropdown.hidden = true;
-                    localeToggle.setAttribute('aria-expanded', 'false');
+            function wireMenu(toggle, menu) {{
+                if (!toggle || !menu) return;
+                function closeMenu() {{
+                    menu.hidden = true;
+                    toggle.setAttribute('aria-expanded', 'false');
                 }}
-                function openLocaleMenu() {{
-                    localeDropdown.hidden = false;
-                    localeToggle.setAttribute('aria-expanded', 'true');
-                    var first = localeDropdown.querySelector('.locale-option--current') || localeDropdown.querySelector('.locale-option');
+                function openMenu() {{
+                    menu.hidden = false;
+                    toggle.setAttribute('aria-expanded', 'true');
+                    var first = menu.querySelector('.locale-option--current') || menu.querySelector('.locale-option');
                     if (first) first.focus();
                 }}
-                localeToggle.addEventListener('click', function(e) {{
-                    e.stopPropagation();
-                    if (localeDropdown.hidden) openLocaleMenu(); else closeLocaleMenu();
+                toggle.addEventListener('click', function() {{
+                    if (menu.hidden) openMenu(); else closeMenu();
                 }});
                 document.addEventListener('click', function(e) {{
-                    if (!localeDropdown.hidden && !localeDropdown.contains(e.target) && e.target !== localeToggle)
-                        closeLocaleMenu();
+                    if (!menu.hidden && !menu.contains(e.target) && !toggle.contains(e.target))
+                        closeMenu();
                 }});
                 document.addEventListener('keydown', function(e) {{
-                    if (e.key === 'Escape' && !localeDropdown.hidden) {{ closeLocaleMenu(); localeToggle.focus(); }}
+                    if (e.key === 'Escape' && !menu.hidden) {{ closeMenu(); toggle.focus(); }}
                 }});
-                localeDropdown.addEventListener('keydown', function(e) {{
-                    if (e.key === 'Tab') {{ closeLocaleMenu(); return; }}
-                    var items = Array.prototype.slice.call(localeDropdown.querySelectorAll('.locale-option'));
+                menu.addEventListener('keydown', function(e) {{
+                    if (e.key === 'Tab') {{ closeMenu(); return; }}
+                    var items = Array.prototype.slice.call(menu.querySelectorAll('.locale-option'));
                     var idx = items.indexOf(document.activeElement);
                     if (e.key === 'ArrowDown') idx = (idx + 1) % items.length;
                     else if (e.key === 'ArrowUp') idx = (idx - 1 + items.length) % items.length;
@@ -810,6 +808,8 @@ public static partial class LayoutProvider
                     items[idx].focus();
                 }});
             }}
+            wireMenu(document.getElementById('locale-toggle'), document.getElementById('locale-dropdown'));
+            wireMenu(document.getElementById('version-toggle'), document.getElementById('version-dropdown'));
 
             var pageControlsToggle = document.querySelector('.page-controls-toggle');
             var pageControlsMenu = document.querySelector('.page-controls-menu');

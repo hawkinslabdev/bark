@@ -223,13 +223,35 @@ A `TopNavItem` is a link (`text`, `link`) or a dropdown (`text`, `items`), never
 
 Source: `docs/config.json`.
 
-Social links render in the header; at 768px and below they move into the sidebar drawer. Each entry requires `icon` and `url`.
+Social links form the last section of the sidebar. Pages without a sidebar, such as the home page, show them in the footer instead. Each entry requires `icon` and `url`.
 
 | Field | Type | Description |
 |---|---|---|
-| `icon` | `string` | `"github"` and `"mastodon"` render as inline SVGs. Any other value renders as plain text, which works well for short labels like `"npm"` or `"discord"`. |
+| `icon` | `string` | A [Simple Icons](https://simpleicons.org/) slug shipped with Bark, such as `"github"`, `"mastodon"`, `"peertube"`, `"pixelfed"`, `"bluesky"`, `"x"`, `"youtube"` or `"discord"`, renders as an icon. Any other value renders as a short text label. |
 | `url` | `string` | Link target. Opens in a new tab. |
 | `title` | `string?` | Accessible label and tooltip text. Falls back to the `icon` value if omitted. |
+
+## Versions
+
+Source: `docs/config.json`.
+
+Each version is its own Bark deploy, usually one per git tag. List the same `versions` in every deploy, newest first:
+
+```json
+"versions": {
+  "enabled": true,
+  "items": [
+    { "text": "v2", "link": "/" },
+    { "text": "v1", "link": "/v1/" }
+  ]
+}
+```
+
+Links are relative to the site root, so the same list works at `/` and under a base path. The latest links to `"/"`; an older version runs with its link appended to the base path (`--base-path /v1`, or `/docs/v1` when the site lives at `/docs`). An `http(s)` link points to a version hosted elsewhere.
+
+A switcher appears in the header, next to the icons. Older versions show a notice that links to the latest, and are marked `noindex`. On the latest deploy, `/{text}/…` temporarily redirects to `/…`, so links pinned to a version (`/v2/guide`) keep working once that version moves to its own path. Set `enabled` to `false` to hide all of it, for example while previewing locally. Mistakes in the list are logged as warnings on startup.
+
+To build every version as a static site, run `scripts/export-versions.sh`. It renders each older entry from its git tag (the last segment of its `link`).
 
 ## CLI flags
 

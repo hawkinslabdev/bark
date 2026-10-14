@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
@@ -157,8 +158,9 @@ try
     // Must finish before DocumentationService's async renders the pages
     await app.Services.GetRequiredService<ISyntaxHighlighter>().InitializeAsync(CancellationToken.None);
 
+    // UsePathBase on WebApplication re-runs routing at once, so the /{**path} catch-all would shadow static files
     if (basePath.Length > 0)
-        app.UsePathBase(basePath);
+        app.UseMiddleware<UsePathBaseMiddleware>(new PathString(basePath));
 
     app.UseSecurityHeaders(customCsp);
     app.UseResponseCompression();

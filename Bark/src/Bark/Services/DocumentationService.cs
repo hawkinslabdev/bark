@@ -329,6 +329,8 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
 
         // Loaded up front so title fallback can consult config.json before the filename.
         var config = LoadConfig(docsPath);
+        foreach (var problem in VersionSwitcherRenderer.Validate(config?.Versions))
+            _logger.LogWarning("config.json versions: {Problem}", problem);
         var locales = Localization.BuildAll(docsPath, config, _logger);
         var navTitlesByPath = BuildNavTitleLookup(config);
         var configuredLocales = LocaleRouting.TreeCodes(config);

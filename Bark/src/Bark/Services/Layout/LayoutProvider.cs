@@ -52,6 +52,7 @@ public static partial class LayoutProvider
         ThemeMode themeMode = ThemeMode.Auto,
         Localization? localization = null,
         string? localeSwitcherHtml = null,
+        string? versionSwitcherHtml = null,
         bool isRootLocale = true,
         string localePrefix = "")
     {
@@ -232,7 +233,7 @@ public static partial class LayoutProvider
                         aria-haspopup=""dialog"" aria-controls=""search-modal"" aria-label=""{HtmlEncode(l.SearchAria)}"">
                     <svg viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" aria-hidden=""true""><circle cx=""11"" cy=""11"" r=""7""/><path d=""M21 21l-4.3-4.3""/></svg>
                 </button>
-                {socialLinksHtml}
+                {versionSwitcherHtml}
                 {repoWidgetHtml}
                 {localeSwitcherHtml}
                 {themeToggleHtml}
@@ -294,7 +295,7 @@ public static partial class LayoutProvider
 </html>");
     }
 
-    public static string Get404Layout(Func<string?, string> htmlEncode, string basePath = "", string lang = "en", IBarkTheme? theme = null, ThemeMode themeMode = ThemeMode.Auto, Localization? localization = null, string localePrefix = "")
+    public static string Get404Layout(Func<string?, string> htmlEncode, string basePath = "", string lang = "en", IBarkTheme? theme = null, ThemeMode themeMode = ThemeMode.Auto, Localization? localization = null, string localePrefix = "", string? themeCss = null)
     {
         var l = localization ?? Localization.Default;
         var homeHref = LocaleRouting.Localize(localePrefix, string.Empty) is { Length: > 0 } localeHome
@@ -371,6 +372,7 @@ public static partial class LayoutProvider
             text-decoration: underline;
         }}
     </style>
+    {themeCss}
 </head>
 <body>
     <div class=""not-found"">

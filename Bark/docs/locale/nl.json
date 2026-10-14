@@ -59,6 +59,9 @@
   "translationStale": "De originele pagina is gewijzigd nadat deze vertaling is gemaakt. Mogelijk is een deel van de informatie verouderd.",
   "translationStaleLink": "Vergelijk met origineel",
   "translationMachine": "Deze pagina is door een machine vertaald, sommige zinnen lopen daardoor misschien niet lekker. Verbeteringen zijn welkom.",
+  "versionSwitcher": "Versie wisselen",
+  "versionOutdated": "Dit is een oudere versie van de documentatie.",
+  "versionLatestLink": "Bekijk de nieuwste",
   "config": {
     "Home": "Start",
     "Guide": "Gids",

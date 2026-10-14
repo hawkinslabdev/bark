@@ -76,6 +76,9 @@ public sealed class Localization
         ["translationStale"] = "The original of this page changed after this translation was written, so parts of it may be out of date.",
         ["translationStaleLink"] = "Compare with the original",
         ["translationMachine"] = "This page was translated by a machine, so some sentences may read badly. Corrections are welcome.",
+        ["versionSwitcher"] = "Switch version",
+        ["versionOutdated"] = "This is an older version of the docs.",
+        ["versionLatestLink"] = "View the latest",
         ["repoWidgetAria"] = "{0} repository",
         ["apiTryIt"] = "Try it",
         ["apiWebhook"] = "Webhook",
@@ -235,6 +238,9 @@ public sealed class Localization
     public string TranslationStale => this["translationStale"];
     public string TranslationStaleLink => this["translationStaleLink"];
     public string TranslationMachine => this["translationMachine"];
+    public string VersionSwitcher => this["versionSwitcher"];
+    public string VersionOutdated => this["versionOutdated"];
+    public string VersionLatestLink => this["versionLatestLink"];
     public string RepoWidgetAria => this["repoWidgetAria"];
 
     private static Localization From(string docsPath, Config? config, ILogger logger) =>

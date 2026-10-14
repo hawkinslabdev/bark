@@ -251,6 +251,13 @@ public sealed class LayoutProviderTests
     }
 
     [Fact]
+    public void Get404Layout_ThemeCss_LoadsAfterBuiltInStyles()
+    {
+        var html = LayoutProvider.Get404Layout(LayoutProvider.HtmlEncode, themeCss: "<link rel=\"stylesheet\" href=\"/theme/custom.css\">");
+        Assert.True(html.IndexOf("</style>", StringComparison.Ordinal) < html.IndexOf("/theme/custom.css", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Get404Layout_DoesNotContainUserContent()
     {
         var html = LayoutProvider.Get404Layout(LayoutProvider.HtmlEncode);
