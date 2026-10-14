@@ -1,8 +1,6 @@
 using System.IO.Compression;
 using Microsoft.AspNetCore.Builder.Extensions;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
 using System.Threading.RateLimiting;

@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace Bark.Services.MarkdownExtensions;
 
 /// <summary>Token color pair plus highlighted-word-match flag.</summary>

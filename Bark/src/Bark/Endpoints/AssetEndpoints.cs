@@ -2,7 +2,6 @@ using Bark.Configuration;
 using Bark.Models;
 using Bark.Services;
 using Bark.Services.Layout;
-using Bark.Services.Rendering;
 using Bark.Services.Theming;
 
 namespace Bark.Endpoints;
