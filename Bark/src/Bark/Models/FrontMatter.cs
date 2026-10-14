@@ -8,11 +8,17 @@ public sealed record FrontMatter
     /// <summary>Social preview image (og:image / twitter:image). Absolute URL, or root-relative path resolved against the request origin.</summary>
     public string? Image { get; init; }
 
-    /// <summary>Set to <c>"home"</c> to render <see cref="Hero"/>/<see cref="Features"/> instead of standard docs chrome.</summary>
+    /// <summary><c>"home"</c> (project landing) or <c>"help"</c> (help center) render <see cref="Hero"/>/<see cref="Features"/> instead of standard docs chrome.</summary>
     public string? Layout { get; init; }
 
     public HeroFrontMatter? Hero { get; init; }
     public List<FeatureFrontMatter>? Features { get; init; }
+
+    /// <summary><c>layout: help</c> only: "Popular articles" links.</summary>
+    public List<HeroActionFrontMatter>? Popular { get; init; }
+
+    /// <summary><c>layout: help</c> only: one line of Markdown closing the page, e.g. a support link.</summary>
+    public string? Contact { get; init; }
 
     public List<string>? Keywords { get; init; }
 

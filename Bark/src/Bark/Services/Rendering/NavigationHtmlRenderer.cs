@@ -212,22 +212,34 @@ public static class NavigationHtmlRenderer
     public static string BuildBottomNavHtml(List<TopNavItem> bottomNav, string basePath, Localization? localization = null, string localePrefix = "")
     {
         var l = localization ?? Localization.Default;
-        var links = bottomNav.Where(item => !string.IsNullOrWhiteSpace(item.Text) && !string.IsNullOrWhiteSpace(item.Link)).ToList();
-        if (links.Count == 0)
+        static bool IsLink(TopNavItem item) => !string.IsNullOrWhiteSpace(item.Text) && !string.IsNullOrWhiteSpace(item.Link);
+        var groups = bottomNav.Where(item => !string.IsNullOrWhiteSpace(item.Text) && item.Items?.Any(IsLink) == true).ToList();
+        var links = bottomNav.Where(item => IsLink(item) && !groups.Contains(item)).ToList();
+        if (groups.Count + links.Count == 0)
             return string.Empty;
 
         var html = new StringBuilder();
-        html.Append($"<nav class=\"footer-nav\" aria-label=\"{LayoutProvider.HtmlEncode(l.FooterNavAria)}\">");
-        foreach (var item in links)
+        html.Append($"<nav class=\"footer-nav{(groups.Count > 0 ? " footer-nav--columns" : "")}\" aria-label=\"{LayoutProvider.HtmlEncode(l.FooterNavAria)}\">");
+        foreach (var group in groups)
         {
-            var isExternal = UrlPaths.IsExternal(item.Link!);
-            var href = isExternal ? item.Link! : UrlPaths.Href(basePath, LocalizeLink(localePrefix, item.Link!));
-            html.Append($"<a href=\"{LayoutProvider.HtmlEncode(href)}\"{(isExternal ? ExternalLinkRel : "")}>")
-                .Append(LayoutProvider.HtmlEncode(l.Label(item.Text)))
-                .Append(isExternal ? ExternalLinkIcon : "")
-                .Append("</a>");
+            html.Append("<div class=\"footer-nav-group\"><h2 class=\"footer-nav-title\">").Append(LayoutProvider.HtmlEncode(l.Label(group.Text))).Append("</h2><ul>");
+            foreach (var item in group.Items!.Where(IsLink))
+                AppendFooterLink(html.Append("<li>"), item, basePath, l, localePrefix).Append("</li>");
+            html.Append("</ul></div>");
         }
+        foreach (var item in links)
+            AppendFooterLink(html, item, basePath, l, localePrefix);
         return html.Append("</nav>").ToString();
+    }
+
+    private static StringBuilder AppendFooterLink(StringBuilder html, TopNavItem item, string basePath, Localization l, string localePrefix)
+    {
+        var isExternal = UrlPaths.IsExternal(item.Link!);
+        var href = isExternal ? item.Link! : UrlPaths.Href(basePath, LocalizeLink(localePrefix, item.Link!));
+        return html.Append($"<a href=\"{LayoutProvider.HtmlEncode(href)}\"{(isExternal ? ExternalLinkRel : "")}>")
+            .Append(LayoutProvider.HtmlEncode(l.Label(item.Text)))
+            .Append(isExternal ? ExternalLinkIcon : "")
+            .Append("</a>");
     }
 
     public static void AppendTopNavLink(StringBuilder html, TopNavItem item, string currentPath, string cssClass, string basePath, bool wrapInItemDiv = false, string localePrefix = "", Localization? localization = null)

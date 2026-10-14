@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -376,7 +377,7 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
             var normalizedRelativePath = relativePath.Replace('\\', '/');
             var pageLocale = LocaleRouting.LocaleOf(pagePath, configuredLocales, configuredRootLocale);
             var localePrefix = pageLocale == configuredRootLocale ? string.Empty : pageLocale;
-            var parsed = _markdown.Parse(content, defaultTitle, filePath: normalizedRelativePath, localePrefix: localePrefix);
+            var parsed = _markdown.Parse(content, defaultTitle, filePath: normalizedRelativePath, localePrefix: localePrefix, localization: locales.For(pageLocale));
             var api = parsed.FrontMatter?.Api is { Length: > 0 } apiValue
                 ? RenderApiPage(apiSpecs, apiValue, parsed, normalizedRelativePath, locales.For(pageLocale))
                 : null;
@@ -420,6 +421,8 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
             foreach (var section in apiSections)
                 AddApiSection(section, apiSpecs, pageMap, pages, config);
         }
+
+        FillHelpArticleCounts(pageMap, pages);
 
         foreach (var (specPath, specText) in apiSpecs.Contents.OrderBy(kv => kv.Key, StringComparer.Ordinal))
             hashInput.Append(specPath).Append('\0').Append(specText).Append('\0');
@@ -521,6 +524,35 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
             _logger.LogWarning("Dead internal links found in: {Sources}", list);
         }
     }
+
+    // Help topic counts need the whole page set, so they are filled in after every page is parsed.
+    private static void FillHelpArticleCounts(Dictionary<string, DocumentationPage> pageMap, List<DocumentationPage> pages)
+    {
+        for (var i = 0; i < pages.Count; i++)
+        {
+            var page = pages[i];
+            if (page.Layout != "help")
+                continue;
+
+            var html = HelpCountRegex().Replace(page.HtmlContent, match =>
+            {
+                var section = WebUtility.HtmlDecode(match.Groups["section"].Value);
+                var count = pageMap.Keys.Count(path => path.StartsWith(section + "/", StringComparison.Ordinal));
+                if (count == 0)
+                    return string.Empty;
+
+                var label = count == 1
+                    ? match.Groups["one"].Value
+                    : WebUtility.HtmlEncode(string.Format(CultureInfo.InvariantCulture, WebUtility.HtmlDecode(match.Groups["many"].Value), count));
+                return $"<span class=\"bark-help-count\">{label}</span>";
+            });
+            pages[i] = page with { HtmlContent = html };
+            pageMap[page.Path] = pages[i];
+        }
+    }
+
+    [GeneratedRegex(@"<span class=""bark-help-count"" data-section=""(?<section>[^""]*)"" data-one=""(?<one>[^""]*)"" data-many=""(?<many>[^""]*)""></span>")]
+    private static partial Regex HelpCountRegex();
 
     private static string ResolveHref(string pagePath, string href)
     {

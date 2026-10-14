@@ -6,11 +6,12 @@ hero:
   name: Documentation, served
   text: Markdown in, docs site out.
   tagline: Point Bark at a folder of Markdown files and it serves the whole site. There is no build step.
+  image: /brand-image.svg
   actions:
     - theme: brand
       text: Get Started
       link: what-is-bark
-    - theme: alt
+    - theme: minimal
       text: View on GitHub
       link: https://github.com/hawkinslabdev/bark
 features:

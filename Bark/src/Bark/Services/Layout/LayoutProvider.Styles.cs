@@ -846,6 +846,9 @@ public static partial class LayoutProvider
         .bark-hero-action {{
             display: inline-flex;
             align-items: center;
+            gap: 0.5rem;
+            min-height: 2.75rem;
+            box-sizing: border-box;
             padding: 0.65rem 1.4rem;
             border-radius: 8px;
             font-weight: 600;
@@ -856,6 +859,19 @@ public static partial class LayoutProvider
         .bark-hero-action.brand {{
             background-color: var(--accent);
             color: var(--bg-color);
+            border-radius: 999px;
+        }}
+        .bark-hero-action svg {{
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+        }}
+        .bark-hero-action.minimal {{
+            padding-inline: 0.25rem;
+            color: var(--text-color);
+        }}
+        .bark-hero-action.minimal:hover {{
+            color: var(--accent);
         }}
         .bark-hero-action.brand:hover {{
             opacity: 0.85;
@@ -870,19 +886,24 @@ public static partial class LayoutProvider
         }}
         .bark-features {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 2.5rem 3rem;
-            margin: 0 0 3rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+            gap: 1rem;
+            margin: 0 0 4rem;
         }}
         .bark-feature {{
             display: grid;
             grid-template-columns: auto 1fr;
-            column-gap: 0.6rem;
+            column-gap: 0.75rem;
             align-content: start;
-            padding-top: 1.25rem;
-            border-top: 1px solid var(--border);
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
             text-decoration: none;
             color: inherit;
+            transition: border-color 0.15s ease;
+        }}
+        a.bark-feature:hover {{
+            border-color: var(--accent);
         }}
         a.bark-feature:hover .bark-feature-title {{
             color: var(--accent);
@@ -895,19 +916,19 @@ public static partial class LayoutProvider
             grid-row: 1;
             display: inline-flex;
             align-items: center;
-            font-size: 1.15rem;
-            color: var(--text-muted);
+            font-size: 1.35rem;
+            color: var(--accent);
             background: none;
             transition: color 0.15s ease;
         }}
         .bark-feature-icon img {{
-            width: 1.15rem;
-            height: 1.15rem;
+            width: 1.375rem;
+            height: 1.375rem;
             object-fit: contain;
         }}
         .bark-feature-icon svg {{
-            width: 1.15rem;
-            height: 1.15rem;
+            width: 1.375rem;
+            height: 1.375rem;
             stroke: currentColor;
             stroke-width: 1.5;
             fill: none;
@@ -932,7 +953,8 @@ public static partial class LayoutProvider
         .bark-feature-title {{
             grid-column: 2;
             grid-row: 1;
-            font-size: 1rem;
+            align-self: center;
+            font-size: 1.1rem;
             font-weight: 650;
             margin: 0;
             transition: color 0.15s ease;
@@ -940,10 +962,342 @@ public static partial class LayoutProvider
         .bark-feature-details {{
             grid-column: 1 / -1;
             grid-row: 2;
-            margin-top: 0.6rem;
-            font-size: 0.9rem;
+            margin-top: 0.75rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
             line-height: 1.55;
+        }}
+        .bark-hero-body {{
+            min-width: 0;
+        }}
+        .bark-home-content:has(.bark-hero--split) {{
+            max-width: 1180px;
+        }}
+        @media (min-width: 769px) {{
+            .bark-hero--split {{
+                display: grid;
+                grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+                align-items: center;
+                gap: 3rem;
+                text-align: left;
+            }}
+            .bark-hero--split .bark-hero-image {{
+                order: 2;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+            }}
+            .bark-hero--split .bark-hero-image img {{
+                max-width: 100%;
+                max-height: 320px;
+            }}
+            .bark-hero--split .bark-hero-tagline {{
+                margin-left: 0;
+            }}
+            .bark-hero--split .bark-hero-actions {{
+                justify-content: flex-start;
+            }}
+            .bark-home--banner .bark-hero--split {{
+                grid-template-columns: minmax(0, 0.6fr) minmax(0, 1.4fr);
+            }}
+            .bark-home--banner .bark-hero--split .bark-hero-image {{
+                order: 0;
+            }}
+            .bark-home--banner .bark-hero--split .bark-hero-image img {{
+                max-height: 220px;
+            }}
+        }}
+        .bark-home--banner .bark-hero {{
+            background-color: var(--accent);
+            color: var(--bg-color);
+            box-shadow: 0 0 0 100vmax var(--accent);
+            clip-path: inset(0 -100vmax);
+            margin-bottom: 4.5rem;
+        }}
+        .bark-home--banner .bark-hero-name,
+        .bark-home--banner .bark-hero-text {{
+            color: inherit;
+        }}
+        .bark-home--banner .bark-hero-tagline {{
+            color: inherit;
+            opacity: 0.85;
+        }}
+        .bark-home--banner .bark-hero-action.brand {{
+            background-color: var(--bg-color);
+            color: var(--accent);
+        }}
+        .bark-home--banner .bark-hero-action.alt {{
+            color: inherit;
+            border-color: currentColor;
+        }}
+        .bark-home--banner .bark-hero-action.alt:hover {{
+            background-color: transparent;
+            opacity: 0.85;
+        }}
+        .bark-home--banner .bark-hero-action.minimal {{
+            color: inherit;
+        }}
+        .bark-home--banner .bark-features {{
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+            gap: 3rem 2.5rem;
+        }}
+        .bark-home--banner .bark-feature {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0;
+            border: none;
+        }}
+        .bark-home--banner .bark-feature-icon {{
+            margin-bottom: 1.25rem;
+            font-size: 2.5rem;
+        }}
+        .bark-home--banner .bark-feature-icon img {{
+            width: auto;
+            height: auto;
+            max-width: 200px;
+            max-height: 180px;
+        }}
+        .bark-home--banner .bark-feature-icon svg {{
+            width: 2.5rem;
+            height: 2.5rem;
+        }}
+        .bark-home--banner .bark-feature-title {{
+            font-size: 1.2rem;
+            font-weight: 700;
+        }}
+        .bark-home-layout:has(.bark-home--banner) .site-footer {{
+            background-color: color-mix(in srgb, var(--accent) 14%, #111412);
+            color: rgba(255, 255, 255, 0.72);
+            box-shadow: 0 0 0 100vmax color-mix(in srgb, var(--accent) 14%, #111412);
+            clip-path: inset(0 -100vmax);
+            padding-top: 2.5rem;
+            padding-bottom: 2rem;
+        }}
+        .bark-home-layout:has(.bark-home--banner) .footer-bar {{
+            border-top: none;
+            padding-top: 0;
+        }}
+        .bark-home-layout:has(.bark-home--banner) .content-footer,
+        .bark-home-layout:has(.bark-home--banner) .footer-nav a {{
+            color: rgba(255, 255, 255, 0.72);
+        }}
+        .bark-home-layout:has(.bark-home--banner) .content-footer a,
+        .bark-home-layout:has(.bark-home--banner) .footer-nav a:hover,
+        .bark-home-layout:has(.bark-home--banner) .footer-nav-title {{
+            color: #ffffff;
+        }}
+        .footer-bar:has(.footer-nav--columns) {{
+            flex-direction: column-reverse;
+            align-items: stretch;
+            text-align: center;
+            gap: 2.5rem;
+        }}
+        .footer-nav--columns {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+            gap: 2rem;
+            text-align: left;
+        }}
+        .footer-nav-title {{
+            margin: 0 0 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }}
+        .footer-nav-group ul {{
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }}
+        .footer-nav--columns .footer-nav-group a {{
+            display: inline-flex;
+            min-height: 2rem;
+            align-items: center;
+            font-size: 0.875rem;
+        }}
+        .bark-help {{
+            max-width: 760px;
+            margin: 0 auto;
+            padding-bottom: 4rem;
+            width: 100%;
+        }}
+        .bark-help-hero {{
+            padding: 4.5rem 0 4rem;
+            text-align: center;
+            background-color: var(--sidebar-bg);
+            box-shadow: 0 0 0 100vmax var(--sidebar-bg), 0 1px 0 100vmax var(--border);
+            clip-path: inset(0 -100vmax -1px);
+        }}
+        .bark-help-title {{
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 500;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            color: var(--text-color);
+        }}
+        .bark-help-tagline {{
+            margin: 0.6rem 0 0;
+            font-size: 1.0625rem;
+            color: var(--text-muted);
+        }}
+        .bark-help-search {{
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            min-height: 3.5rem;
+            margin-top: 1.75rem;
+            padding: 0 1rem;
+            box-sizing: border-box;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background-color: var(--bg-color);
+            color: var(--text-muted);
+            font: inherit;
+            font-size: 1rem;
+            text-align: left;
+            cursor: text;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: border-color 0.15s ease;
+        }}
+        .bark-help-search:hover {{
+            border-color: var(--accent);
+        }}
+        .bark-help-search:focus-visible {{
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }}
+        .bark-help-search svg {{
+            width: 1.125rem;
+            height: 1.125rem;
+            flex-shrink: 0;
+        }}
+        .bark-help-search-label {{
+            flex: 1;
+        }}
+        .bark-help-search kbd {{
+            font: inherit;
+            font-size: 0.75rem;
+            padding: 0.1rem 0.4rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }}
+        .bark-help-section {{
+            margin-top: 3.5rem;
+        }}
+        .bark-help-heading {{
+            margin: 0 0 1rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }}
+        .content .bark-help-topics,
+        .content .bark-help-popular {{
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }}
+        .content .bark-help-topics {{
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }}
+        .content .bark-help-topics li,
+        .content .bark-help-popular li {{
+            margin: 0;
+        }}
+        .content .bark-help-topics li + li {{
+            border-top: 1px solid var(--border);
+        }}
+        .bark-help-topic {{
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            color: var(--text-color);
+            transition: background-color 0.15s ease;
+        }}
+        .content a.bark-help-topic {{
+            color: var(--text-color);
+        }}
+        a.bark-help-topic:hover {{
+            background-color: var(--nav-hover-bg);
+        }}
+        .bark-help-topic > svg {{
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+            color: var(--text-muted);
+        }}
+        .bark-help-topic-body {{
+            flex: 1;
+            min-width: 0;
+        }}
+        .bark-help-topic-title {{
+            display: block;
+            font-weight: 600;
+        }}
+        .bark-help-topic-details {{
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.925rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+        }}
+        .bark-help-count {{
+            display: block;
+            margin-top: 0.5rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }}
+        .content .bark-help-popular {{
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: 2rem;
+        }}
+        .content .bark-help-popular a {{
+            display: block;
+            padding: 0.5rem 0;
+            text-decoration: none;
+        }}
+        .content .bark-help-popular a:hover {{
+            text-decoration: underline;
+        }}
+        .bark-help-contact {{
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+        }}
+        .content .bark-help-contact p {{
+            color: var(--text-muted);
+            margin: 0;
+        }}
+        @media (max-width: 768px) {{
+            .bark-help-hero {{
+                padding: 3rem 0 2.5rem;
+            }}
+            .bark-help-title {{
+                font-size: 1.9rem;
+            }}
+            .bark-help-search kbd {{
+                display: none;
+            }}
+            .bark-help-topic {{
+                padding: 1rem;
+            }}
+            .content .bark-help-popular {{
+                grid-template-columns: 1fr;
+            }}
+            .content .bark-help-popular a {{
+                padding: 0.75rem 0;
+            }}
+            .bark-home--banner .bark-hero {{
+                margin-bottom: 3rem;
+            }}
         }}
         .content .bark-cards {{
             grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
@@ -1264,7 +1618,7 @@ public static partial class LayoutProvider
             color: var(--text-color);
             font-weight: 500;
         }}
-        .content h1:not(.bark-hero-text):not(.bark-hero-name) {{
+        .content h1:not(.bark-hero-text):not(.bark-hero-name):not(.bark-help-title) {{
             font-size: 2.35rem;
             font-weight: 650;
             letter-spacing: -0.035em;
@@ -1384,7 +1738,7 @@ public static partial class LayoutProvider
         .content h6:hover .header-anchor, .header-anchor:focus {{
             opacity: 1;
         }}
-        .content h2:not(.bark-feature-title) {{
+        .content h2:not(.bark-feature-title):not(.bark-help-heading) {{
             font-size: 1.4rem;
             font-weight: 500;
             letter-spacing: -0.02em;
@@ -1394,7 +1748,7 @@ public static partial class LayoutProvider
             border-bottom: 1px solid var(--border);
             scroll-margin-top: calc(var(--topbar-height) + 1rem);
         }}
-        .content p:not(:where(.bark-hero-tagline, .bark-feature-title, .bark-feature-details, .bark-hero-name, .custom-block-title)) {{
+        .content p:not(:where(.bark-hero-tagline, .bark-feature-title, .bark-feature-details, .bark-hero-name, .bark-help-tagline, .custom-block-title)) {{
             color: var(--text-color);
             margin-bottom: 1.25rem;
             text-decoration-color: var(--border);
@@ -1410,7 +1764,7 @@ public static partial class LayoutProvider
         .content a:hover {{
             text-decoration-color: var(--accent);
         }}
-        .content a.bark-hero-action, .content a.bark-feature, .content a.pagination-link {{
+        .content a.bark-hero-action, .content a.bark-feature, .content a.pagination-link, .content a.bark-help-topic {{
             text-decoration: none;
         }}
         .content a.bark-feature {{

@@ -25,7 +25,7 @@ Without `footer` or `bottomNav`, no footer is rendered. There is no default text
 
 ## Footer links
 
-`bottomNav` adds a row of links. Items use the `topNav` shape (`text`, `link`); dropdown `items` are ignored.
+`bottomNav` adds a row of links. Items use the `topNav` shape (`text`, `link`). An item with `items` becomes a titled column of links, shown above the footer text.
 
 ```json
 {
