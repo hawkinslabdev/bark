@@ -773,9 +773,10 @@ public static partial class LayoutProvider
                 window.mermaid.run();
             }}
 
-            var localeToggle = document.getElementById('locale-toggle');
-            var localeDropdown = document.getElementById('locale-dropdown');
-            if (localeToggle && localeDropdown) {{
+            function setupSwitcherMenu(toggleId, dropdownId) {{
+                var localeToggle = document.getElementById(toggleId);
+                var localeDropdown = document.getElementById(dropdownId);
+                if (!localeToggle || !localeDropdown) return;
                 function closeLocaleMenu() {{
                     localeDropdown.hidden = true;
                     localeToggle.setAttribute('aria-expanded', 'false');
@@ -791,7 +792,7 @@ public static partial class LayoutProvider
                     if (localeDropdown.hidden) openLocaleMenu(); else closeLocaleMenu();
                 }});
                 document.addEventListener('click', function(e) {{
-                    if (!localeDropdown.hidden && !localeDropdown.contains(e.target) && e.target !== localeToggle)
+                    if (!localeDropdown.hidden && !localeDropdown.contains(e.target) && !localeToggle.contains(e.target))
                         closeLocaleMenu();
                 }});
                 document.addEventListener('keydown', function(e) {{
@@ -810,6 +811,8 @@ public static partial class LayoutProvider
                     items[idx].focus();
                 }});
             }}
+            setupSwitcherMenu('locale-toggle', 'locale-dropdown');
+            setupSwitcherMenu('version-toggle', 'version-dropdown');
 
             var pageControlsToggle = document.querySelector('.page-controls-toggle');
             var pageControlsMenu = document.querySelector('.page-controls-menu');

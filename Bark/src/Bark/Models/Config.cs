@@ -15,6 +15,9 @@ public class Config
 
     public Dictionary<string, LocaleEntry>? Locales { get; set; }
 
+    /// <summary>Documentation versions. <c>root</c> labels the top-level docs; every other key names a version folder, e.g. <c>"v1.0"</c>.</summary>
+    public Dictionary<string, VersionEntry>? Versions { get; set; }
+
     public static LocaleOptions? ResolveLocale(Config? config)
     {
         if (config is null || (config.Locale is null && config.Lang is null))

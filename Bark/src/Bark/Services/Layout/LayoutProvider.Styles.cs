@@ -1119,6 +1119,32 @@ public static partial class LayoutProvider
         .locale-switcher {{
             position: relative;
         }}
+        .version-toggle {{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            height: 36px;
+            padding: 0 0.6rem;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            font: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.15s ease, background-color 0.15s ease;
+        }}
+        .version-toggle:hover,
+        .version-toggle[aria-expanded=""true""] {{
+            color: var(--text-color);
+            background-color: var(--code-bg);
+        }}
+        .version-toggle svg {{
+            width: 14px;
+            height: 14px;
+        }}
         .repo-widget {{
             display: inline-flex;
             align-items: center;
@@ -1400,7 +1426,7 @@ public static partial class LayoutProvider
         .content li:has(> p) {{
             margin-bottom: 0.9rem;
         }}
-        .content li > div[class^=""language-""] {{
+        .content li > :is(div[class^=""language-""], .bark-code-group) {{
             margin: 0.75rem 0;
         }}
         .content li > :last-child,

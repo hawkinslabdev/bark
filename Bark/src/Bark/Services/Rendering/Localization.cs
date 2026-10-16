@@ -75,6 +75,9 @@ public sealed class Localization
         ["translationMissingLink"] = "Open the original page",
         ["translationStale"] = "The original of this page changed after this translation was written, so parts of it may be out of date.",
         ["translationStaleLink"] = "Compare with the original",
+        ["versionSwitcher"] = "Change version",
+        ["versionOutdated"] = "This page documents an older version.",
+        ["versionLatestLink"] = "View the latest version",
         ["translationMachine"] = "This page was translated by a machine, so some sentences may read badly. Corrections are welcome.",
         ["repoWidgetAria"] = "{0} repository",
         ["apiTryIt"] = "Try it",
@@ -158,9 +161,16 @@ public sealed class Localization
         var root = From(docsPath, config, logger);
         var tables = new Dictionary<string, Localization>(StringComparer.OrdinalIgnoreCase) { [root.Code] = root };
 
-        foreach (var code in LocaleRouting.TreeCodes(config))
+        foreach (var code in LocaleRouting.LocaleCodes(config))
             if (!tables.ContainsKey(code))
                 tables[code] = FromCode(docsPath, code, logger);
+
+        // A version reads in the language of its tree; its own code keys the version's search index.
+        foreach (var code in LocaleRouting.TreeCodes(config).Where(code => LocaleRouting.IsVersion(config, code)))
+        {
+            var language = LocaleRouting.LocalePartOf(config, code) is { Length: > 0 } locale ? tables[locale] : root;
+            tables.TryAdd(code, new Localization(language._map, code, language._labels));
+        }
 
         return new LocaleTables(tables, root);
     }
@@ -235,6 +245,9 @@ public sealed class Localization
     public string TranslationStale => this["translationStale"];
     public string TranslationStaleLink => this["translationStaleLink"];
     public string TranslationMachine => this["translationMachine"];
+    public string VersionSwitcher => this["versionSwitcher"];
+    public string VersionOutdated => this["versionOutdated"];
+    public string VersionLatestLink => this["versionLatestLink"];
     public string RepoWidgetAria => this["repoWidgetAria"];
 
     private static Localization From(string docsPath, Config? config, ILogger logger) =>

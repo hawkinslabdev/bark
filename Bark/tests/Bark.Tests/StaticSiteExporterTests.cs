@@ -1,3 +1,4 @@
+using Bark.Models;
 using Bark.Services;
 
 namespace Bark.Tests;
@@ -7,8 +8,8 @@ public sealed class StaticSiteExporterTests
     [Fact]
     public void ExportPaths_WritesRootPagesUnderEveryLocalePrefix()
     {
-        var paths = StaticSiteExporter.ExportPaths(
-            ["index", "guide/what-is-bark", "nl"], ["nl", "de"], "en");
+        var config = new Config { Lang = "en", Locales = new() { ["root"] = new(), ["nl"] = new(), ["de"] = new() } };
+        var paths = StaticSiteExporter.ExportPaths(["index", "guide/what-is-bark", "nl"], config);
 
         Assert.Contains("nl/guide/what-is-bark", paths);
         Assert.Contains("de/guide/what-is-bark", paths);

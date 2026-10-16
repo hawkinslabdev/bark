@@ -309,6 +309,10 @@ public sealed class PageRequestHandler
             ? await _docs.GetPageAsync(sourcePath, context.RequestAborted)
             : null;
 
+        var versionNoticeHtml = isHomePage
+            ? string.Empty
+            : VersionSwitcherRenderer.Notice(config, route.Code, route.ContentPath, basePath, l, _docs.PathResolves);
+
         var noticeHtml = isHomePage
             ? string.Empty
             : servedFallback && originalHref is not null
@@ -323,11 +327,12 @@ public sealed class PageRequestHandler
                 : string.Empty;
 
         var localeSwitcherHtml = LocaleSwitcherRenderer.Build(
-            config, route.Code, route.ContentPath, basePath, l);
+            config, route.Code, route.ContentPath, basePath, l)
+            + VersionSwitcherRenderer.Build(config, route.Code, route.ContentPath, basePath, l, _docs.PathResolves);
 
         var fullHtml = LayoutProvider.GetLayout(
             title: PageTitleRenderer.ComputeTitle(page.Title, config, l),
-            content: noticeHtml + page.HtmlContent,
+            content: versionNoticeHtml + noticeHtml + page.HtmlContent,
             navigationHtml: navHtml,
             topNavHtml: topNavHtml,
             mobileTopNavHtml: mobileTopNavHtml,

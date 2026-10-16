@@ -92,16 +92,19 @@ internal static partial class SeoEndpoints
             return string.Empty;
 
         var pageLocale = LocaleRouting.LocaleOf(path, localeCodes, rootLocale);
-        var rootPath = LocaleRouting.Delocalize(pageLocale == rootLocale ? string.Empty : pageLocale, path);
+        var tree = pageLocale == rootLocale ? string.Empty : pageLocale;
+        var version = LocaleRouting.VersionPartOf(config, tree);
+        var rootPath = LocaleRouting.Delocalize(tree, path);
 
         var sb = new StringBuilder();
-        foreach (var code in localeCodes.Prepend(rootLocale))
+        foreach (var locale in LocaleRouting.LocaleCodes(config).Prepend(string.Empty))
         {
-            var candidate = LocaleRouting.Localize(code == rootLocale ? string.Empty : code, rootPath);
+            var candidate = LocaleRouting.Localize(LocaleRouting.TreeOf(locale, version), rootPath);
             if (!pagePaths.Contains(candidate))
                 continue;
 
-            sb.Append($"<xhtml:link rel=\"alternate\" hreflang=\"{LocaleRouting.LangOf(config, code)}\" href=\"{UrlPaths.Href(basePath, candidate)}\"/>");
+            var lang = LocaleRouting.LangOf(config, locale.Length == 0 ? rootLocale : locale);
+            sb.Append($"<xhtml:link rel=\"alternate\" hreflang=\"{lang}\" href=\"{UrlPaths.Href(basePath, candidate)}\"/>");
         }
 
         return sb.ToString();
