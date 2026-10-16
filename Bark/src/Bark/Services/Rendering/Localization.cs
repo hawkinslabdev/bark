@@ -79,6 +79,11 @@ public sealed class Localization
         ["versionSwitcher"] = "Switch version",
         ["versionOutdated"] = "This is an older version of the docs.",
         ["versionLatestLink"] = "View the latest",
+        ["helpSearch"] = "Search for articles…",
+        ["helpTopics"] = "Browse by topic",
+        ["helpPopular"] = "Popular articles",
+        ["helpArticleCount"] = "{0} articles",
+        ["helpArticleCountOne"] = "1 article",
         ["repoWidgetAria"] = "{0} repository",
         ["apiTryIt"] = "Try it",
         ["apiWebhook"] = "Webhook",
@@ -248,6 +253,11 @@ public sealed class Localization
     public string VersionSwitcher => this["versionSwitcher"];
     public string VersionOutdated => this["versionOutdated"];
     public string VersionLatestLink => this["versionLatestLink"];
+    public string HelpSearch => this["helpSearch"];
+    public string HelpTopics => this["helpTopics"];
+    public string HelpPopular => this["helpPopular"];
+    public string HelpArticleCount => this["helpArticleCount"];
+    public string HelpArticleCountOne => this["helpArticleCountOne"];
     public string RepoWidgetAria => this["repoWidgetAria"];
 
     private static Localization From(string docsPath, Config? config, ILogger logger) =>

@@ -501,6 +501,9 @@ public static partial class LayoutProvider
             if (searchTriggerMobile) {{
                 searchTriggerMobile.addEventListener('click', openSearchModal);
             }}
+            document.querySelectorAll('[data-bark-search]').forEach(function(el) {{
+                el.addEventListener('click', openSearchModal);
+            }});
             searchModalClose.addEventListener('click', closeSearchModal);
             searchOverlay.addEventListener('mousedown', function(e) {{
                 if (e.target === searchOverlay) closeSearchModal();

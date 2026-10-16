@@ -1,11 +1,14 @@
 ---
 title: Homepage
-description: layout:home frontmatter, hero and features
+description: Landing page layouts, home for a project landing and help for a help center
 ---
 
 # Homepage
 
-`layout: home` replaces the doc interface (sidebar, table of contents, breadcrumbs) with a hero section and a features grid. This site's `index.md` uses it.
+Two layouts replace the doc interface (sidebar, table of contents, breadcrumbs) with a landing page:
+
+- `layout: home` is a project landing page: a hero with actions, then feature cards. This site's [index](/) uses it; [Banner home](/examples/banner-home) shows the `banner` variant.
+- `layout: help` is a help center: a search field, topics and popular articles. See [Help center](#help-center) and the [example](/examples/help-center).
 
 ```yaml
 ---
@@ -14,11 +17,12 @@ hero:
   name: Bark
   text: Markdown in, docs site out.
   tagline: Drop .md files in a folder. Get a searchable, navigable docs site.
+  image: /brand-image.svg
   actions:
     - theme: brand
       text: Get Started
       link: /guide/getting-started
-    - theme: alt
+    - theme: minimal
       text: View on GitHub
       link: https://github.com/hawkinslabdev/bark
 features:
@@ -28,6 +32,8 @@ features:
 ---
 ```
 
+With an image file, the hero sits beside it; with an emoji or no image, the hero is centered. Add `variant: banner` under `hero` for a full-width band in the brand colour.
+
 ## Hero
 
 | Field | Type | Required | Description |
@@ -35,14 +41,15 @@ features:
 | `name` | `string` | no | Small heading above `text`, typically the product name. |
 | `text` | `string` | no | The big headline. |
 | `tagline` | `string` | no | Supporting subtext below `text`. |
-| `image` | `string` | no | A URL (rendered as `<img>`) or a single emoji/character (rendered as text) shown above the headline. |
+| `image` | `string` | no | An image path or URL, shown beside the headline (below it on phones), or a single emoji/character, shown above a centered headline. |
 | `actions` | `HeroAction[]` | no | Call-to-action buttons. |
+| `variant` | `"banner"` | no | Renders the hero as a full-width band in the brand colour, with features as centered columns and a dark footer below. |
 
 **`HeroAction`**
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `theme` | `"brand"` \| `"alt"` | no | `brand` is the filled button, `alt` is the outline button. Defaults to `brand`. |
+| `theme` | `"brand"` \| `"alt"` \| `"minimal"` | no | `brand` is the filled button with an arrow, `alt` the outline button, `minimal` a text link (with an external-link icon for absolute URLs). Defaults to `brand`. |
 | `text` | `string` | yes | Button label. |
 | `link` | `string` | yes | Button target. Internal paths and external URLs are supported. |
 
@@ -71,3 +78,100 @@ Array of cards rendered in a responsive grid below the hero.
 > `hero.image` accepts a URL or a single emoji/character. The `iconImage` format is not supported.
 
 Markdown below the front matter renders beneath the features grid.
+
+## Help center
+
+`layout: help` is a search-first landing page for end-user documentation: a title, a large search field, a list of topics with article counts, popular articles and a closing contact line.
+
+```yaml
+---
+layout: help
+hero:
+  text: How can we help?
+  tagline: Guides and answers for your product.
+features:
+  - title: Running payroll
+    details: Pay runs, corrections and holiday pay.
+    link: /running-payroll/
+popular:
+  - text: Run your first payroll
+    link: /running-payroll/first-run
+contact: "Can't find what you need? [Contact support](mailto:support@example.com)"
+---
+```
+
+| Field | Description |
+|---|---|
+| `hero.text`, `hero.tagline` | Title and subtitle above the search field. Other hero fields are ignored. |
+| `features` | Topics, listed in order. The article count is the number of pages under each topic's `link`; it's hidden when there are none. `icon` is ignored. |
+| `popular` | Links (`text`, `link`) shown in two columns. Optional. |
+| `contact` | One line of Markdown closing the page. Optional. |
+
+The search field opens the site search. Markdown below the front matter renders after these blocks.
+
+## Examples
+
+Both example pages ship with these docs. Copy one into your `docs/` folder as a starting point.
+
+- [Banner home](/examples/banner-home): `layout: home` with `variant: banner`.
+- [Help center](/examples/help-center): `layout: help`, with topics pointing at this site's own sections.
+
+::: code-group
+```md [examples/banner-home/index.md]
+---
+title: Banner home
+description: Example of the home layout with a banner hero.
+layout: home
+hero:
+  variant: banner
+  name: Bark
+  text: Serve beautiful docs straight from your Markdown
+  tagline: A folder of Markdown files in, a searchable documentation site out.
+  image: /brand-image.svg
+  actions:
+    - theme: brand
+      text: Get started
+      link: /guide/getting-started
+    - theme: alt
+      text: View on GitHub
+      link: https://github.com/hawkinslabdev/bark
+features:
+  - title: Easy to use
+    details: Drop Markdown files in a folder. Navigation, breadcrumbs and search follow your structure.
+  - title: Focus on what matters
+    details: No build step and no framework to learn. Save a file and the live site updates.
+  - title: Runs anywhere
+    details: Docker, IIS or systemd, or a static export for GitHub Pages.
+---
+```
+```md [examples/help-center/index.md]
+---
+title: Help center
+description: Example of the help-center home layout.
+layout: help
+hero:
+  text: How can we help?
+  tagline: Guides and answers for running Bark.
+features:
+  - title: Guide
+    details: Install Bark, write Markdown and deploy your site.
+    link: /guide/
+  - title: Reference
+    details: Every setting in config.json and frontmatter.
+    link: /reference/
+  - title: Example API
+    details: Pages generated from an OpenAPI spec.
+    link: /examples/api/
+popular:
+  - text: Getting started
+    link: /guide/getting-started
+  - text: Deploy
+    link: /guide/deploy
+  - text: Site config
+    link: /reference/site-config
+  - text: Themes
+    link: /guide/themes
+contact: "Can't find what you need? [Open an issue on GitHub](https://github.com/hawkinslabdev/bark/issues)."
+---
+```
+:::

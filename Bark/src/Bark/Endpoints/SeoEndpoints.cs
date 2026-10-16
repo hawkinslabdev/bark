@@ -124,7 +124,7 @@ internal static partial class SeoEndpoints
         var feedLang = WebUtility.HtmlEncode(config?.Lang ?? "en");
 
         var recentPages = pages
-            .Where(p => p.Layout != "home" && !LocaleRouting.IsVersion(config, LocaleRouting.LocaleOf(p.Path, docs.LocaleCodes, docs.RootLocale)))
+            .Where(p => p.Layout is not ("home" or "help") && !LocaleRouting.IsVersion(config, LocaleRouting.LocaleOf(p.Path, docs.LocaleCodes, docs.RootLocale)))
             .OrderByDescending(p => p.LastModified ?? DateTime.MinValue)
             .Take(20)
             .ToList();

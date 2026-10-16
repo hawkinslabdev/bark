@@ -225,7 +225,7 @@ public sealed class PageRequestHandler
         var crumbs = await _docs.GetBreadcrumbsAsync(path, l, context.RequestAborted);
         var breadcrumbHtml = BreadcrumbHtmlRenderer.BuildBreadcrumbHtml(crumbs, page.Title, basePath);
 
-        var isHomePage = page.Layout == "home";
+        var isHomePage = page.Layout is "home" or "help";
         var paginationHtml = string.Empty;
         if (!isHomePage && page.ShowPagination)
         {

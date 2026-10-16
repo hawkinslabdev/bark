@@ -76,7 +76,8 @@ public sealed partial class MarkdownService
         string? defaultTitle = null,
         string? filePath = null,
         string localePrefix = "",
-        string versionPrefix = "")
+        string versionPrefix = "",
+        Localization? localization = null)
     {
         markdown = EscapeBracesInCodeSpans(markdown);
         var document = Markdown.Parse(markdown, _pipeline);
@@ -116,6 +117,8 @@ public sealed partial class MarkdownService
 
         if (frontMatter?.Layout == "home")
             html = RenderHomePage(frontMatter, _basePath, localePrefix) + html;
+        else if (frontMatter?.Layout == "help")
+            html = RenderHelpPage(frontMatter, _basePath, localePrefix, localization ?? Localization.Default) + html;
 
         return new MarkdownParseResult(
             html,
@@ -160,25 +163,41 @@ public sealed partial class MarkdownService
         }
     }
 
+    private const string ArrowIcon =
+        "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg>";
+
+    private const string ExternalIcon =
+        "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5\"/></svg>";
+
+    private const string ChevronIcon =
+        "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 6l6 6-6 6\"/></svg>";
+
+    private const string SearchIcon =
+        "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"M21 21l-4.3-4.3\"/></svg>";
+
     private static string RenderHomePage(FrontMatter frontMatter, string basePath, string localePrefix)
     {
+        var hero = frontMatter.Hero;
+        var isBanner = hero?.Variant == "banner";
         var sb = new StringBuilder();
-        sb.Append("<div class=\"bark-home\">");
+        sb.Append(isBanner ? "<div class=\"bark-home bark-home--banner\">" : "<div class=\"bark-home\">");
 
-        if (frontMatter.Hero is { } hero)
+        if (hero is not null)
         {
-            sb.Append("<div class=\"bark-hero\">");
+            var hasImageFile = !string.IsNullOrWhiteSpace(hero.Image)
+                && (hero.Image.Contains('/') || hero.Image.StartsWith("http", StringComparison.OrdinalIgnoreCase));
+            sb.Append(hasImageFile ? "<div class=\"bark-hero bark-hero--split\">" : "<div class=\"bark-hero\">");
 
             if (!string.IsNullOrWhiteSpace(hero.Image))
             {
-                var isUrl = hero.Image.Contains('/') || hero.Image.StartsWith("http", StringComparison.OrdinalIgnoreCase);
                 sb.Append("<div class=\"bark-hero-image\">")
-                    .Append(isUrl
+                    .Append(hasImageFile
                         ? $"<img src=\"{WebUtility.HtmlEncode(PrefixInternalAsset(hero.Image, basePath))}\" alt=\"\">"
                         : WebUtility.HtmlEncode(hero.Image))
                     .Append("</div>");
             }
 
+            sb.Append("<div class=\"bark-hero-body\">");
             // `name` is the first headline line, so `text` takes the <h1>; a name-only hero keeps it.
             var hasHeadline = !string.IsNullOrWhiteSpace(hero.Text);
             if (!string.IsNullOrWhiteSpace(hero.Name))
@@ -196,15 +215,22 @@ public sealed partial class MarkdownService
                 sb.Append("<div class=\"bark-hero-actions\">");
                 foreach (var action in actions)
                 {
-                    var theme = action.Theme == "alt" ? "alt" : "brand";
+                    var theme = action.Theme is "alt" or "minimal" ? action.Theme : "brand";
+                    var link = action.Link ?? "#";
+                    var icon = theme switch
+                    {
+                        "brand" => ArrowIcon,
+                        "minimal" when UrlPaths.IsExternal(link) => ExternalIcon,
+                        _ => "",
+                    };
                     sb.Append("<a class=\"bark-hero-action ").Append(theme).Append("\" href=\"")
-                        .Append(WebUtility.HtmlEncode(PrefixInternalLink(action.Link ?? "#", basePath, localePrefix))).Append("\">")
-                        .Append(WebUtility.HtmlEncode(action.Text ?? string.Empty)).Append("</a>");
+                        .Append(WebUtility.HtmlEncode(PrefixInternalLink(link, basePath, localePrefix))).Append("\">")
+                        .Append(WebUtility.HtmlEncode(action.Text ?? string.Empty)).Append(icon).Append("</a>");
                 }
                 sb.Append("</div>");
             }
 
-            sb.Append("</div>");
+            sb.Append("</div></div>");
         }
 
         if (frontMatter.Features is { Count: > 0 } features)
@@ -230,6 +256,63 @@ public sealed partial class MarkdownService
 
         sb.Append("</div>");
         return sb.ToString();
+    }
+
+    private string RenderHelpPage(FrontMatter frontMatter, string basePath, string localePrefix, Localization l)
+    {
+        var sb = new StringBuilder();
+        sb.Append("<div class=\"bark-help\"><div class=\"bark-help-hero\">");
+        if (frontMatter.Hero?.Text is { Length: > 0 } heading)
+            sb.Append("<h1 class=\"bark-help-title\">").Append(WebUtility.HtmlEncode(heading)).Append("</h1>");
+        if (frontMatter.Hero?.Tagline is { Length: > 0 } tagline)
+            sb.Append("<p class=\"bark-help-tagline\">").Append(WebUtility.HtmlEncode(tagline)).Append("</p>");
+        sb.Append("<button type=\"button\" class=\"bark-help-search\" data-bark-search aria-haspopup=\"dialog\" aria-controls=\"search-modal\">")
+            .Append(SearchIcon)
+            .Append("<span class=\"bark-help-search-label\">").Append(WebUtility.HtmlEncode(l.HelpSearch)).Append("</span>")
+            .Append("<kbd aria-hidden=\"true\">Ctrl K</kbd></button></div>");
+
+        if (frontMatter.Features is { Count: > 0 } topics)
+        {
+            sb.Append("<section class=\"bark-help-section\" aria-labelledby=\"bark-help-topics\">")
+                .Append("<h2 id=\"bark-help-topics\" class=\"bark-help-heading\">").Append(WebUtility.HtmlEncode(l.HelpTopics)).Append("</h2>")
+                .Append("<ul class=\"bark-help-topics\">");
+            foreach (var topic in topics.Where(t => !string.IsNullOrWhiteSpace(t.Title)))
+            {
+                var link = topic.Link;
+                var section = string.IsNullOrWhiteSpace(link) || UrlPaths.IsExternal(link)
+                    ? null
+                    : LocaleRouting.Localize(localePrefix, link.Trim('/')).ToLowerInvariant();
+                sb.Append("<li>")
+                    .Append(link is { Length: > 0 }
+                        ? $"<a class=\"bark-help-topic\" href=\"{WebUtility.HtmlEncode(PrefixInternalLink(link, basePath, localePrefix))}\">"
+                        : "<div class=\"bark-help-topic\">")
+                    .Append("<span class=\"bark-help-topic-body\"><span class=\"bark-help-topic-title\">").Append(WebUtility.HtmlEncode(topic.Title)).Append("</span>");
+                if (!string.IsNullOrWhiteSpace(topic.Details))
+                    sb.Append("<span class=\"bark-help-topic-details\">").Append(WebUtility.HtmlEncode(topic.Details)).Append("</span>");
+                if (section is { Length: > 0 })
+                    sb.Append("<span class=\"bark-help-count\" data-section=\"").Append(WebUtility.HtmlEncode(section))
+                        .Append("\" data-one=\"").Append(WebUtility.HtmlEncode(l.HelpArticleCountOne))
+                        .Append("\" data-many=\"").Append(WebUtility.HtmlEncode(l.HelpArticleCount)).Append("\"></span>");
+                sb.Append("</span>").Append(link is { Length: > 0 } ? ChevronIcon + "</a>" : "</div>").Append("</li>");
+            }
+            sb.Append("</ul></section>");
+        }
+
+        if (frontMatter.Popular is { Count: > 0 } popular)
+        {
+            sb.Append("<section class=\"bark-help-section\" aria-labelledby=\"bark-help-popular\">")
+                .Append("<h2 id=\"bark-help-popular\" class=\"bark-help-heading\">").Append(WebUtility.HtmlEncode(l.HelpPopular)).Append("</h2>")
+                .Append("<ul class=\"bark-help-popular\">");
+            foreach (var item in popular.Where(p => !string.IsNullOrWhiteSpace(p.Text) && !string.IsNullOrWhiteSpace(p.Link)))
+                sb.Append("<li><a href=\"").Append(WebUtility.HtmlEncode(PrefixInternalLink(item.Link!, basePath, localePrefix))).Append("\">")
+                    .Append(WebUtility.HtmlEncode(item.Text)).Append("</a></li>");
+            sb.Append("</ul></section>");
+        }
+
+        if (frontMatter.Contact is { Length: > 0 } contact)
+            sb.Append("<div class=\"bark-help-contact\">").Append(ToHtml(contact)).Append("</div>");
+
+        return sb.Append("</div>").ToString();
     }
 
     private static void AppendFeatureIcon(StringBuilder sb, Models.FeatureFrontMatter feature, string basePath)

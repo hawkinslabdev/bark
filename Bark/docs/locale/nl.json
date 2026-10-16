@@ -62,6 +62,11 @@
   "versionSwitcher": "Versie wisselen",
   "versionOutdated": "Dit is een oudere versie van de documentatie.",
   "versionLatestLink": "Bekijk de nieuwste",
+  "helpSearch": "Zoek in artikelen…",
+  "helpTopics": "Bekijk per onderwerp",
+  "helpPopular": "Populaire artikelen",
+  "helpArticleCount": "{0} artikelen",
+  "helpArticleCountOne": "1 artikel",
   "config": {
     "Home": "Start",
     "Guide": "Gids",
