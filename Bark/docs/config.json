@@ -237,11 +237,28 @@
   "bottomNav": [                                                                                                                                                
       { "text": "Privacy", "link": "/privacy" }                                                                             
   ], 
+  "versions": {
+    "enabled": true,
+    "items": [
+      { "text": "Latest", "link": "/" },
+      { "text": "v0.0.29", "link": "/v0.0.29/" }
+    ]
+  },
   "socialLinks": [
     {
       "icon": "mastodon",
       "url": "https://fosstodon.org/@example",
       "title": "Mastodon"
+    },
+    {
+      "icon": "peertube",
+      "url": "https://peertube.tv/a/example",
+      "title": "PeerTube"
+    },
+    {
+      "icon": "pixelfed",
+      "url": "https://pixelfed.social/example",
+      "title": "Pixelfed"
     }
   ],
   "editLink": {

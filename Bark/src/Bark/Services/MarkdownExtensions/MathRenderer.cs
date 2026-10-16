@@ -1,7 +1,5 @@
-using System.Linq;
 using System.Net;
 using Jint;
-using Jint.Runtime;
 
 namespace Bark.Services.MarkdownExtensions;
 

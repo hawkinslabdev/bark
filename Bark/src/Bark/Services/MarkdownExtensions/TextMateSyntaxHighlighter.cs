@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Linq;
 using TextMateSharp.Grammars;
 using TextMateSharp.Internal.Themes.Reader;
 using TextMateSharp.Registry;

@@ -231,25 +231,28 @@ Markdown values use the exact source string, including links, as the key:
 
 ## Versions
 
-Documentation versions use one directory per version, declared in `config.json`:
+`versions` in `config.json` lists the documentation versions, newest first. A version is a separate deploy or a folder in `docs/`. The list format and separate deploys are described in [Site Config](/reference/site-config#versions).
+
+A folder version is an entry whose `link` is one path segment with a matching folder: `{ "text": "v1.0", "link": "/v1.0/" }` with `docs/v1.0/`. `docs/v1.0/guide/install.md` is served at `/v1.0/guide/install/`.
 
 ```json
 {
   "versions": {
-    "root": { "label": "v2.0" },
-    "v1.0": {
-      "label": "v1.0",
-      "sidebar": {
-        "/guide/": [
-          { "title": "Guide", "items": [{ "title": "Install", "path": "guide/install" }] }
-        ]
+    "items": [
+      { "text": "v2.0", "link": "/" },
+      {
+        "text": "v1.0",
+        "link": "/v1.0/",
+        "sidebar": {
+          "/guide/": [
+            { "title": "Guide", "items": [{ "title": "Install", "path": "guide/install" }] }
+          ]
+        }
       }
-    }
+    ]
   }
 }
 ```
-
-`root` is the latest version at the top of `docs/`. Other keys are directory names: `docs/v1.0/guide/install.md` is served at `/v1.0/guide/install/`.
 
 ```
 docs/
@@ -262,24 +265,25 @@ docs/
 
 | Key | Description |
 |---|---|
-| `label` | Text in the version switcher. Defaults to the key. |
-| `sidebar` | Sidebar for the version, in the format of the site `sidebar`. Paths are relative to the version directory. Defaults to the site `sidebar`. |
+| `text` | Text in the version switcher. |
+| `link` | `/` for the latest version. `/<folder>/` for a folder version. |
+| `sidebar` | Sidebar for a folder version, in the format of the site `sidebar`. Paths are relative to the version folder. Defaults to the site `sidebar`. |
 
-Each version has its own navigation and search index. A version uses the language and interface strings of its tree. Absolute links in a version page, such as `/guide/install`, resolve inside the version directory.
-
-The header includes a version switcher when `versions` lists a key other than `root`. The switcher lists versions in `config.json` order. Each entry links to the same page in that version. If the page does not exist in that version: the entry links to the version home.
-
-Pages of a version other than `root` render a notice with a link to the latest version. A page missing from a version returns `404`. Versions do not fall back to `root` pages.
+- Each folder version has its own navigation and search index. A version uses the language and interface strings of its tree.
+- Absolute links in a version page, such as `/guide/install`, resolve inside the version folder.
+- The switcher entry of a folder version links to the same page in that version. If the page does not exist in that version: the entry links to the version home. Entries without a folder link to the root of that deploy.
+- Pages of an older version render a notice with a link to the latest version, are marked `noindex`, and are left out of the sitemap and feed.
+- A page missing from a version returns `404`. Versions do not fall back to pages of the latest version.
 
 ::: tip
-To archive the current documentation as a version, copy `docs/` (without `locale/`, `assets/` and `config.json`) to `docs/<version>/`, then copy the `sidebar` from `config.json` to `versions.<version>.sidebar`.
+To archive the current documentation as a folder version, copy `docs/` (without `locale/`, `assets/` and `config.json`) to `docs/<version>/`, add an entry with `"link": "/<version>/"`, and copy the site `sidebar` to its `sidebar`.
 :::
 
-Version keys must differ from locale codes and the primary language code. If a version key matches one: the directory is served as a version, and startup logs a warning.
+Version folders must differ from locale codes and the primary language code. If a version folder matches one: the folder is served as a version, and startup logs a warning.
 
 ### Translated versions
 
-A translated version is a version directory inside a locale directory. `docs/nl/v1.0/guide/install.md` is served at `/nl/v1.0/guide/install/`.
+A translated version is a version folder inside a locale folder. `docs/nl/v1.0/guide/install.md` is served at `/nl/v1.0/guide/install/`.
 
 ```
 docs/
@@ -292,5 +296,5 @@ docs/
 - A translated version uses the language and interface strings of its locale, and the sidebar of its version.
 - If a page is missing from a translated version: the page of the same version in the primary language is served with the untranslated notice. A page missing from both returns `404`.
 - The version switcher keeps the current locale. The locale switcher keeps the current version.
-- Each translated version has its own search index and sitemap alternates.
-- `--translate` translates version directories into the locale directory.
+- Each translated version has its own search index.
+- `--translate` translates version folders into the locale folder.

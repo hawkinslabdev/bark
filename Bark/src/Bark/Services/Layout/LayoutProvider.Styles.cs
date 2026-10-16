@@ -1116,24 +1116,28 @@ public static partial class LayoutProvider
                 min-height: 44px;
             }}
         }}
-        .locale-switcher {{
+        .locale-switcher, .version-switcher {{
             position: relative;
+        }}
+        .version-switcher {{
+            margin-right: 0.25rem;
         }}
         .version-toggle {{
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            height: 36px;
-            padding: 0 0.6rem;
-            border: 0;
+            gap: 0.2rem;
+            min-height: 32px;
+            padding: 0.2rem 0.4rem 0.2rem 0.55rem;
+            border: none;
             border-radius: 6px;
             background: transparent;
             color: var(--text-muted);
             font: inherit;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 500;
-            cursor: pointer;
+            font-variant-numeric: tabular-nums;
             white-space: nowrap;
+            cursor: pointer;
             transition: color 0.15s ease, background-color 0.15s ease;
         }}
         .version-toggle:hover,
@@ -1141,9 +1145,20 @@ public static partial class LayoutProvider
             color: var(--text-color);
             background-color: var(--code-bg);
         }}
+        .version-toggle:focus-visible {{
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }}
         .version-toggle svg {{
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
+            transition: transform 0.15s ease;
+        }}
+        .version-toggle[aria-expanded=""true""] svg {{
+            transform: rotate(180deg);
+        }}
+        .locale-dropdown.version-dropdown {{
+            min-width: 9rem;
         }}
         .repo-widget {{
             display: inline-flex;
@@ -2146,10 +2161,38 @@ public static partial class LayoutProvider
             gap: 0.25rem;
         }}
         .social-icon-text {{
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }}
+        .social-links .icon-btn:has(.social-icon-text) {{
+            width: auto;
+            padding: 0 0.5rem;
+        }}
+        .footer-end {{
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem 1.25rem;
         }}
         .sidebar-social-links {{
+            margin-top: 0.75rem;
+            padding: 0.75rem 0 0 0.625rem;
+            border-top: 1px solid var(--border);
+        }}
+        .sidebar-social-links .social-links {{
+            flex-wrap: wrap;
+        }}
+        .social-label {{
             display: none;
+        }}
+        .sidebar-social-links .social-links:not(:has(> :nth-child(3))) .icon-btn {{
+            width: auto;
+            gap: 0.5rem;
+            padding: 0 0.5rem;
+            font-size: 0.875rem;
+        }}
+        .sidebar-social-links .social-links:not(:has(> :nth-child(3))) .social-label {{
+            display: inline;
         }}
         .site-footer {{
             padding: 0 3rem 1.25rem 4rem;
@@ -2446,16 +2489,6 @@ public static partial class LayoutProvider
             .search-result-excerpt {{
                 font-size: 0.8rem;
             }}
-            .topbar-right .social-links {{
-                display: none;
-            }}
-            .sidebar-social-links {{
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.25rem;
-                padding: 1.25rem 0 0.25rem;
-                border-top: 1px solid var(--border);
-            }}
         }}
         @media (max-width: 380px) {{
             .topbar-inner {{
@@ -2469,6 +2502,26 @@ public static partial class LayoutProvider
             }}
             .brand a {{
                 white-space: nowrap;
+            }}
+            .version-toggle {{
+                font-size: 0.8rem;
+            }}
+            .topbar-right .icon-btn, .topbar-right .repo-widget {{
+                width: 32px;
+            }}
+        }}
+        @media (max-width: 768px) {{
+            .brand a {{
+                white-space: nowrap;
+            }}
+            .version-switcher {{
+                margin-right: 0;
+            }}
+            .version-toggle {{
+                padding: 0.2rem 0.3rem;
+            }}
+            .version-toggle svg {{
+                display: none;
             }}
         }}
         @media (prefers-reduced-motion: reduce) {{

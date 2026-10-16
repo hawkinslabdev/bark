@@ -4,7 +4,8 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'docs/**'
+      - 'Bark/docs/**'
+      - 'scripts/export-versions.sh'
       - '.github/workflows/bark-deployment.yml'
   workflow_dispatch: {}
 
@@ -40,9 +41,8 @@ jobs:
         dotnet publish Bark/src/Bark/Bark.csproj -c Release -o ${{ github.workspace }}/publish
 
     - name: Generate static site
-      working-directory: ${{ github.workspace }}/publish
       run: |
-        ./Bark --export ${{ github.workspace }}/site --base-url https://hawkinslabdev.github.io --base-path /bark
+        scripts/export-versions.sh ${{ github.workspace }}/publish ${{ github.workspace }}/site https://hawkinslabdev.github.io /bark
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3

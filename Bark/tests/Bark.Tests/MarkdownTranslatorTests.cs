@@ -149,7 +149,7 @@ public sealed class TranslationRunnerTests : IDisposable
         Directory.CreateDirectory(Path.Combine(_docsDir, "v1.0"));
         await File.WriteAllTextAsync(Path.Combine(_docsDir, "v1.0", "index.md"), "Old welcome.\n");
         var config = LocaleConfig();
-        config.Versions = new() { ["root"] = new(), ["v1.0"] = new() };
+        config.Versions = VersionConfigs.Folders("v1.0");
 
         var outcome = await TranslationRunner.RunAsync(new TranslationRequest(_docsDir, "nl", Overwrite: false), config, Shout, NullLogger.Instance);
 

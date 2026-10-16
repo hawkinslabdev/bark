@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace Bark.Services.MarkdownExtensions;
 
 /// <summary>No-op <see cref="ISyntaxHighlighter"/>: each line comes back as one plain token. Also the fallback on failure.</summary>

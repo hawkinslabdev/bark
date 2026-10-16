@@ -42,8 +42,23 @@ public static class LocaleRouting
 
     public static IReadOnlyList<string> LocaleCodes(Config? config) => NonRootKeys(config?.Locales?.Keys).Order().ToArray();
 
-    // Config order, so the switcher lists versions as the author wrote them.
-    public static IReadOnlyList<string> VersionCodes(Config? config) => NonRootKeys(config?.Versions?.Keys).Distinct().ToArray();
+    // Folder versions in config order, so the switcher lists versions as the author wrote them.
+    public static IReadOnlyList<string> VersionCodes(Config? config) =>
+        config?.Versions is { Enabled: true, Items: { } items } versions
+            ? items.Skip(1).Select(VersionCodeOf).OfType<string>().Where(versions.Folders.Contains).Distinct().ToArray()
+            : [];
+
+    // "/v1/" names folder version "v1"; "/", nested paths and absolute URLs name no folder.
+    public static string? VersionCodeOf(TopNavItem item) =>
+        item.Link is ['/', ..] link && !link.StartsWith("//", StringComparison.Ordinal)
+            && link.Trim('/') is { Length: > 0 } path && !path.Contains('/') && !path.Contains('\\')
+            ? path.ToLowerInvariant()
+            : null;
+
+    private static VersionItem? VersionItemOf(Config? config, string version) =>
+        config?.Versions?.Items is { } items
+            ? version.Length == 0 ? items.FirstOrDefault() : items.Skip(1).FirstOrDefault(item => VersionCodeOf(item) == version)
+            : null;
 
     public static IReadOnlyList<string> VersionLocaleCollisions(Config? config) =>
         VersionCodes(config).Where(code => code.Equals(RootCode(config), StringComparison.OrdinalIgnoreCase) || LocaleCodes(config).Contains(code)).ToArray();
@@ -53,14 +68,11 @@ public static class LocaleRouting
     public static string VersionLabelOf(Config? config, string code)
     {
         var version = VersionPartOf(config, code);
-        var key = version.Length == 0 ? RootKey : version;
-        var entry = config?.Versions?.FirstOrDefault(kv => kv.Key.Equals(key, StringComparison.OrdinalIgnoreCase)).Value;
-        return entry?.Label is { Length: > 0 } label ? label : key;
+        return VersionItemOf(config, version)?.Text is { Length: > 0 } text ? text : version.Length == 0 ? RootKey : version;
     }
 
     public static Dictionary<string, List<NavEntry>>? SidebarFor(Config? config, string prefix) =>
-        VersionPartOf(config, prefix) is { Length: > 0 } version
-            && config?.Versions?.FirstOrDefault(kv => kv.Key.Equals(version, StringComparison.OrdinalIgnoreCase)).Value?.Sidebar is { } sidebar
+        VersionPartOf(config, prefix) is { Length: > 0 } version && VersionItemOf(config, version)?.Sidebar is { } sidebar
             ? sidebar
             : config?.Sidebar;
 

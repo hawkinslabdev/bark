@@ -15,9 +15,6 @@ public class Config
 
     public Dictionary<string, LocaleEntry>? Locales { get; set; }
 
-    /// <summary>Documentation versions. <c>root</c> labels the top-level docs; every other key names a version folder, e.g. <c>"v1.0"</c>.</summary>
-    public Dictionary<string, VersionEntry>? Versions { get; set; }
-
     public static LocaleOptions? ResolveLocale(Config? config)
     {
         if (config is null || (config.Locale is null && config.Lang is null))
@@ -52,6 +49,9 @@ public class Config
     public List<TopNavItem>? TopNav { get; set; }
 
     public List<SocialLink>? SocialLinks { get; set; }
+
+    /// <summary>Version switcher in the header. A version is its own deploy, or a docs folder named after its link.</summary>
+    public VersionsConfig? Versions { get; set; }
 
     public List<TopNavItem>? BottomNav { get; set; }
 

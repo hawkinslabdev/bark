@@ -41,8 +41,7 @@ public sealed class TranslatedVersionWebApplicationFactory : WebApplicationFacto
                 "nl": { "label": "Nederlands", "lang": "nl-NL" }
               },
               "versions": {
-                "root": { "label": "v2.0" },
-                "v1.0": { "label": "v1.0" }
+                "items": [ { "text": "v2.0", "link": "/" }, { "text": "v1.0", "link": "/v1.0/" } ]
               }
             }
             """);
@@ -107,7 +106,7 @@ public sealed class TranslatedVersionTests : IClassFixture<TranslatedVersionWebA
 
         Assert.Contains("id=\"version-toggle\"", html);
         Assert.Contains("href=\"/nl/v1.0/guide/install/\">v1.0</a>", html);
-        Assert.Contains("href=\"/nl/guide/install/\" aria-current=\"true\">v2.0</a>", html);
+        Assert.Contains("aria-current=\"true\" role=\"menuitem\" href=\"/nl/guide/install/\">v2.0</a>", html);
     }
 
     [Fact]
@@ -149,12 +148,23 @@ public sealed class TranslatedVersionTests : IClassFixture<TranslatedVersionWebA
     }
 
     [Fact]
-    public async Task Sitemap_LinksVersionTranslationsAsAlternates()
+    public async Task Sitemap_ListsTheLatestVersionOnly()
     {
         var xml = await _factory.CreateClient().GetStringAsync("/sitemap.xml");
 
-        Assert.Contains("hreflang=\"nl-NL\" href=\"/nl/v1.0/guide/install/\"", xml);
-        Assert.Contains("hreflang=\"en\" href=\"/v1.0/guide/install/\"", xml);
+        Assert.Contains("hreflang=\"nl-NL\" href=\"/nl/guide/install/\"", xml);
+        Assert.DoesNotContain("/v1.0/", xml);
+    }
+
+    [Fact]
+    public async Task OlderFolderVersions_AreNotIndexed()
+    {
+        var client = _factory.CreateClient();
+        var old = await client.GetStringAsync("/nl/v1.0/guide/install");
+        var latest = await client.GetStringAsync("/nl/guide/install");
+
+        Assert.Contains("<meta name=\"robots\" content=\"noindex\">", old);
+        Assert.DoesNotContain("noindex", latest);
     }
 
     [Fact]
@@ -177,7 +187,7 @@ public sealed class TranslatedVersionTests : IClassFixture<TranslatedVersionWebA
         {
             Lang = "en",
             Locales = new() { ["root"] = new(), ["nl"] = new() },
-            Versions = new() { ["root"] = new(), ["v1.0"] = new() },
+            Versions = VersionConfigs.Folders("v1.0"),
         };
 
         var paths = StaticSiteExporter.ExportPaths(["index", "guide/deploy", "v1.0", "v1.0/guide/setup"], config);
@@ -199,7 +209,7 @@ public sealed class TranslatedVersionTests : IClassFixture<TranslatedVersionWebA
         {
             Lang = "en",
             Locales = new() { ["root"] = new(), ["nl"] = new() },
-            Versions = new() { ["root"] = new(), ["v1.0"] = new() },
+            Versions = VersionConfigs.Folders("v1.0"),
         };
 
         var route = LocaleRouting.Resolve(config, path);

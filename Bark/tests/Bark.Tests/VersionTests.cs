@@ -7,6 +7,15 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Bark.Tests;
 
+internal static class VersionConfigs
+{
+    public static VersionsConfig Folders(params string[] folders) => new()
+    {
+        Items = [new() { Text = "v2.0", Link = "/" }, .. folders.Select(folder => new VersionItem { Text = folder, Link = $"/{folder}/" })],
+        Folders = new HashSet<string>(folders, StringComparer.OrdinalIgnoreCase),
+    };
+}
+
 public sealed class VersionWebApplicationFactory : WebApplicationFactory<Program>
 {
     public string DocsDir { get; } =
@@ -27,13 +36,16 @@ public sealed class VersionWebApplicationFactory : WebApplicationFactory<Program
             {
               "lang": "en",
               "versions": {
-                "root": { "label": "v2.0" },
-                "v1.0": {
-                  "label": "v1.0",
-                  "sidebar": {
-                    "/guide/": [ { "title": "Old guide", "items": [ { "title": "Setup", "path": "guide/setup" } ] } ]
+                "items": [
+                  { "text": "v2.0", "link": "/" },
+                  {
+                    "text": "v1.0",
+                    "link": "/v1.0/",
+                    "sidebar": {
+                      "/guide/": [ { "title": "Old guide", "items": [ { "title": "Setup", "path": "guide/setup" } ] } ]
+                    }
                   }
-                }
+                ]
               },
               "sidebar": {
                 "/guide/": [ { "title": "Guide", "items": [ { "title": "Deploy", "path": "guide/deploy" } ] } ]
@@ -89,7 +101,7 @@ public sealed class VersionTests : IClassFixture<VersionWebApplicationFactory>
 
         Assert.Contains("id=\"version-toggle\"", old);
         Assert.Contains("href=\"/guide/install/\">v2.0</a>", old);
-        Assert.Contains("href=\"/v1.0/guide/install/\" aria-current=\"true\">v1.0</a>", old);
+        Assert.Contains("aria-current=\"true\" role=\"menuitem\" href=\"/v1.0/guide/install/\">v1.0</a>", old);
         Assert.Contains("href=\"/v1.0/\">v1.0</a>", latest);
         Assert.DoesNotContain("id=\"locale-toggle\"", old);
     }
@@ -136,7 +148,7 @@ public sealed class VersionTests : IClassFixture<VersionWebApplicationFactory>
         {
             Lang = "en",
             Locales = new() { ["root"] = new(), ["nl"] = new() },
-            Versions = new() { ["root"] = new(), ["v1.0"] = new() },
+            Versions = VersionConfigs.Folders("v1.0"),
         };
         var paths = StaticSiteExporter.ExportPaths(["index", "guide/deploy", "v1.0", "v1.0/guide/install", "nl/v1.0/guide/install"], config);
 
@@ -149,9 +161,36 @@ public sealed class VersionTests : IClassFixture<VersionWebApplicationFactory>
     }
 
     [Fact]
+    public void VersionSwitcher_MixesFolderVersionsAndDeploys()
+    {
+        var config = new Config
+        {
+            Versions = new VersionsConfig
+            {
+                Items =
+                [
+                    new() { Text = "v2.0", Link = "/" },
+                    new() { Text = "v1.0", Link = "/v1.0/" },
+                    new() { Text = "v0.9", Link = "/v0.9/" },
+                    new() { Text = "v0.1", Link = "https://old.example.com/" },
+                ],
+                Folders = new HashSet<string>(["v1.0"], StringComparer.OrdinalIgnoreCase),
+            },
+        };
+
+        var html = VersionSwitcherRenderer.Build(config, "v1.0", "v1.0/guide/install", "", Localization.Default, _ => true);
+
+        Assert.Contains("href=\"/guide/install/\">v2.0</a>", html);
+        Assert.Contains("aria-current=\"true\" role=\"menuitem\" href=\"/v1.0/guide/install/\">v1.0</a>", html);
+        Assert.Contains("href=\"/v0.9/\">v0.9</a>", html);
+        Assert.Contains("href=\"https://old.example.com/\">v0.1</a>", html);
+        Assert.Equal(["v1.0"], LocaleRouting.VersionCodes(config));
+    }
+
+    [Fact]
     public void Routing_VersionHasNoFallback()
     {
-        var config = new Config { Versions = new() { ["root"] = new(), ["v1.0"] = new() } };
+        var config = new Config { Versions = VersionConfigs.Folders("v1.0") };
 
         var route = LocaleRouting.Resolve(config, "v1.0/guide/deploy");
 
@@ -166,7 +205,7 @@ public sealed class VersionTests : IClassFixture<VersionWebApplicationFactory>
         {
             Lang = "en",
             Locales = new() { ["root"] = new(), ["nl"] = new() },
-            Versions = new() { ["root"] = new(), ["NL"] = new(), ["en"] = new(), ["v1.0"] = new() },
+            Versions = VersionConfigs.Folders("NL", "en", "v1.0"),
         };
 
         Assert.Equal(["nl", "en"], LocaleRouting.VersionLocaleCollisions(config));
@@ -178,7 +217,7 @@ public sealed class VersionTests : IClassFixture<VersionWebApplicationFactory>
         var config = new Config
         {
             Locales = new() { ["root"] = new(), ["nl"] = new() },
-            Versions = new() { ["root"] = new(), ["v1.0"] = new() },
+            Versions = VersionConfigs.Folders("v1.0"),
         };
 
         Assert.Empty(LocaleRouting.VersionLocaleCollisions(config));

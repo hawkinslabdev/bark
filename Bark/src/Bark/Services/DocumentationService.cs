@@ -329,11 +329,13 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
 
         // Loaded up front so title fallback can consult config.json before the filename.
         var config = LoadConfig(docsPath);
+        foreach (var problem in VersionSwitcherRenderer.Validate(config?.Versions))
+            _logger.LogWarning("config.json versions: {Problem}", problem);
         var locales = Localization.BuildAll(docsPath, config, _logger);
         var navTitlesByPath = BuildNavTitleLookup(config);
         var configuredLocales = LocaleRouting.TreeCodes(config);
         if (LocaleRouting.VersionLocaleCollisions(config) is { Count: > 0 } collisions)
-            _logger.LogWarning("config.json versions {Codes} match a locale code. These directories are served as versions, not translations. Rename the version keys.",
+            _logger.LogWarning("config.json versions {Codes} match a locale code. These folders are served as versions, not translations. Change the version links.",
                 string.Join(", ", collisions));
         var configuredRootLocale = LocaleRouting.RootCode(config);
 
@@ -773,10 +775,15 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
         try
         {
             var json = File.ReadAllText(configPath);
-            return JsonSerializer.Deserialize<Config>(json, new JsonSerializerOptions
+            var config = JsonSerializer.Deserialize<Config>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
+            if (config?.Versions?.Items is { } items)
+                config.Versions.Folders = items.Skip(1).Select(LocaleRouting.VersionCodeOf).OfType<string>()
+                    .Where(code => Directory.Exists(Path.Combine(docsPath, code)))
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            return config;
         }
         catch
         {

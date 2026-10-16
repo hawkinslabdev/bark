@@ -67,7 +67,8 @@ internal static partial class SeoEndpoints
             : "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
         sb.AppendLine($"  <url><loc>{UrlPaths.Href(basePath, "")}</loc><priority>1.0</priority></url>");
 
-        foreach (var page in pages.OrderBy(p => p.Path))
+        // Older versions are noindex; the sitemap lists the latest version only.
+        foreach (var page in pages.Where(p => !LocaleRouting.IsVersion(config, LocaleRouting.LocaleOf(p.Path, localeCodes, rootLocale))).OrderBy(p => p.Path))
         {
             if (page.Path == "index") continue;
             var lastMod = page.LastModified?.ToString("yyyy-MM-dd") ?? DateTime.UtcNow.ToString("yyyy-MM-dd");
@@ -123,7 +124,7 @@ internal static partial class SeoEndpoints
         var feedLang = WebUtility.HtmlEncode(config?.Lang ?? "en");
 
         var recentPages = pages
-            .Where(p => p.Layout != "home")
+            .Where(p => p.Layout != "home" && !LocaleRouting.IsVersion(config, LocaleRouting.LocaleOf(p.Path, docs.LocaleCodes, docs.RootLocale)))
             .OrderByDescending(p => p.LastModified ?? DateTime.MinValue)
             .Take(20)
             .ToList();
