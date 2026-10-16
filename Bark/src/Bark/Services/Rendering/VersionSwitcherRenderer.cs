@@ -5,8 +5,9 @@ using Bark.Services.Layout;
 namespace Bark.Services.Rendering;
 
 /// <summary>
-/// Each version is its own deploy. Links are relative to the site root (the latest deploy's base path): the first
-/// entry is the latest at <c>"/"</c>, an older one at e.g. <c>"/v1/"</c> runs with base path <c>{site root}/v1</c>.
+/// A version is its own deploy, or a folder of the latest deploy. Links are relative to the site root (the latest deploy's
+/// base path): the first entry is the latest at <c>"/"</c>, an older one at e.g. <c>"/v1/"</c> runs with base path
+/// <c>{site root}/v1</c>, or is served from <c>docs/v1/</c> when that folder exists.
 /// </summary>
 public static class VersionSwitcherRenderer
 {
@@ -46,11 +47,38 @@ public static class VersionSwitcherRenderer
         return path.Length == 0 ? $"{siteRoot}/" : $"{siteRoot}/{path}/";
     }
 
-    public static string Build(IReadOnlyList<TopNavItem>? versions, int current, string basePath, Localization localization)
+    public static string Build(IReadOnlyList<TopNavItem>? versions, int current, string basePath, Localization localization) =>
+        versions is { Count: > 1 } && current >= 0
+            ? Render(versions, current, i => Href(versions, current, basePath, versions[i].Link), localization)
+            : string.Empty;
+
+    /// <summary>Switcher for a page: a folder version links to the same page in that version, a deploy to its root.</summary>
+    public static string Build(Config? config, string currentCode, string currentPath, string basePath, Localization localization, Func<string, bool> exists)
     {
-        if (versions is not { Count: > 1 } || current < 0)
+        if (Active(config) is not { } versions)
             return string.Empty;
 
+        var at = PositionOf(config, versions, currentCode, currentPath, basePath);
+        return Render(versions, at.Current, i => HrefOf(config, versions, at, i, basePath, exists), localization);
+    }
+
+    /// <summary>Index of the version a page belongs to, or <c>-1</c> without an active switcher.</summary>
+    public static int CurrentIndex(Config? config, string currentCode, string basePath) =>
+        Active(config) is { } versions ? PositionOf(config, versions, currentCode, string.Empty, basePath).Current : -1;
+
+    public static string Notice(Config? config, string currentCode, string currentPath, string basePath, Localization localization, Func<string, bool> exists)
+    {
+        if (Active(config) is not { } versions)
+            return string.Empty;
+
+        var at = PositionOf(config, versions, currentCode, currentPath, basePath);
+        return at.Current > 0
+            ? TranslationNoticeRenderer.Build("translation-notice version-notice", localization.VersionOutdated, localization.VersionLatestLink, HrefOf(config, versions, at, 0, basePath, exists))
+            : string.Empty;
+    }
+
+    private static string Render(IReadOnlyList<TopNavItem> versions, int current, Func<int, string> href, Localization localization)
+    {
         var currentText = versions[current].Text;
         var toggleLabel = LayoutProvider.HtmlEncode($"{localization.VersionSwitcher} ({currentText})");
         var html = new StringBuilder();
@@ -67,7 +95,7 @@ public static class VersionSwitcherRenderer
             var isCurrent = i == current;
             html.Append("<a class=\"locale-option")
                 .Append(isCurrent ? " locale-option--current\" aria-current=\"true\"" : "\"")
-                .Append(" role=\"menuitem\" href=\"").Append(LayoutProvider.HtmlEncode(Href(versions, current, basePath, versions[i].Link))).Append("\">")
+                .Append(" role=\"menuitem\" href=\"").Append(LayoutProvider.HtmlEncode(href(i))).Append("\">")
                 .Append(LayoutProvider.HtmlEncode(versions[i].Text)).Append("</a>");
         }
 
@@ -121,6 +149,46 @@ public static class VersionSwitcherRenderer
             else if (i > 0 && path is { Length: 0 })
                 yield return $"only the first entry may link to \"/\"; \"{item.Text}\" needs its own path";
         }
+    }
+
+    private readonly record struct Position(int Deploy, int Current, string Locale, string RootPath);
+
+    private static Position PositionOf(Config? config, IReadOnlyList<TopNavItem> versions, string currentCode, string currentPath, string basePath)
+    {
+        var tree = currentCode.Equals(LocaleRouting.RootCode(config), StringComparison.OrdinalIgnoreCase) ? string.Empty : currentCode;
+        var deploy = CurrentIndex(versions, basePath);
+        var version = LocaleRouting.VersionPartOf(config, tree);
+        var folder = version.Length == 0 ? -1 : IndexOf(versions, version);
+        return new Position(deploy, folder > 0 ? folder : deploy, LocaleRouting.LocalePartOf(config, tree), LocaleRouting.Delocalize(tree, currentPath));
+    }
+
+    private static int IndexOf(IReadOnlyList<TopNavItem> versions, string code)
+    {
+        for (var i = 1; i < versions.Count; i++)
+            if (LocaleRouting.VersionCodeOf(versions[i]) == code)
+                return i;
+        return -1;
+    }
+
+    // Folder versions only exist in the latest deploy; an older deploy links every entry by its site-root link.
+    private static string HrefOf(Config? config, IReadOnlyList<TopNavItem> versions, Position at, int index, string basePath, Func<string, bool> exists)
+    {
+        var folder = index == 0 ? string.Empty
+            : LocaleRouting.VersionCodeOf(versions[index]) is { } code && LocaleRouting.VersionCodes(config).Contains(code) ? code
+            : null;
+        return at.Deploy == 0 && folder is not null
+            ? SamePage(LocaleRouting.TreeOf(at.Locale, folder), at.RootPath, basePath, exists)
+            : Href(versions, at.Deploy, basePath, versions[index].Link);
+    }
+
+    private static string SamePage(string prefix, string rootPath, string basePath, Func<string, bool> exists)
+    {
+        var target = LocaleRouting.Localize(prefix, rootPath);
+        if (!exists(target.Length == 0 ? "index" : target))
+            target = prefix;
+        if (target.Equals("index", StringComparison.OrdinalIgnoreCase))
+            target = string.Empty;
+        return UrlPaths.Href(basePath, target);
     }
 
     private static string? RelativePath(string? link) =>

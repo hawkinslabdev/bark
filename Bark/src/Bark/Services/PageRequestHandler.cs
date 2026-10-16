@@ -338,11 +338,9 @@ public sealed class PageRequestHandler
         var localeSwitcherHtml = LocaleSwitcherRenderer.Build(
             config, route.Code, route.ContentPath, basePath, l);
 
-        var versions = VersionSwitcherRenderer.Active(config);
-        var versionIndex = VersionSwitcherRenderer.CurrentIndex(versions, basePath);
-        var versionSwitcherHtml = VersionSwitcherRenderer.Build(versions, versionIndex, basePath, l);
-        var versionNoticeHtml = isHomePage ? string.Empty : VersionSwitcherRenderer.Notice(versions, versionIndex, basePath, l);
-        var noIndexHtml = versionIndex > 0 ? "<meta name=\"robots\" content=\"noindex\">" : string.Empty;
+        var versionSwitcherHtml = VersionSwitcherRenderer.Build(config, route.Code, route.ContentPath, basePath, l, _docs.PathResolves);
+        var versionNoticeHtml = isHomePage ? string.Empty : VersionSwitcherRenderer.Notice(config, route.Code, route.ContentPath, basePath, l, _docs.PathResolves);
+        var noIndexHtml = VersionSwitcherRenderer.CurrentIndex(config, route.Code, basePath) > 0 ? "<meta name=\"robots\" content=\"noindex\">" : string.Empty;
 
         var fullHtml = LayoutProvider.GetLayout(
             title: PageTitleRenderer.ComputeTitle(page.Title, config, l),

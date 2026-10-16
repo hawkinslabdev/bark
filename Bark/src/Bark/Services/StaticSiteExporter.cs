@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Bark.Configuration;
+using Bark.Models;
 using Bark.Serialization;
 using Bark.Services.Rendering;
 
@@ -30,7 +31,7 @@ public static class StaticSiteExporter
         var publicPrefix = string.IsNullOrEmpty(baseUrl) ? null : baseUrl.TrimEnd('/');
         var basePath = app.Services.GetRequiredService<PageRequestSettings>().BasePath;
 
-        foreach (var path in ExportPaths(pages.Select(p => p.Path), docs.LocaleCodes, docs.RootLocale))
+        foreach (var path in ExportPaths(pages.Select(p => p.Path), docs.SiteConfig))
         {
             var requestPath = path == "index" ? "/" : $"/{path}";
             using var response = await client.GetAsync(requestPath, cancellationToken);
@@ -41,7 +42,7 @@ public static class StaticSiteExporter
             var depth = path == "index" ? 0 : path.Split('/').Length;
             var relativePrefix = string.Concat(Enumerable.Repeat("../", depth));
             html = html.Replace($"{basePath}/bark.css", $"{relativePrefix}bark.css")
-                       .Replace($"{basePath}/bark.js", $"{relativePrefix}bark.js");
+                       .Replace($"{basePath}/bark.js", $"{relativePrefix}{ScriptPath(LocaleRouting.LocaleOf(path, docs.LocaleCodes, docs.RootLocale), docs.RootLocale)}");
             var targetFile = path == "index"
                 ? Path.Combine(outputDir, "index.html")
                 : Path.Combine(outputDir, path, "index.html");
@@ -57,11 +58,17 @@ public static class StaticSiteExporter
             await File.WriteAllTextAsync(Path.Combine(outputDir, extra), content, cancellationToken);
         }
 
-        foreach (var asset in new[] { "bark.css", "bark.js" })
+        // A static host ignores the locale query, so each tree gets its own script with its strings and search index URL.
+        var assets = docs.LocaleCodes.Prepend(docs.RootLocale)
+            .Select(code => (Request: $"/bark.js?locale={Uri.EscapeDataString(code)}", File: ScriptPath(code, docs.RootLocale)))
+            .Prepend(("/bark.css", "bark.css"));
+        foreach (var (request, file) in assets)
         {
-            using var assetResponse = await client.GetAsync($"/{asset}", cancellationToken);
+            using var assetResponse = await client.GetAsync(request, cancellationToken);
             var bytes = await assetResponse.Content.ReadAsByteArrayAsync(cancellationToken);
-            await File.WriteAllBytesAsync(Path.Combine(outputDir, asset), bytes, cancellationToken);
+            var target = Path.Combine(outputDir, file);
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            await File.WriteAllBytesAsync(target, bytes, cancellationToken);
         }
 
         using var notFoundResponse = await client.GetAsync("/__bark_export_404__", cancellationToken);
@@ -94,19 +101,28 @@ public static class StaticSiteExporter
         await app.StopAsync(cancellationToken);
     }
 
-    // A locale tree only holds the pages actually translated; the server falls back to the root locale for the rest.
-    // A static host has no fallback, so every root page is also written under each locale prefix.
-    internal static IReadOnlyList<string> ExportPaths(
-        IEnumerable<string> pagePaths, IReadOnlyList<string> localeCodes, string rootLocale)
+    // A translated tree only holds the pages actually translated; the server falls back to the same version in the root language.
+    // A static host has no fallback, so every page of that source tree is also written under the translated prefix.
+    internal static string ScriptPath(string treeCode, string rootLocale) =>
+        treeCode == rootLocale ? "bark.js" : $"{treeCode}/bark.js";
+
+    internal static IReadOnlyList<string> ExportPaths(IEnumerable<string> pagePaths, Config? config)
     {
         var paths = pagePaths.ToList();
         var seen = new HashSet<string>(paths, StringComparer.Ordinal);
-        var rootPages = paths.Where(p => LocaleRouting.LocaleOf(p, localeCodes, rootLocale) == rootLocale).ToList();
+        var treeCodes = LocaleRouting.TreeCodes(config);
+        var rootLocale = LocaleRouting.RootCode(config);
+        var pagesByTree = paths.ToLookup(p => LocaleRouting.LocaleOf(p, treeCodes, rootLocale) is var tree && tree == rootLocale ? string.Empty : tree);
 
-        foreach (var code in localeCodes)
-            foreach (var localized in rootPages.Select(p => LocaleRouting.Localize(code, p)))
+        foreach (var code in treeCodes)
+        {
+            if (LocaleRouting.FallbackTreeOf(config, code) is not { } source)
+                continue;
+
+            foreach (var localized in pagesByTree[source].Select(page => LocaleRouting.Localize(code, LocaleRouting.Delocalize(source, page))).ToList())
                 if (seen.Add(localized))
                     paths.Add(localized);
+        }
 
         return paths;
     }

@@ -253,6 +253,8 @@ A switcher appears in the header, next to the icons. Older versions show a notic
 
 To build every version as a static site, run `scripts/export-versions.sh`. It renders each older entry from its git tag (the last segment of its `link`).
 
+If `docs/<segment>/` exists for an entry with `"link": "/<segment>/"`: the latest deploy serves that version from the folder, and its switcher entry links to the same page. An entry accepts a `sidebar` for its folder. See [Versions](/guide/configuration#versions).
+
 ## CLI flags
 
 Command-line flags override configuration for a single run. Used mainly for [static export](/guide/deploy#option-e-static-export-github-pages-etc); also valid in server mode.

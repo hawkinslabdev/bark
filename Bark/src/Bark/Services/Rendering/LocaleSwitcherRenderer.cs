@@ -20,14 +20,16 @@ public static class LocaleSwitcherRenderer
     {
         var rootCode = LocaleRouting.RootCode(config);
         var codes = new List<string> { rootCode };
-        codes.AddRange(LocaleRouting.TreeCodes(config).Where(code => code != rootCode));
+        codes.AddRange(LocaleRouting.LocaleCodes(config).Where(code => code != rootCode));
         if (codes.Count < 2)
             return string.Empty;
 
         var currentPrefix = currentCode == rootCode ? string.Empty : currentCode;
+        var currentLocale = LocaleRouting.LocalePartOf(config, currentPrefix) is { Length: > 0 } locale ? locale : rootCode;
+        var version = LocaleRouting.VersionPartOf(config, currentPrefix);
         var rootPath = LocaleRouting.Delocalize(currentPrefix, currentPath);
 
-        var toggleLabel = LayoutProvider.HtmlEncode($"{localization.LocaleSwitcher} ({LocaleRouting.LabelOf(config, currentCode)})");
+        var toggleLabel = LayoutProvider.HtmlEncode($"{localization.LocaleSwitcher} ({LocaleRouting.LabelOf(config, currentLocale)})");
         var html = new StringBuilder();
         html.Append("<div class=\"locale-switcher\">")
             .Append("<button type=\"button\" class=\"locale-toggle icon-btn\" id=\"locale-toggle\" aria-haspopup=\"menu\" aria-controls=\"locale-dropdown\" aria-expanded=\"false\" aria-label=\"")
@@ -39,11 +41,11 @@ public static class LocaleSwitcherRenderer
 
         foreach (var code in codes)
         {
-            var prefix = code == rootCode ? string.Empty : code;
+            var prefix = LocaleRouting.TreeOf(code == rootCode ? string.Empty : code, version);
             var target = LocaleRouting.Localize(prefix, rootPath);
             if (target.Equals("index", StringComparison.OrdinalIgnoreCase))
                 target = string.Empty;
-            var isCurrent = code == currentCode;
+            var isCurrent = code == currentLocale;
 
             html.Append("<a class=\"locale-option")
                 .Append(isCurrent ? " locale-option--current\"" : "\"")

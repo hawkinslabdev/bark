@@ -1441,7 +1441,7 @@ public static partial class LayoutProvider
         .content li:has(> p) {{
             margin-bottom: 0.9rem;
         }}
-        .content li > div[class^=""language-""] {{
+        .content li > :is(div[class^=""language-""], .bark-code-group) {{
             margin: 0.75rem 0;
         }}
         .content li > :last-child,
