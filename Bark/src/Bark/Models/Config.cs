@@ -50,7 +50,7 @@ public class Config
 
     public List<SocialLink>? SocialLinks { get; set; }
 
-    /// <summary>Version switcher in the header; each version is its own deploy.</summary>
+    /// <summary>Version switcher in the header. A version is its own deploy, or a docs folder named after its link.</summary>
     public VersionsConfig? Versions { get; set; }
 
     public List<TopNavItem>? BottomNav { get; set; }

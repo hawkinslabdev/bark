@@ -8,7 +8,7 @@ namespace Bark.Tests;
 
 public sealed class VersionSwitcherTests
 {
-    private static readonly List<TopNavItem> Versions =
+    private static readonly List<VersionItem> Versions =
     [
         new() { Text = "v2", Link = "/" },
         new() { Text = "v1", Link = "/v1/" },

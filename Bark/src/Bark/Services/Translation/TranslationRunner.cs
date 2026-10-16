@@ -16,7 +16,7 @@ public static class TranslationRunner
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
-        var treeCodes = LocaleRouting.TreeCodes(config);
+        var localeCodes = LocaleRouting.LocaleCodes(config);
         var targetDir = Path.Combine(request.DocsPath, request.TargetCode);
         var written = 0;
         var skipped = 0;
@@ -25,7 +25,7 @@ public static class TranslationRunner
         {
             var relative = Path.GetRelativePath(request.DocsPath, file).Replace('\\', '/');
             var head = relative.Split('/')[0];
-            if (treeCodes.Contains(head, StringComparer.OrdinalIgnoreCase))
+            if (localeCodes.Contains(head, StringComparer.OrdinalIgnoreCase))
                 continue;
 
             var destination = Path.Combine(targetDir, relative.Replace('/', Path.DirectorySeparatorChar));

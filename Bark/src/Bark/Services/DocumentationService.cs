@@ -335,6 +335,9 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
         var locales = Localization.BuildAll(docsPath, config, _logger);
         var navTitlesByPath = BuildNavTitleLookup(config);
         var configuredLocales = LocaleRouting.TreeCodes(config);
+        if (LocaleRouting.VersionLocaleCollisions(config) is { Count: > 0 } collisions)
+            _logger.LogWarning("config.json versions {Codes} match a locale code. These folders are served as versions, not translations. Change the version links.",
+                string.Join(", ", collisions));
         var configuredRootLocale = LocaleRouting.RootCode(config);
 
         // Sorted for deterministic hashing, regardless of FS enumeration order.
@@ -377,7 +380,8 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
             var normalizedRelativePath = relativePath.Replace('\\', '/');
             var pageLocale = LocaleRouting.LocaleOf(pagePath, configuredLocales, configuredRootLocale);
             var localePrefix = pageLocale == configuredRootLocale ? string.Empty : pageLocale;
-            var parsed = _markdown.Parse(content, defaultTitle, filePath: normalizedRelativePath, localePrefix: localePrefix, localization: locales.For(pageLocale));
+            var parsed = _markdown.Parse(content, defaultTitle, filePath: normalizedRelativePath, localePrefix: localePrefix,
+                versionPrefix: LocaleRouting.IsVersion(config, pageLocale) ? pageLocale : string.Empty, localization: locales.For(pageLocale));
             var api = parsed.FrontMatter?.Api is { Length: > 0 } apiValue
                 ? RenderApiPage(apiSpecs, apiValue, parsed, normalizedRelativePath, locales.For(pageLocale))
                 : null;
@@ -595,7 +599,7 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
     private NavigationNode BuildNavigation(string docsPath, IEnumerable<DocumentationPage> pages, IReadOnlyList<string> localeCodes, Localization localization)
     {
         var pageMap = pages.ToDictionary(p => p.Path);
-        return BuildNodeFromDirectory(docsPath, docsPath, pageMap, localeCodes, localization, skipLocaleDirectories: true);
+        return BuildNodeFromDirectory(docsPath, docsPath, pageMap, localeCodes, localization);
     }
 
     private NavigationNode BuildNodeFromDirectory(
@@ -603,8 +607,7 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
         string currentDir,
         Dictionary<string, DocumentationPage> pageMap,
         IReadOnlyList<string> localeCodes,
-        Localization localization,
-        bool skipLocaleDirectories = false)
+        Localization localization)
     {
         var relativePath = Path.GetRelativePath(basePath, currentDir).Replace('\\', '/');
         var title = Path.GetFileName(currentDir);
@@ -615,7 +618,7 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
 
         foreach (var subDir in Directory.GetDirectories(currentDir))
         {
-            if (skipLocaleDirectories && localeCodes.Contains(Path.GetFileName(subDir), StringComparer.OrdinalIgnoreCase))
+            if (localeCodes.Contains(Path.GetRelativePath(basePath, subDir).Replace('\\', '/'), StringComparer.OrdinalIgnoreCase))
                 continue;
 
             var node = BuildNodeFromDirectory(basePath, subDir, pageMap, localeCodes, localization);
@@ -677,7 +680,8 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
 
         var code = LocaleRouting.LocaleOf(normalized, snapshot.LocaleCodes, snapshot.RootLocale);
         return code != snapshot.RootLocale
-            && snapshot.Pages.ContainsKey(LocaleRouting.Delocalize(code, normalized));
+            && LocaleRouting.FallbackTreeOf(snapshot.Config, code) is { } fallbackTree
+            && snapshot.Pages.ContainsKey(LocaleRouting.Localize(fallbackTree, LocaleRouting.Delocalize(code, normalized)));
     }
 
     public Task<IReadOnlyList<DocumentationPage>> GetAllPagesAsync(CancellationToken cancellationToken = default)
@@ -708,7 +712,7 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
         var allSegments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
         var localePrefix = localeCode == snapshotForHome.RootLocale ? string.Empty : localeCode;
         var segments = allSegments
-            .Skip(localePrefix.Length == 0 ? 0 : 1)
+            .Skip(localePrefix.Length == 0 ? 0 : localePrefix.Split('/').Length)
             .Where(s => !s.Equals("index", StringComparison.OrdinalIgnoreCase))
             .ToArray();
         var table = localization ?? snapshotForHome.Locales.Root;
@@ -803,10 +807,15 @@ public sealed partial class DocumentationService : IHostedService, IDisposable, 
         try
         {
             var json = File.ReadAllText(configPath);
-            return JsonSerializer.Deserialize<Config>(json, new JsonSerializerOptions
+            var config = JsonSerializer.Deserialize<Config>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
+            if (config?.Versions?.Items is { } items)
+                config.Versions.Folders = items.Skip(1).Select(LocaleRouting.VersionCodeOf).OfType<string>()
+                    .Where(code => Directory.Exists(Path.Combine(docsPath, code)))
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            return config;
         }
         catch
         {

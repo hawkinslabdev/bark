@@ -27,7 +27,7 @@ public static class NavigationHtmlRenderer
         var l = localization ?? Localization.Default;
         var configPath = LocaleRouting.Delocalize(localePrefix, currentPath);
 
-        if (config?.Sidebar is { Count: > 0 } sidebars)
+        if (LocaleRouting.SidebarFor(config, localePrefix) is { Count: > 0 } sidebars)
         {
             var matchedSections = SidebarResolver.Resolve(sidebars, configPath);
             if (matchedSections is not null)
@@ -293,7 +293,7 @@ public static class NavigationHtmlRenderer
     {
         var configPath = LocaleRouting.Delocalize(localePrefix, currentPath);
 
-        if (config?.Sidebar is { Count: > 0 } sidebars)
+        if (LocaleRouting.SidebarFor(config, localePrefix) is { Count: > 0 } sidebars)
         {
             var matchedSections = SidebarResolver.Resolve(sidebars, configPath);
             if (matchedSections is not null)

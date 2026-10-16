@@ -144,6 +144,20 @@ public sealed class TranslationRunnerTests : IDisposable
     }
 
     [Fact]
+    public async Task TranslatesVersionTreesIntoTheLocaleTree()
+    {
+        Directory.CreateDirectory(Path.Combine(_docsDir, "v1.0"));
+        await File.WriteAllTextAsync(Path.Combine(_docsDir, "v1.0", "index.md"), "Old welcome.\n");
+        var config = LocaleConfig();
+        config.Versions = VersionConfigs.Folders("v1.0");
+
+        var outcome = await TranslationRunner.RunAsync(new TranslationRequest(_docsDir, "nl", Overwrite: false), config, Shout, NullLogger.Instance);
+
+        Assert.Equal(3, outcome.Written);
+        Assert.Contains("OLD WELCOME.", await File.ReadAllTextAsync(Path.Combine(_docsDir, "nl", "v1.0", "index.md")));
+    }
+
+    [Fact]
     public async Task DoesNotTranslateAnExistingTranslationTree()
     {
         await TranslationRunner.RunAsync(new TranslationRequest(_docsDir, "nl", Overwrite: false), LocaleConfig(), Shout, NullLogger.Instance);

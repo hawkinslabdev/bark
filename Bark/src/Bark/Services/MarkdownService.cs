@@ -76,6 +76,7 @@ public sealed partial class MarkdownService
         string? defaultTitle = null,
         string? filePath = null,
         string localePrefix = "",
+        string versionPrefix = "",
         Localization? localization = null)
     {
         markdown = EscapeBracesInCodeSpans(markdown);
@@ -110,6 +111,7 @@ public sealed partial class MarkdownService
         }
 
         var html = UnescapeBraces(AddHeadingAnchors(document.ToHtml(_pipeline)));
+        html = PrefixVersionLinks(html, versionPrefix);
         html = PrefixBodyContent(html, _basePath);
         html = RewriteAbbreviations(html);
 
@@ -439,6 +441,17 @@ public sealed partial class MarkdownService
             return $"{m.Groups[1].Value}=\"{basePath}{url}\"";
         });
     }
+
+    // Root-relative page links in a version page stay inside the version tree; file links such as /assets/x.pdf do not.
+    private static string PrefixVersionLinks(string html, string versionPrefix) =>
+        versionPrefix.Length == 0
+            ? html
+            : RootRelativeHrefRegex().Replace(html, m => Path.HasExtension(m.Groups[1].Value)
+                ? m.Value
+                : $"href=\"/{LocaleRouting.LocalizeInTree(versionPrefix, m.Groups[1].Value)}{m.Groups[2].Value}\"");
+
+    [GeneratedRegex(@"href=""/(?!/)([^""#?]*)([^""]*)""")]
+    private static partial Regex RootRelativeHrefRegex();
 
     [GeneratedRegex(@"(href|src)=""(/(?!/)[^""]*)""")]
     private static partial Regex BodyContentUrlRegex();

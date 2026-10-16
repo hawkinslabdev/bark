@@ -166,9 +166,16 @@ public sealed class Localization
         var root = From(docsPath, config, logger);
         var tables = new Dictionary<string, Localization>(StringComparer.OrdinalIgnoreCase) { [root.Code] = root };
 
-        foreach (var code in LocaleRouting.TreeCodes(config))
+        foreach (var code in LocaleRouting.LocaleCodes(config))
             if (!tables.ContainsKey(code))
                 tables[code] = FromCode(docsPath, code, logger);
+
+        // A version reads in the language of its tree; its own code keys the version's search index.
+        foreach (var code in LocaleRouting.TreeCodes(config).Where(code => LocaleRouting.IsVersion(config, code)))
+        {
+            var language = LocaleRouting.LocalePartOf(config, code) is { Length: > 0 } locale ? tables[locale] : root;
+            tables.TryAdd(code, new Localization(language._map, code, language._labels));
+        }
 
         return new LocaleTables(tables, root);
     }
