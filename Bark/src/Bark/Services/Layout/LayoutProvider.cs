@@ -83,7 +83,7 @@ public static partial class LayoutProvider
             : hasLeftNav ? "layout" : "layout no-left-sidebar";
         if (isApiPage)
             layoutClass += " bark-api-layout";
-        var mobileSocialHtml = !string.IsNullOrWhiteSpace(socialLinksHtml)
+        var mobileSocialHtml = socialLinksHtml?.Split("<a ").Length > 2
             ? $@"<div class=""sidebar-social-links"">{socialLinksHtml}</div>"
             : "";
         // Home declares "no sidebar"; the mobile drawer must honour that too, so it carries top-nav sections only.
@@ -234,6 +234,7 @@ public static partial class LayoutProvider
                     <svg viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" aria-hidden=""true""><circle cx=""11"" cy=""11"" r=""7""/><path d=""M21 21l-4.3-4.3""/></svg>
                 </button>
                 {versionSwitcherHtml}
+                {socialLinksHtml}
                 {repoWidgetHtml}
                 {localeSwitcherHtml}
                 {themeToggleHtml}

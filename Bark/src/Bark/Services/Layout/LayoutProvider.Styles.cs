@@ -337,7 +337,8 @@ public static partial class LayoutProvider
             min-width: 0;
         }}
         @media (min-width: 769px) {{
-            .layout.no-left-sidebar > .sidebar-left {{
+            .layout.no-left-sidebar > .sidebar-left,
+            .sidebar-social-links {{
                 display: none;
             }}
         }}
@@ -350,6 +351,12 @@ public static partial class LayoutProvider
             align-self: start;
             height: calc(100vh - var(--topbar-height));
             overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+        }}
+        .sidebar-left:hover,
+        .sidebar-left:focus-within {{
+            scrollbar-color: color-mix(in oklab, var(--text-muted) 45%, transparent) transparent;
         }}
         .brand a {{
             font-size: 1.1rem;
@@ -2752,6 +2759,9 @@ public static partial class LayoutProvider
                 margin-bottom: 1.25rem;
                 padding-bottom: 1.25rem;
                 border-bottom: 1px solid var(--border);
+            }}
+            .topbar-right .social-links:has(> :nth-child(2)) {{
+                display: none;
             }}
             .mobile-top-nav:last-child,
             .mobile-top-nav:has(+ .sidebar-social-links) {{

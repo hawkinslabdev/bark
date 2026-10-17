@@ -56,6 +56,19 @@ public sealed class LayoutProviderTests
         Assert.DoesNotContain("bark-content-width", html);
     }
 
+    [Theory]
+    [InlineData(1, false)]
+    [InlineData(2, true)]
+    public void GetLayout_SocialLinks_InTopbar_DrawerCopyOnlyForSeveral(int count, bool inDrawer)
+    {
+        var links = "<div class=\"social-links\">" + string.Concat(Enumerable.Repeat("<a href=\"#\" class=\"icon-btn\">x</a>", count)) + "</div>";
+        var html = LayoutProvider.GetLayout("Title", "<p>x</p>", "<nav></nav>", null, "", "", null, socialLinksHtml: links);
+
+        var topbar = html[html.IndexOf("class=\"topbar-right\"", StringComparison.Ordinal)..];
+        Assert.Contains("social-links", topbar);
+        Assert.Equal(inDrawer, html.Contains("sidebar-social-links", StringComparison.Ordinal));
+    }
+
     [Fact]
     public void GetLayout_ContainsContent()
     {
