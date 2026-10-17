@@ -6,10 +6,10 @@ namespace Bark.Services.Rendering;
 
 public static class LocaleSwitcherRenderer
 {
-    private const string GlobeIcon =
+    private const string TranslateIcon =
         "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" " +
-        "stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M3 12h18\"/>" +
-        "<path d=\"M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z\"/></svg>";
+        "stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m5 8 6 6\"/><path d=\"m4 14 6-6 2-3\"/><path d=\"M2 5h12\"/>" +
+        "<path d=\"M7 2h1\"/><path d=\"m22 22-5-10-5 10\"/><path d=\"M14 18h6\"/></svg>";
 
     public static string Build(
         Config? config,
@@ -35,7 +35,7 @@ public static class LocaleSwitcherRenderer
             .Append("<button type=\"button\" class=\"locale-toggle icon-btn\" id=\"locale-toggle\" aria-haspopup=\"menu\" aria-controls=\"locale-dropdown\" aria-expanded=\"false\" aria-label=\"")
             .Append(toggleLabel).Append("\" title=\"").Append(toggleLabel)
             .Append("\">")
-            .Append(GlobeIcon)
+            .Append(TranslateIcon)
             .Append("</button>")
             .Append("<div class=\"locale-dropdown\" id=\"locale-dropdown\" hidden role=\"menu\" aria-labelledby=\"locale-toggle\">");
 
