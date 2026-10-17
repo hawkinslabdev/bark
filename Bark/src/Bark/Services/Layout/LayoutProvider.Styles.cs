@@ -351,7 +351,6 @@ public static partial class LayoutProvider
             align-self: start;
             height: calc(100vh - var(--topbar-height));
             overflow-y: auto;
-            scrollbar-width: thin;
             scrollbar-color: transparent transparent;
         }}
         .sidebar-left:hover,
