@@ -258,12 +258,9 @@ public sealed class PageRequestHandler
         var bottomNavHtml = config?.BottomNav is { } bottomNav
             ? NavigationHtmlRenderer.BuildBottomNavHtml(bottomNav, basePath, l, route.Prefix)
             : string.Empty;
-        // Socials sit at the bottom of the sidebar; pages without one carry them in the footer instead.
-        var socialsInSidebar = !isHomePage && !string.IsNullOrWhiteSpace(navHtml);
-        var footerSocialHtml = socialsInSidebar ? string.Empty : socialLinksHtml;
-        var footerEndHtml = bottomNavHtml.Length + footerSocialHtml.Length == 0
+        var footerEndHtml = bottomNavHtml.Length == 0
             ? string.Empty
-            : $"<div class=\"footer-end\">{bottomNavHtml}{footerSocialHtml}</div>";
+            : $"<div class=\"footer-end\">{bottomNavHtml}</div>";
         var footerHtml = footerNoteHtml.Length + footerEndHtml.Length == 0
             ? string.Empty
             : $"<div class=\"footer-bar{(footerEndHtml.Length == 0 ? "" : " footer-bar--split")}\">{footerNoteHtml}{footerEndHtml}</div>";
@@ -357,7 +354,7 @@ public sealed class PageRequestHandler
             enableDarkMode: ThemeProvider.UseDarkMode(_themeOptions),
             showScrollIndicator: ThemeProvider.ShowScrollIndicator(_themeOptions),
             footerHtml: footerHtml,
-            socialLinksHtml: socialsInSidebar ? socialLinksHtml : null,
+            socialLinksHtml: socialLinksHtml,
             repoWidgetHtml: repoWidgetHtml,
             enableLiveReload: _docsOptions.EnableHotReload,
             staticSearch: _docsOptions.IsStaticExport,

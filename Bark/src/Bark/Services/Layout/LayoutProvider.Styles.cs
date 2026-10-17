@@ -2536,9 +2536,8 @@ public static partial class LayoutProvider
             gap: 0.5rem 1.25rem;
         }}
         .sidebar-social-links {{
-            margin-top: 0.75rem;
-            padding: 0.75rem 0 0 0.625rem;
-            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+            padding-left: 0.625rem;
         }}
         .sidebar-social-links .social-links {{
             flex-wrap: wrap;
