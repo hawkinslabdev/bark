@@ -217,14 +217,16 @@ public sealed partial class MarkdownService
                 {
                     var theme = action.Theme is "alt" or "minimal" ? action.Theme : "brand";
                     var link = action.Link ?? "#";
+                    var external = action.External ?? UrlPaths.IsExternal(link);
                     var icon = theme switch
                     {
                         "brand" => ArrowIcon,
-                        "minimal" when UrlPaths.IsExternal(link) => ExternalIcon,
+                        "minimal" when external => ExternalIcon,
                         _ => "",
                     };
                     sb.Append("<a class=\"bark-hero-action ").Append(theme).Append("\" href=\"")
-                        .Append(WebUtility.HtmlEncode(PrefixInternalLink(link, basePath, localePrefix))).Append("\">")
+                        .Append(WebUtility.HtmlEncode(PrefixInternalLink(link, basePath, localePrefix))).Append('"')
+                        .Append(external ? " target=\"_blank\" rel=\"noopener noreferrer\">" : ">")
                         .Append(WebUtility.HtmlEncode(action.Text ?? string.Empty)).Append(icon).Append("</a>");
                 }
                 sb.Append("</div>");

@@ -6,13 +6,15 @@ hero:
   name: Direct documentatie
   text: Documentatie in een handomdraai
   tagline: Geef Bark een map met Markdown-bestanden en je complete site staat direct online. Geen buildstap nodig.
+  image: /brand-image.svg
   actions:
     - theme: brand
       text: Aan de slag
       link: what-is-bark
-    - theme: alt
+    - theme: minimal
       text: Bekijk op GitHub
       link: https://github.com/hawkinslabdev/bark
+      external: true
 features:
   - icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h9l5 5v11H4z"/><path d="M13 4v5h5"/><path d="M8 13h7M8 16.5h5"/></svg>'
     title: Inhoud eerst

@@ -49,9 +49,10 @@ With an image file, the hero sits beside it; with an emoji or no image, the hero
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `theme` | `"brand"` \| `"alt"` \| `"minimal"` | no | `brand` is the filled button with an arrow, `alt` the outline button, `minimal` a text link (with an external-link icon for absolute URLs). Defaults to `brand`. |
+| `theme` | `"brand"` \| `"alt"` \| `"minimal"` | no | `brand` is the filled button with an arrow, `alt` the outline button, `minimal` a text link (with an external-link icon when `external` is `true`). Defaults to `brand`. |
 | `text` | `string` | yes | Button label. |
 | `link` | `string` | yes | Button target. Internal paths and external URLs are supported. |
+| `external` | `boolean` | no | Opens the link in a new tab. Defaults to `true` for absolute `http://` and `https://` URLs. |
 
 ## Features
 

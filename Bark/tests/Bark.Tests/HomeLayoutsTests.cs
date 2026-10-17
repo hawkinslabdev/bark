@@ -53,8 +53,31 @@ public sealed class HomeLayoutsTests : IDisposable
             """);
 
         Assert.Contains("class=\"bark-hero-action brand\" href=\"/start/\">Start<svg", html);
-        Assert.Contains("class=\"bark-hero-action minimal\" href=\"https://github.com/x/y\">GitHub<svg", html);
+        Assert.Contains("class=\"bark-hero-action minimal\" href=\"https://github.com/x/y\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub<svg", html);
         Assert.Contains("class=\"bark-hero-action brand\" href=\"/other/\">Other<svg", html);
+    }
+
+    [Fact]
+    public void Actions_ExternalOverridesTheUrlCheck()
+    {
+        var html = Render("""
+            layout: home
+            hero:
+              text: Docs
+              actions:
+                - theme: alt
+                  text: Old
+                  link: /v1/
+                  external: true
+                - theme: alt
+                  text: Repo
+                  link: https://github.com/x/y
+                  external: false
+
+            """);
+
+        Assert.Contains("href=\"/v1/\" target=\"_blank\" rel=\"noopener noreferrer\">Old</a>", html);
+        Assert.Contains("href=\"https://github.com/x/y\">Repo</a>", html);
     }
 
     [Fact]

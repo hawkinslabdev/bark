@@ -6,4 +6,6 @@ public sealed record HeroActionFrontMatter
     public string? Theme { get; init; }
     public string? Text { get; init; }
     public string? Link { get; init; }
+    /// <summary>Opens the link in a new tab. Defaults to <c>true</c> for absolute URLs.</summary>
+    public bool? External { get; init; }
 }
