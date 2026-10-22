@@ -20,10 +20,35 @@ public sealed class ThemeProviderTests : IDisposable
     }
 
     [Fact]
-    public void BuildThemeCss_BrandColor_TargetsBothLightAndDarkRoots()
+    public void BuildThemeCss_Font_TargetsBothLightAndDarkRoots()
     {
+        var css = ThemeProvider.BuildThemeCss(new ThemeOptions { FontSans = "Inter" });
+        Assert.Contains(":root, :root[data-theme=\"dark\"] {\n    --font-sans: Inter;", css);
+    }
+
+    [Fact]
+    public void BuildThemeCss_PrimaryColor_StaysOutOfDarkMode()
+    {
+        // A light-tuned brand hex on a dark surface fails AA contrast.
         var css = ThemeProvider.BuildThemeCss(new ThemeOptions { PrimaryColor = "#7c3aed" });
-        Assert.Contains(":root, :root[data-theme=\"dark\"]", css);
+        Assert.Contains(":root[data-theme=\"light\"] {\n    --primary-color: #7c3aed;", css);
+        Assert.DoesNotContain(":root[data-theme=\"dark\"]", css);
+        Assert.DoesNotContain("prefers-color-scheme: dark", css);
+    }
+
+    [Fact]
+    public void BuildThemeCss_DarkValues_MirrorTheThemesDarkSelectors()
+    {
+        var css = ThemeProvider.BuildThemeCss(new ThemeOptions { PrimaryColorDark = "#c4b5fd", AccentLightDark = "#2e1065" });
+        const string vars = "    --primary-color: #c4b5fd;\n    --accent: #c4b5fd;\n    --accent-light: #2e1065;\n}\n";
+        Assert.Contains("@media (prefers-color-scheme: dark) {\n:root:not([data-theme=\"light\"]) {\n" + vars + "}\n", css);
+        Assert.Contains(":root[data-theme=\"dark\"] {\n" + vars, css);
+    }
+
+    [Fact]
+    public void BuildThemeCss_DarkValues_DroppedWhenDarkModeDisabled()
+    {
+        Assert.Equal("", ThemeProvider.BuildThemeCss(new ThemeOptions { PrimaryColorDark = "#c4b5fd", DarkMode = false }));
     }
 
     [Fact]
