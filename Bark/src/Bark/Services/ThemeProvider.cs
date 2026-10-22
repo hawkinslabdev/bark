@@ -32,9 +32,15 @@ public static class ThemeProvider
         var blocks = "";
         if (brandVars.Count > 0)
             blocks += ":root, :root[data-theme=\"dark\"] {\n" + string.Join("\n", brandVars) + "\n}\n";
-        // Light-mode-only selector: the theme's own [data-theme="dark"] block outranks this on toggle.
+        // Light-mode-only: with no data-theme set, an OS in dark mode must keep the theme's dark surfaces.
         if (surfaceVars.Count > 0)
-            blocks += ":root:not([data-theme=\"dark\"]) {\n" + string.Join("\n", surfaceVars) + "\n}\n";
+        {
+            var surface = string.Join("\n", surfaceVars);
+            blocks += UseDarkMode(theme)
+                ? ":root[data-theme=\"light\"] {\n" + surface + "\n}\n" +
+                  "@media (prefers-color-scheme: light) {\n:root:not([data-theme=\"dark\"]) {\n" + surface + "\n}\n}\n"
+                : ":root:not([data-theme=\"dark\"]) {\n" + surface + "\n}\n";
+        }
 
         return $"<style{nonceAttr}>\n{blocks}</style>";
     }

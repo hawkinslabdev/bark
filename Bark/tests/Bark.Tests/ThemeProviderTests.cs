@@ -35,6 +35,24 @@ public sealed class ThemeProviderTests : IDisposable
     }
 
     [Fact]
+    public void BuildThemeCss_SurfaceColor_DoesNotApplyWhenOsIsDark()
+    {
+        // Unset data-theme + OS dark must not pick up light surfaces, or the page renders half light, half dark.
+        var css = ThemeProvider.BuildThemeCss(new ThemeOptions { BgColor = "#fff" });
+        Assert.Contains(":root[data-theme=\"light\"] {\n    --bg-color: #fff;", css);
+        Assert.Contains("@media (prefers-color-scheme: light) {\n:root:not([data-theme=\"dark\"]) {\n    --bg-color: #fff;", css);
+        Assert.DoesNotContain("<style>\n:root:not([data-theme=\"dark\"])", css);
+    }
+
+    [Fact]
+    public void BuildThemeCss_SurfaceColor_DarkModeDisabled_AppliesRegardlessOfOs()
+    {
+        var css = ThemeProvider.BuildThemeCss(new ThemeOptions { BgColor = "#fff", DarkMode = false });
+        Assert.Contains("<style>\n:root:not([data-theme=\"dark\"]) {\n    --bg-color: #fff;", css);
+        Assert.DoesNotContain("prefers-color-scheme", css);
+    }
+
+    [Fact]
     public void BuildThemeCss_NoValuesSet_ReturnsEmpty()
     {
         Assert.Equal("", ThemeProvider.BuildThemeCss(new ThemeOptions()));
