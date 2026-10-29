@@ -12,8 +12,9 @@ public static partial class LayoutProvider
         return $"<script defer src=\"{basePath}/bark.js?v={asset.Version}&amp;locale={Uri.EscapeDataString(localization.Code)}\"></script>";
     }
 
+    // BuildVersion restarts per host
     internal static GeneratedAsset GetScriptsAsset(bool enableLiveReload, bool enableDarkMode, long buildVersion, string basePath, bool staticSearch, Localization localization, bool isRootLocale) =>
-        GetOrBuildAsset(_jsAssets, localization.Code, $"{enableLiveReload} {enableDarkMode} {buildVersion} {basePath} {staticSearch} {localization.Code} {isRootLocale}",
+        GetOrBuildAsset(_jsAssets, localization.Code, $"{enableLiveReload} {enableDarkMode} {buildVersion} {basePath} {staticSearch} {localization.Code} {System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(localization)} {isRootLocale}",
             () => BuildScriptsBody(enableLiveReload, enableDarkMode, buildVersion, basePath, staticSearch, localization, isRootLocale));
 
     private static string BuildScriptsBody(bool enableLiveReload, bool enableDarkMode, long buildVersion, string basePath, bool staticSearch, Localization localization, bool isRootLocale)

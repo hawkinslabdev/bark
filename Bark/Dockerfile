@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0-preview AS build
 WORKDIR /src
 
 COPY Bark.slnx Directory.Build.props Directory.Packages.props NuGet.Config global.json ./
@@ -10,7 +10,7 @@ COPY docs/ docs/
 COPY src/Bark/ src/Bark/
 RUN dotnet publish src/Bark/Bark.csproj -c Release -o /app --no-self-contained
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:11.0-preview AS runtime
 WORKDIR /app
 
 # only needed for the opt-in Git:Enabled content sync (see GitContentSyncService)
