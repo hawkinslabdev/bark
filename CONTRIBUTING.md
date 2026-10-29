@@ -1,10 +1,10 @@
-# Contributing to Bark
+# Contributing
 
 First off, thanks for taking the time to contribute! Please submit a PR with your suggested changes. 
 
 #### Building
 
-Requires the [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0).
+Requires the [.NET 11 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/11.0).
 
 ```bash
 git clone https://github.com/hawkinslabdev/bark.git

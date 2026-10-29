@@ -80,7 +80,7 @@ Symlinks inside `docs/` are excluded from serving, indexing and export. This pre
 
 ## Option B: Windows / IIS
 
-1. Install the [.NET 10 Hosting Bundle](https://dotnet.microsoft.com/en-us/download/dotnet/10.0){target="_blank" rel="noopener"} on the server. It provides the ASP.NET Core Module for IIS.
+1. Install the [.NET 11 Hosting Bundle](https://dotnet.microsoft.com/en-us/download/dotnet/11.0){target="_blank" rel="noopener"} on the server. It provides the ASP.NET Core Module for IIS.
 2. Download the latest `*-Windows_x64.zip` from [Releases](https://github.com/hawkinslabdev/bark/releases){target="_blank" rel="noopener"} and extract it to the site folder, for example `C:\inetpub\bark`.
 3. Create an IIS site for that folder with .NET CLR version **No Managed Code**. Bark runs through the ASP.NET Core Module.
 4. Start the site.
@@ -112,7 +112,7 @@ Persistence across reboots: [Running as a service](#running-as-a-service-source-
 
 ## Option D: Build from source
 
-For contributing to Bark or running without a container image. Requires the [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0){target="_blank" rel="noopener"}.
+For contributing to Bark or running without a container image. Requires the [.NET 11 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/11.0){target="_blank" rel="noopener"}.
 
 ```bash
 cd Bark

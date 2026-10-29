@@ -50,7 +50,7 @@ For those running Windows, follow the following steps:
 2. Extract it to your site folder (e.g. `C:\inetpub\bark`).
 3. In IIS, create a site (or app) pointing at that folder, with the **No Managed Code** .NET CLR version.
 4. The zip already includes a `web.config` wired for in-process hosting. No manual edits needed.
-5. Make sure the [.NET 10 Hosting Bundle](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) is installed on the server (gives IIS the ASP.NET Core Module).
+5. Make sure the [.NET 11 Hosting Bundle](https://dotnet.microsoft.com/en-us/download/dotnet/11.0) is installed on the server (gives IIS the ASP.NET Core Module).
 6. Start the site and browse to it.
 
 A Linux x64 self-contained-runtime build (`*-Linux_x64.zip`) is published alongside each release. See [Option C: Linux release zip](Bark/docs/getting-started/deploy#option-c-linux-release-zip) for installation instructions.

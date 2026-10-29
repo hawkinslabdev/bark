@@ -20,7 +20,7 @@ features:
     title: Write First, Structure Follows
     details: Write Markdown, save, and watch your live site update instantly. Page navigation, site hierarchy, breadcrumbs, and search reflect your folder structure automatically.
   - icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3 5 13.5h5.5L11 21l8-10.5h-5.5z"/></svg>'
-    title: Powered by .NET 10
+    title: Powered by .NET 11
     details: A single Kestrel process handles delivery with full hot-reload support during development. Deploy anywhere using Docker, IIS, or systemd, or export straight to static HTML.
   - icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20a8 8 0 1 1 8-8"/><path d="M12 12l5-3.5"/><circle cx="12" cy="12" r="1.4"/></svg>'
     title: Engineered for Speed
