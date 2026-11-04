@@ -103,7 +103,7 @@ Defaults (`default` theme, light mode):
 | `--font-mono` | system stack | Code font. |
 
 > [!IMPORTANT]
-> Overrides apply to **both** light and dark mode. For a single mode, use `custom.css` with a `:root[data-theme="dark"]` selector, or a custom theme.
+> Color overrides apply to light mode. `PrimaryColorDark` and `AccentLightDark` set the dark accent and accent tint. Other dark colors require `custom.css` rules for both `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }` and `:root[data-theme="dark"]`, or a custom theme. Font overrides apply to both modes. If `DarkMode` is `false`: the page has no dark variant.
 
 Set overrides in `theme.json` or in `Docs:Themes` in `appsettings.json`. Field names are the variable names in PascalCase:
 
@@ -238,6 +238,7 @@ Rules enforced by the test suite:
 - **Both modes.** Every literal color in `LightTokens` requires a counterpart in `DarkTokens`.
 - **The eight palette keys are required.** `--bg-color`, `--sidebar-bg`, `--text-color`, `--text-muted`, `--accent`, `--accent-light`, `--border`, `--code-bg`. Other values (alert hues, fonts, shadows, aliases) default from `ThemeDefaults`.
 - **Contrast.** Text, muted text, accent and alert colors require at least 4.5:1 against the background in both modes (WCAG 1.4.3); accent also against `--accent-light`. `dotnet test --filter ThemeContrastTests` reports measured ratios.
+- **Syntax colors.** Every foreground in `Resources/Themes/github-light.json` and `github-dark.json` requires at least 4.5:1 against `--code-bg` in the matching mode.
 - **Gamut.** Generated `oklch()` values stay inside sRGB.
 
 `ComponentCss` is appended after the built-in stylesheet in the same `<style>` element; `!important` is not required.

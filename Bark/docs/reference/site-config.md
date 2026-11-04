@@ -47,14 +47,16 @@ All fields are optional CSS variable overrides or feature toggles; unset fields 
 | Option | Type | Maps to | Description |
 |---|---|---|---|
 | `Name` | `string` | n/a | Built-in theme name. Overrides `config.json`'s `theme`; the `--theme` flag overrides both. |
-| `PrimaryColor` | `string` | `--primary-color`, `--accent` | Accent color used for links and highlights. Applies to both light and dark mode. |
+| `PrimaryColor` | `string` | `--primary-color`, `--accent` | Accent color used for links and highlights in light mode. |
+| `PrimaryColorDark` | `string` | `--primary-color`, `--accent` | Accent color used for links and highlights in dark mode. |
 | `BgColor` | `string` | `--bg-color` | Page background. |
 | `SidebarBg` | `string` | `--sidebar-bg` | Sidebar background, which can differ from the page background. |
 | `TextColor` | `string` | `--text-color` | Primary text color. |
 | `TextMuted` | `string` | `--text-muted` | Secondary text: descriptions, timestamps, muted labels. |
 | `BorderColor` | `string` | `--border` | Hairline borders throughout the layout. |
 | `CodeBg` | `string` | `--code-bg` | Background for inline code and fenced code blocks. |
-| `AccentLight` | `string` | `--accent-light` | Light tint of the accent color, used for active and highlighted states. |
+| `AccentLight` | `string` | `--accent-light` | Tint of the accent color used for active and highlighted states in light mode. |
+| `AccentLightDark` | `string` | `--accent-light` | Tint of the accent color used for active and highlighted states in dark mode. |
 | `FontSans` | `string` | `--font-sans` | Body font stack. |
 | `FontMono` | `string` | `--font-mono` | Code font stack. |
 | `CustomCssUrl` | `string` | n/a | Injects an extra `<link rel="stylesheet">`, loaded after Bark's built-in styles. Takes priority over an auto-detected `wwwroot/theme/custom.css` if both are present. |
