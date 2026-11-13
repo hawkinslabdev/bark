@@ -78,6 +78,10 @@ public static partial class LayoutProvider
                 nodes.forEach(function(n) {{ if (n) n.inert = active; }});
             }}
 
+            function barkCopy(text) {{
+                return Promise.resolve().then(function() {{ return navigator.clipboard.writeText(text); }});
+            }}
+
             function getFocusable(container) {{
                 return Array.prototype.slice.call(
                     container.querySelectorAll('a[href], button:not([disabled]), input, [tabindex]:not([tabindex=""-1""])'));
@@ -621,6 +625,16 @@ public static partial class LayoutProvider
                 var buttons = document.createElement('div');
                 buttons.className = 'code-block-buttons';
 
+                var copyStatus = document.createElement('span');
+                copyStatus.className = 'sr-only';
+                copyStatus.setAttribute('role', 'status');
+                wrapper.appendChild(copyStatus);
+                function announceCopy(message) {{
+                    copyStatus.textContent = '';
+                    setTimeout(function() {{ copyStatus.textContent = message; }}, 50);
+                    setTimeout(function() {{ copyStatus.textContent = ''; }}, 2000);
+                }}
+
                 var iconCopy = '<svg xmlns=""http://www.w3.org/2000/svg"" width=""17"" height=""17"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" aria-hidden=""true""><rect width=""14"" height=""14"" x=""8"" y=""8"" rx=""2"" ry=""2""/><path d=""M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2""/></svg>';
                 var iconCheck = '<svg xmlns=""http://www.w3.org/2000/svg"" width=""17"" height=""17"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2.5"" stroke-linecap=""round"" stroke-linejoin=""round"" aria-hidden=""true""><path d=""M20 6 9 17l-5-5""/></svg>';
                 var iconX = '<svg xmlns=""http://www.w3.org/2000/svg"" width=""17"" height=""17"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" aria-hidden=""true""><path d=""M18 6 6 18""/><path d=""m6 6 12 12""/></svg>';
@@ -674,10 +688,12 @@ public static partial class LayoutProvider
                 copyBtn.setAttribute('aria-label', 'Copy code');
                 copyBtn.setAttribute('title', 'Copy code');
                 copyBtn.addEventListener('click', function() {{
-                    navigator.clipboard.writeText(codeText()).then(function() {{
+                    barkCopy(codeText()).then(function() {{
                         flash(copyBtn, iconCopy, iconCheck, 'copied');
+                        announceCopy('{Localization.JsEncode(l.Copied)}');
                     }})['catch'](function() {{
                         flash(copyBtn, iconCopy, iconX, 'failed');
+                        announceCopy('{Localization.JsEncode(l.CopyFailed)}');
                     }});
                 }});
                 buttons.appendChild(copyBtn);
@@ -891,7 +907,7 @@ public static partial class LayoutProvider
                         btn.setAttribute('aria-busy', 'true');
                         fetch(btn.getAttribute('data-copy-url'))
                             .then(function(r) {{ if (!r.ok) throw new Error(); return r.text(); }})
-                            .then(function(text) {{ return navigator.clipboard.writeText(text); }})
+                            .then(barkCopy)
                             .then(function() {{ btn.removeAttribute('aria-busy'); showResult(btn, true); }})
                             ['catch'](function() {{ btn.removeAttribute('aria-busy'); showResult(btn, false); }});
                     }});
@@ -900,7 +916,7 @@ public static partial class LayoutProvider
                 pageControlsMenu.querySelectorAll('[data-copy-value]').forEach(function(btn) {{
                     btn.addEventListener('click', function() {{
                         var value = new URL(btn.getAttribute('data-copy-value'), window.location.href).href;
-                        navigator.clipboard.writeText(value)
+                        barkCopy(value)
                             .then(function() {{ showResult(btn, true); }})
                             ['catch'](function() {{ showResult(btn, false); }});
                     }});
