@@ -298,10 +298,6 @@ public static partial class LayoutProvider
                 var trigger = item.querySelector('.top-nav-link');
                 var menu = item.querySelector('.top-nav-dropdown-menu');
                 if (!trigger || !menu) return;
-                item.addEventListener('focusin', function() {{ trigger.setAttribute('aria-expanded', 'true'); }});
-                item.addEventListener('focusout', function(e) {{
-                    if (!item.contains(e.relatedTarget)) trigger.setAttribute('aria-expanded', 'false');
-                }});
                 item.addEventListener('keydown', function(e) {{
                     if (e.key === 'Escape') {{
                         trigger.setAttribute('aria-expanded', 'false');
@@ -957,7 +953,9 @@ public static partial class LayoutProvider
                     }}, 0);
                 }});
                 item.addEventListener('mouseenter', function() {{ btn.setAttribute('aria-expanded', 'true'); }});
-                item.addEventListener('mouseleave', function() {{ btn.setAttribute('aria-expanded', 'false'); }});
+                item.addEventListener('mouseleave', function() {{
+                    if (!item.matches(':focus-within')) btn.setAttribute('aria-expanded', 'false');
+                }});
             }});
 
             function positionAbbrTip(e) {{
