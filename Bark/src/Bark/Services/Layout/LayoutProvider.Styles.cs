@@ -2106,8 +2106,18 @@ public static partial class LayoutProvider
             gap: 0.25rem;
             border-bottom: 1px solid var(--border);
         }}
+        .content .bark-code-group .tabs {{
+            position: relative;
+        }}
         .content .bark-code-group .tabs input {{
-            display: none;
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }}
+        .content .bark-code-group .tabs input:focus-visible + label {{
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+            border-radius: 4px;
         }}
         .content .bark-code-group .tabs label {{
             display: inline-flex;
