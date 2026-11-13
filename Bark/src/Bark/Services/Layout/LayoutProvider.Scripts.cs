@@ -108,10 +108,16 @@ public static partial class LayoutProvider
                     var current = themeRoot.getAttribute('data-theme');
                     var isDark = current ? current === 'dark' : prefersDark.matches;
                     var next = isDark ? 'light' : 'dark';
-                    themeRoot.setAttribute('data-theme', next);
-                    themeRoot.style.colorScheme = next;
+                    if ((next === 'dark') === prefersDark.matches) {{
+                        themeRoot.removeAttribute('data-theme');
+                        themeRoot.style.colorScheme = '';
+                        try {{ localStorage.removeItem('bark-theme'); }} catch (e) {{}}
+                    }} else {{
+                        themeRoot.setAttribute('data-theme', next);
+                        themeRoot.style.colorScheme = next;
+                        try {{ localStorage.setItem('bark-theme', next); }} catch (e) {{}}
+                    }}
                     themeToggle.setAttribute('aria-checked', String(next === 'dark'));
-                    try {{ localStorage.setItem('bark-theme', next); }} catch (e) {{}}
 
                     // Mermaid bakes theme colors into its SVG at render time; reload to re-render.
                     if (document.querySelector('.mermaid')) {{
