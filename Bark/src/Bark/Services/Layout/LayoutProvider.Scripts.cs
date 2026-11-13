@@ -235,6 +235,7 @@ public static partial class LayoutProvider
                     var link = item.querySelector('a');
                     var matches = link && link.getAttribute('href') === '#' + id;
                     item.classList.toggle('active', !!matches);
+                    if (link) {{ if (matches) link.setAttribute('aria-current', 'true'); else link.removeAttribute('aria-current'); }}
                 }});
                 updateTocIndicator();
             }}
