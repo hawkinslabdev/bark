@@ -2154,7 +2154,6 @@ public static partial class LayoutProvider
         }}
         .table-wrapper {{
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
             margin: 1.5rem 0;
             border-radius: 6px;
         }}
