@@ -498,8 +498,16 @@
             el('div', { class: 'api-pg-body' }, [inputs, result]),
         ]);
 
-        dialog = el('dialog', { class: 'api-playground', 'aria-labelledby': titleId }, [form]);
-        dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.close(); });
+        dialog = el('dialog', { class: 'api-playground', 'aria-labelledby': titleId, closedby: 'any' }, [form]);
+        if (!('closedBy' in HTMLDialogElement.prototype)) {
+            var outside = function (e) {
+                var r = dialog.getBoundingClientRect();
+                return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+            };
+            var pressedOutside = false;
+            dialog.addEventListener('pointerdown', function (e) { pressedOutside = outside(e); });
+            dialog.addEventListener('pointerup', function (e) { if (pressedOutside && outside(e)) dialog.close(); });
+        }
         dialog.addEventListener('close', function () { if (controller) controller.abort(); });
         document.body.appendChild(dialog);
     }
