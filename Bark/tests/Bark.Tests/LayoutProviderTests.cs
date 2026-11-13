@@ -17,6 +17,15 @@ public sealed class LayoutProviderTests
         Assert.Contains("Test Title", html);
     }
 
+    [Fact]
+    public void GetLayout_SearchIsNativeModalDialog()
+    {
+        var html = LayoutProvider.GetLayout("Title", "<p>x</p>", "", null, "", "", null);
+
+        Assert.Contains("<dialog class=\"search-modal\" id=\"search-modal\"", html);
+        Assert.DoesNotContain("aria-modal", html);
+    }
+
     [Theory]
     [InlineData("", null, true)]
     [InlineData("", "<li>toc</li>", false)]

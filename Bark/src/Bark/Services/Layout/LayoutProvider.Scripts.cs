@@ -317,14 +317,13 @@ public static partial class LayoutProvider
 
             var searchTrigger = document.getElementById('search-trigger');
             var searchTriggerKbd = document.getElementById('search-trigger-kbd');
-            var searchOverlay = document.getElementById('search-overlay');
+            var searchModal = document.getElementById('search-modal');
             var searchModalInput = document.getElementById('search-modal-input');
             var searchModalResults = document.getElementById('search-modal-results');
             var searchModalClose = document.getElementById('search-modal-close');
             var searchModalStatus = document.getElementById('search-modal-status');
             var searchTimeout;
             var searchActiveIndex = -1;
-            var searchLastFocused = null;
             var searchRequestId = 0;
 
             // Static export: search runs in-browser against a prebuilt index, mirroring SearchIndex.
@@ -474,32 +473,23 @@ public static partial class LayoutProvider
             }}
 
             function openSearchModal() {{
-                searchLastFocused = document.activeElement;
-                searchOverlay.hidden = false;
-                requestAnimationFrame(function() {{ searchOverlay.classList.add('open'); }});
-                document.documentElement.style.overflow = 'hidden';
+                if (searchModal.open) return;
                 searchModalInput.value = '';
-                searchModalInput.focus();
                 searchModalResults.innerHTML = '';
                 searchModalInput.setAttribute('aria-expanded', 'false');
                 searchModalInput.removeAttribute('aria-activedescendant');
                 searchModalStatus.textContent = '';
                 searchActiveIndex = -1;
-                setInert([topbarEl, sidebarLeft, mainContainerEl, sidebarRightEl], true);
+                searchModal.showModal();
+                searchModalInput.focus();
             }}
 
             function closeSearchModal() {{
-                searchOverlay.classList.remove('open');
-                searchOverlay.hidden = true;
-                document.documentElement.style.overflow = '';
-                setInert([topbarEl, sidebarLeft, mainContainerEl, sidebarRightEl], false);
-                if (searchLastFocused && typeof searchLastFocused.focus === 'function') {{
-                    searchLastFocused.focus();
-                }}
+                searchModal.close();
             }}
 
             function isSearchModalOpen() {{
-                return !searchOverlay.hidden;
+                return searchModal.open;
             }}
 
             if (searchTrigger) {{
@@ -513,9 +503,15 @@ public static partial class LayoutProvider
                 el.addEventListener('click', openSearchModal);
             }});
             searchModalClose.addEventListener('click', closeSearchModal);
-            searchOverlay.addEventListener('mousedown', function(e) {{
-                if (e.target === searchOverlay) closeSearchModal();
-            }});
+            if (!('closedBy' in HTMLDialogElement.prototype)) {{
+                var searchPressedOutside = false;
+                var outsideSearchModal = function(e) {{
+                    var r = searchModal.getBoundingClientRect();
+                    return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+                }};
+                searchModal.addEventListener('pointerdown', function(e) {{ searchPressedOutside = outsideSearchModal(e); }});
+                searchModal.addEventListener('pointerup', function(e) {{ if (searchPressedOutside && outsideSearchModal(e)) closeSearchModal(); }});
+            }}
 
             document.addEventListener('keydown', function(e) {{
                 var isCtrlK = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k';
@@ -528,16 +524,6 @@ public static partial class LayoutProvider
                 if (e.key === 'Escape') {{
                     e.preventDefault();
                     closeSearchModal();
-                    return;
-                }}
-                if (e.key === 'Tab') {{
-                    var focusable = [searchModalInput, searchModalClose];
-                    var currentIndex = focusable.indexOf(document.activeElement);
-                    e.preventDefault();
-                    var nextIndex = e.shiftKey
-                        ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
-                        : (currentIndex === -1 || currentIndex === focusable.length - 1 ? 0 : currentIndex + 1);
-                    focusable[nextIndex].focus();
                     return;
                 }}
                 if (e.key === 'ArrowDown') {{
