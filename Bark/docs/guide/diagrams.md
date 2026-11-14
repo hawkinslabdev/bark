@@ -94,5 +94,5 @@ pie title Search ranking weight
 Diagrams render client-side. They are absent from the HTML source, from text-only crawlers, and from `llms.txt`. Content essential to understanding must also appear in the surrounding text, which also provides a text alternative for assistive technology.
 
 ::: note
-Diagram colors come from the active theme palette. Mermaid bakes colors into the SVG instead of using CSS variables, so toggling dark mode on a page with diagrams triggers a full reload.
+Diagram colors come from the active theme palette. Mermaid bakes colors into the SVG instead of using CSS variables, so toggling dark mode re-renders each diagram in place.
 :::

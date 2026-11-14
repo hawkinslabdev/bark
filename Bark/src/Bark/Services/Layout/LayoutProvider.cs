@@ -112,7 +112,7 @@ public static partial class LayoutProvider
             {drawerNavigationHtml}
             {mobileSocialHtml}
         </aside>
-        <script{nonceAttr}>try{{var s=sessionStorage.getItem('bark-sidebar-scroll');if(s)document.getElementById('sidebar-left').scrollTop=+s;}}catch(e){{}}</script>";
+        <script{nonceAttr}>(function(){{var s=document.getElementById('sidebar-left');try{{var v=sessionStorage.getItem('bark-sidebar-scroll');if(v)s.scrollTop=+v;}}catch(e){{}}var a=s.querySelector('.nav-item.active, .sidebar-link.is-active');if(a){{var i=a.getBoundingClientRect(),r=s.getBoundingClientRect();if(i.top<r.top||i.bottom>r.bottom)s.scrollTop+=(i.top-r.top)-(s.clientHeight-i.height)/2;}}}})();</script>";
         var breadcrumbAndTocHtml = isHomePage ? "" : $@"
             <nav class=""breadcrumb"" aria-label=""{HtmlEncode(l.BreadcrumbAria)}"">
                 {breadcrumbHtml}
@@ -174,6 +174,19 @@ public static partial class LayoutProvider
             ? "<script" + nonceAttr + ">(function(){try{var t=localStorage.getItem('bark-theme');if(t==='dark'||t==='light'){var r=document.documentElement;r.setAttribute('data-theme',t);r.style.colorScheme=t;}}catch(e){}})();</script>"
             : "";
 
+        // Head-inline so the collapsed width applies before first paint; only emitted when the page has a TOC to collapse.
+        var tocInitScript = sidebarRightHtml.Length > 0
+            ? "<script" + nonceAttr + ">try{if(localStorage.getItem('bark-toc-collapsed')==='1')document.documentElement.classList.add('toc-collapsed');}catch(e){}</script>"
+            : "";
+        // Raw diagram source stays hidden until Mermaid marks it processed; without scripting it is the only fallback.
+        var mermaidHeadHtml = hasMermaid
+            ? $"<script defer src=\"{basePath}/js/mermaid.min.js\"></script><noscript><style>.mermaid:not([data-processed]){{visibility:visible}}</style></noscript>"
+            : "";
+        // api.js is deferred; the class has to exist before first paint or every inactive response shows first.
+        var apiHeadHtml = isApiPage
+            ? $"<link rel=\"stylesheet\" href=\"{basePath}/css/api.css\"><script{nonceAttr}>document.documentElement.classList.add('api-ready')</script><script defer src=\"{basePath}/js/api.js\"></script>"
+            : "";
+
         var themeToggleHtml = toggleEnabled
             ? $@"<button type=""button"" class=""icon-btn theme-toggle"" id=""theme-toggle"" role=""switch"" aria-checked=""false"" aria-label=""{HtmlEncode(l.ThemeToggle)}"">
                 <svg class=""icon-sun"" viewBox=""0 0 24 24"" fill=""none"" stroke=""currentColor"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" aria-hidden=""true""><circle cx=""12"" cy=""12"" r=""4""/><path d=""M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41""/></svg>
@@ -199,6 +212,7 @@ public static partial class LayoutProvider
 <head>
     <meta charset=""UTF-8"">
     {themeInitScript}
+    {tocInitScript}
     {colorSchemeMeta}
     <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
     <title>{HtmlEncode(title)}</title>
@@ -213,8 +227,8 @@ public static partial class LayoutProvider
     {GetStylesLink(themeTokenCss, activeTheme.ComponentCss, basePath)}
     {themeCss}
     {(hasMath ? $"<link rel=\"stylesheet\" href=\"{basePath}/css/katex.min.css\">" : "")}
-    {(hasMermaid ? $"<script defer src=\"{basePath}/js/mermaid.min.js\"></script>" : "")}
-    {(isApiPage ? $"<link rel=\"stylesheet\" href=\"{basePath}/css/api.css\"><script defer src=\"{basePath}/js/api.js\"></script>" : "")}
+    {mermaidHeadHtml}
+    {apiHeadHtml}
 </head>
 <body>
     <a href=""#main-content"" class=""skip-link"">{HtmlEncode(l.SkipToContent)}</a>

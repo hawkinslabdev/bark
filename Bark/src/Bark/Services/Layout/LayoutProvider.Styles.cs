@@ -2156,7 +2156,10 @@ public static partial class LayoutProvider
         .content .bark-code-group .blocks > div[class^=""language-""].active {{
             display: block;
         }}
-        .content .bark-code-group .tabs label.active-tab {{
+        .mermaid:not([data-processed]) {{
+            visibility: hidden;
+        }}
+        .content .bark-code-group .tabs input:checked + label {{
             color: var(--text-color);
             border-bottom-color: var(--accent);
         }}
@@ -2405,7 +2408,8 @@ public static partial class LayoutProvider
             overscroll-behavior: contain;
             padding: 0.25rem 0.25rem 2rem 0;
         }}
-        .sidebar-right[hidden] {{
+        .sidebar-right[hidden],
+        .toc-collapsed .sidebar-right {{
             display: none;
         }}
         .toc-title {{
