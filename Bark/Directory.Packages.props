@@ -3,7 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Jint" Version="4.18.0" />
+    <PackageVersion Include="Jint" Version="4.18.1" />
     <PackageVersion Include="Markdig" Version="1.6.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="11.0.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
